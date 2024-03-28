@@ -1,5 +1,9 @@
 package org.example.Utils;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
@@ -8,18 +12,22 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ParseCourseData {
     private String dataPath;
 
     private static final Logger logger = LogManager.getLogger(ParseCourseData.class);
 
-    public HashMap<String, String> parseCourseData(String dataPath) {
+    public HashMap<String, String> parseCourseData() {
         HashMap<String, String> courseMap = new HashMap<>();
         String keyColumnHeader = "Ders Kodu";
         String valueColumnHeader = "Ders Adı";
 
         try {
-            FileInputStream file = new FileInputStream(dataPath);
+            FileInputStream file = new FileInputStream(this.dataPath);
             Workbook workbook = WorkbookFactory.create(file);
             Sheet sheet = workbook.getSheetAt(0);
 
