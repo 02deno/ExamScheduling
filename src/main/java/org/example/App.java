@@ -13,7 +13,7 @@ public class App
         final Logger logger = LogManager.getLogger(App.class);
         logger.info("Hello World!");
         String dataPath = "data/tum_dersler.xlsx";
-        ParseCourseData courseDataParser = new ParseCourseData(dataPath);
+        ParseCourseData courseDataParser = new ParseCourseData();
         HashMap<String, String> courseData = courseDataParser.parseCourseData();
         logger.info(courseData);
     }
