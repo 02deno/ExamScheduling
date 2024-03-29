@@ -32,16 +32,16 @@
 # Distribution of Tasks
 | Deniz  | Dilanur  | 
 |--------|----------|
-|  Encoding |  Selection  | 
-|  Parameter | Crossover  | 
-|  Pipeline | Mutation  | 
-|  Helper Fuctions | Hybrid Methods  | 
-|  Generating | Initialization  | 
-|  Fitness | Replacement  | 
-|  Visualization | Termiantion  | 
-|  Fitness Sharing | Algorithm - Main  | 
-|  Elitism | Parameter Control and Tuning | 
-|  Adaptive Operations part 1 | PAdaptive Operations part 2 | 
+|  1. Generating(**in progress**) | 3. Initialization  | 
+|  2. Encoding | 5. Selection | 
+|  4. Fitness | 6. Crossover | 
+|  Helper Fuctions(no rank do it when needed simultaneously) | 7. Mutation | 
+|  10. Parameter | 8. Replacement | 
+|  12. Visualization | 9. Termination | 
+|  13. Pipeline | 11. Algorithm - Main| 
+|  14. Fitness Sharing | 16. Parameter Control and Tuning | 
+|  15. Elitism | 17. Hybrid Methods| 
+|  18. Adaptive Operations part 1 | 19. Adaptive Operations part 2 | 
 
 - [Random distribution link](https://wheeldecide.com/)  
 - ![image](../../ExamScheduling-main/tez/image.png)
