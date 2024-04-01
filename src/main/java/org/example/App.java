@@ -2,19 +2,16 @@ package org.example;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.Utils.ParseCourseData;
-
-import java.util.HashMap;
+import org.example.DataPreprocessing.RandomDataGenerator;
 
 public class App 
 {
     public static void main( String[] args )
     {
         final Logger logger = LogManager.getLogger(App.class);
-        logger.info("Hello World!");
-        String dataPath = "data/tum_dersler.xlsx";
-        ParseCourseData courseDataParser = new ParseCourseData(dataPath);
-        HashMap<String, String> courseData = courseDataParser.parseCourseData();
-        logger.info(courseData);
+        logger.info("Application started...");
+        RandomDataGenerator generator = new RandomDataGenerator();
+        logger.info((generator.combineAllData()));
+        logger.info("Application finished!");
     }
 }
