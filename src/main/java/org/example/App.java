@@ -3,6 +3,7 @@ package org.example;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.DataPreprocessing.RandomDataGenerator;
+import org.example.Models.Classroom;
 import org.example.Models.Course;
 import org.example.Models.Invigilator;
 import org.example.Utils.ArraylistHelper;
@@ -19,9 +20,14 @@ public class App
         HashMap<String, HashMap<String, ArrayList<Object>>> randomData = RandomDataGenerator.combineAllData();
         ArrayList<Course> courses = RandomDataGenerator.generateCourseInstances(randomData.get("courseData"));
         ArrayList<Invigilator> invigilators = RandomDataGenerator.generateInvigilatorInstances(randomData.get("invigilatorData"));
-        HashMap<String, ArrayList<?>> result = RandomDataGenerator.mapInvigilatorsWithCourses(courses, invigilators);
-        courses = ArraylistHelper.castArrayList(result.get("courses"), Course.class);
-        invigilators = ArraylistHelper.castArrayList(result.get("invigilators"), Invigilator.class);
+        ArrayList<Classroom> classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
+
+
+        HashMap<String, ArrayList<?>> resultCoursesInvigilators = RandomDataGenerator.mapInvigilatorsWithCourses(courses, invigilators);
+        HashMap<String, ArrayList<?>> resultCoursesClassrooms = RandomDataGenerator.mapCoursesWithClassrooms(courses, classrooms);
+        courses = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("courses"), Course.class);
+        invigilators = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
+
         logger.info("Application finished!");
     }
 

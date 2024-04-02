@@ -3,11 +3,13 @@ package org.example.DataPreprocessing;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.Models.Classroom;
 import org.example.Models.Course;
 import org.example.Models.Invigilator;
 import org.example.Utils.ArraylistHelper;
 import org.example.Utils.HTMLHelper;
 
+import java.nio.channels.ClosedSelectorException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -122,6 +124,26 @@ public class RandomDataGenerator {
         return invigilators;
     }
 
+    public static ArrayList<Classroom> generateClassroomInstances(HashMap<String, ArrayList<Object>> classroomData) {
+        // create Classroom instances
+        ArrayList<Classroom> classrooms = new ArrayList<Classroom>();
+        for (HashMap.Entry<String, ArrayList<Object>> entry : classroomData.entrySet()) {
+            String classroomCode = entry.getKey();
+            String classroomName = (String) entry.getValue().get(2);
+            int classroomCapacity = (int) entry.getValue().get(1);
+            String classroomProperties = (String) entry.getValue().get(0);
+            double pcLabProbability = 0.35; // 10%
+            double randomNumber = random.nextDouble();
+            boolean isPcLab = randomNumber < pcLabProbability;
+            Classroom classroom = new Classroom(classroomCode, classroomName, classroomCapacity, isPcLab, classroomProperties);
+            classrooms.add(classroom);
+        }
+        //logger.info(invigilators);
+        logger.info("Classroom instances created successfully:)");
+        logger.info("Number of Classroom: " + classrooms.size());
+        return classrooms;
+    }
+
     public static HashMap<String, ArrayList<?>> mapInvigilatorsWithCourses(ArrayList<Course> courses, ArrayList<Invigilator> invigilators) {
         // Step 5
 
@@ -143,8 +165,8 @@ public class RandomDataGenerator {
             //logger.info("Capacity: " + capacity + " Invigilator Count: " + invigilatorCount);
             int counter = 0;
             while(counter < invigilatorCount) {
-                int invigilator_index = ArraylistHelper.getRandomElement(invigilators);
-                Invigilator invigilator = invigilators.get(invigilator_index);
+                int invigilatorIndex = ArraylistHelper.getRandomElement(invigilators);
+                Invigilator invigilator = invigilators.get(invigilatorIndex);
                 if(invigilator.isAvailable()) {
                     availableInvigilators.add(invigilator.getID());
                     ArrayList<String> monitoredCourses = invigilator.getMonitoredCourses();
@@ -154,7 +176,7 @@ public class RandomDataGenerator {
                     if(invigilator.getMonitoredCourses().size() == invigilator.getMaxCoursesMonitoredCount()) {
                         invigilator.setAvailable(false);
                     }
-                    invigilators.set(invigilator_index, invigilator);
+                    invigilators.set(invigilatorIndex, invigilator);
                 }
             }
             course.setAvailableInvigilators(availableInvigilators);
@@ -166,7 +188,6 @@ public class RandomDataGenerator {
         HTMLHelper.generateHistogram(studentCapacities, "graphs/studentCapacityHistogram.html", "Student Capacity");
 
         // return two arraylist
-        HashMap<String, ArrayList<?>> result = new HashMap<>();
         logger.info("Course instances mapped with invigilators successfully :)");
 
         logger.info(courses);
@@ -180,6 +201,7 @@ public class RandomDataGenerator {
                 new String[]{"ID", "Name", "Surname", "Maximum Number of Courses to Monitor", "Monitored Class IDs", "Available"},
                 new String[]{"ID", "name", "surname", "maxCoursesMonitoredCount", "monitoredCourses", "isAvailable"});
 
+        HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("courses", courses);
         result.put("invigilators", invigilators);
         return result;
@@ -189,7 +211,16 @@ public class RandomDataGenerator {
         // Step 4
     }
 
-    public static void mapCoursesWithClassrooms() {
+    public static HashMap<String, ArrayList<?>> mapCoursesWithClassrooms(ArrayList<Course> courses, ArrayList<Classroom> classrooms) {
         // Step 6
+
+        HTMLHelper.generateReport(classrooms, "graphs/classroom_report.html", "Classroom Report",
+                new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Available", "Course Code"},
+                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "isAvailable", "courseCode"});
+
+        HashMap<String, ArrayList<?>> result = new HashMap<>();
+        result.put("courses", courses);
+        result.put("classrooms", classrooms);
+        return result;
     }
 }

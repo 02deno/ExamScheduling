@@ -15,10 +15,12 @@ public class Course {
     /*
     * courseName : String
     * courseCode : String
-    * professor : Professor
-    * availableInvigilators : Array<Invigilator>
+    * availableInvigilators : Array<String>
     * isPcExam : boolean
     * studentCapacity : int
+    * beforeExamPrepTime : int
+    * examDuration : int
+    * afterExamPrepTime : int
     * */
     private String courseName;
     private String courseCode;

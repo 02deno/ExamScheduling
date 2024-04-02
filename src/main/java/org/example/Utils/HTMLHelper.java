@@ -74,10 +74,19 @@ public class HTMLHelper {
         StringBuilder htmlContent = new StringBuilder();
 
         // HTML head
-        htmlContent.append("<html>");
+        htmlContent.append("<!DOCTYPE html>");
+        htmlContent.append("<html lang=\"en\">");
         htmlContent.append("<head>");
+        htmlContent.append("<meta charset=\"UTF-8\">");
+        htmlContent.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
         htmlContent.append("<title>").append(reportTitle).append("</title>");
-        htmlContent.append("<meta charset=\"UTF-8\">"); // for Turkish characters
+        htmlContent.append("<style>");
+        // CSS styles
+        htmlContent.append("table { border-collapse: collapse; width: 100%; }");
+        htmlContent.append("th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }");
+        htmlContent.append("tr:hover { background-color: #f5f5f5; }");
+        htmlContent.append("th { background-color: #4CAF50; color: white; }");
+        htmlContent.append("</style>");
         htmlContent.append("</head>");
         htmlContent.append("<body>");
 
@@ -85,7 +94,7 @@ public class HTMLHelper {
         htmlContent.append("<h1>").append(reportTitle).append("</h1>");
 
         // Table to display data
-        htmlContent.append("<table border=\"1\">");
+        htmlContent.append("<table>");
         htmlContent.append("<tr>");
         for (String header : headers) {
             htmlContent.append("<th>").append(header).append("</th>");
@@ -93,8 +102,13 @@ public class HTMLHelper {
         htmlContent.append("</tr>");
 
         // Iterate over data and add rows to the table
-        for (Object obj : data) {
-            htmlContent.append("<tr>");
+        for (int i = 0; i < data.size(); i++) {
+            htmlContent.append("<tr");
+            if (i % 2 == 0) {
+                htmlContent.append(" style=\"background-color: #f2f2f2;\"");
+            }
+            htmlContent.append(">");
+            Object obj = data.get(i);
             for (String field : fields) {
                 try {
                     // Construct method name based on field
@@ -109,7 +123,7 @@ public class HTMLHelper {
                     Object value = method.invoke(obj);
                     htmlContent.append("<td>").append(value).append("</td>");
                 } catch (Exception e) {
-                    logger.error("An error occurred while creating the html report.", e);
+                    e.printStackTrace();
                 }
             }
             htmlContent.append("</tr>");
