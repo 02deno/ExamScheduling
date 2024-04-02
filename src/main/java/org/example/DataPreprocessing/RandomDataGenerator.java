@@ -9,7 +9,6 @@ import org.example.Models.Invigilator;
 import org.example.Utils.ArraylistHelper;
 import org.example.Utils.HTMLHelper;
 
-import java.nio.channels.ClosedSelectorException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -84,7 +83,7 @@ public class RandomDataGenerator {
 
     public static ArrayList<Course> generateCourseInstances(HashMap<String, ArrayList<Object>> courseData) {
         // create Course instances
-        ArrayList<Course> courses = new ArrayList<Course>();
+        ArrayList<Course> courses = new ArrayList<>();
         for (HashMap.Entry<String, ArrayList<Object>> entry : courseData.entrySet()) {
             String courseCode = entry.getKey();
             String courseName = (String) entry.getValue().get(0);
@@ -108,7 +107,7 @@ public class RandomDataGenerator {
 
     public static ArrayList<Invigilator> generateInvigilatorInstances(HashMap<String, ArrayList<Object>> invigilatorData) {
         // create Invigilator instances
-        ArrayList<Invigilator> invigilators = new ArrayList<Invigilator>();
+        ArrayList<Invigilator> invigilators = new ArrayList<>();
         for (HashMap.Entry<String, ArrayList<Object>> entry : invigilatorData.entrySet()) {
             String id = entry.getKey();
             String name = (String) entry.getValue().get(1);
@@ -126,7 +125,7 @@ public class RandomDataGenerator {
 
     public static ArrayList<Classroom> generateClassroomInstances(HashMap<String, ArrayList<Object>> classroomData) {
         // create Classroom instances
-        ArrayList<Classroom> classrooms = new ArrayList<Classroom>();
+        ArrayList<Classroom> classrooms = new ArrayList<>();
         for (HashMap.Entry<String, ArrayList<Object>> entry : classroomData.entrySet()) {
             String classroomCode = entry.getKey();
             String classroomName = (String) entry.getValue().get(2);
@@ -155,7 +154,7 @@ public class RandomDataGenerator {
         // set course attribute "availableInvigilators"
         // set invigilator attribute "monitoredCourses"
 
-        ArrayList<Integer> studentCapacities = new ArrayList<Integer>();
+        ArrayList<Integer> studentCapacities = new ArrayList<>();
         for(int i = 0; i < courses.size(); i++) {
             Course course = courses.get(i);
             int capacity = course.getStudentCapacity();
@@ -214,7 +213,7 @@ public class RandomDataGenerator {
     public static HashMap<String, ArrayList<?>> mapCoursesWithClassrooms(ArrayList<Course> courses, ArrayList<Classroom> classrooms) {
         // Step 6
 
-        ArrayList<Integer> classroomCapacities = new ArrayList<Integer>();
+        ArrayList<Integer> classroomCapacities = new ArrayList<>();
         for(int i = 0; i < classrooms.size(); i++) {
             Classroom classroom = classrooms.get(i);
             int capacity = classroom.getCapacity();

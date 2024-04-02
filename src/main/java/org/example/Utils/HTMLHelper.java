@@ -61,12 +61,12 @@ public class HTMLHelper {
 
         // Write HTML content to file
         try {
-            FileWriter writer = new FileWriter(new File(outputFilePath));
+            FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            System.out.println("Histogram saved as HTML file: " + outputFilePath);
+            logger.info("Histogram saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
-            System.err.println("Error writing HTML file: " + e.getMessage());
+            logger.error("Error writing HTML file: " + e.getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ public class HTMLHelper {
                     Object value = method.invoke(obj);
                     htmlContent.append("<td>").append(value).append("</td>");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("An error occurred while creating html report.", e);
                 }
             }
             htmlContent.append("</tr>");
@@ -140,9 +140,9 @@ public class HTMLHelper {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            System.out.println("Report saved as HTML file: " + outputFilePath);
+            logger.info("Report saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
-            System.err.println("Error writing HTML file: " + e.getMessage());
+            logger.error("Error writing HTML file: " + e.getMessage());
         }
     }
 }
