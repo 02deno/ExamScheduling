@@ -24,7 +24,7 @@ public class ExcelDataParserHelper {
         if (headerRow != null) {
             for (Cell cell : headerRow) {
                 String columnHeader = cell.getStringCellValue();
-                logger.info("Column Name:" + columnHeader);
+                //logger.info("Column Name:" + columnHeader);
 
                 if (columnIndexMap.containsKey(columnHeader)) {
                     columnIndexMap.put(columnHeader, cell.getColumnIndex());
