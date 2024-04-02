@@ -214,6 +214,15 @@ public class RandomDataGenerator {
     public static HashMap<String, ArrayList<?>> mapCoursesWithClassrooms(ArrayList<Course> courses, ArrayList<Classroom> classrooms) {
         // Step 6
 
+        ArrayList<Integer> classroomCapacities = new ArrayList<Integer>();
+        for(int i = 0; i < classrooms.size(); i++) {
+            Classroom classroom = classrooms.get(i);
+            int capacity = classroom.getCapacity();
+            classroomCapacities.add(capacity);
+        }
+
+        HTMLHelper.generateHistogram(classroomCapacities, "graphs/classroomCapacityHistogram.html", "Clasroom Capacity");
+
         HTMLHelper.generateReport(classrooms, "graphs/classroom_report.html", "Classroom Report",
                 new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Available", "Course Code"},
                 new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "isAvailable", "courseCode"});
