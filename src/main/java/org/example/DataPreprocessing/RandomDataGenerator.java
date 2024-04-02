@@ -3,9 +3,14 @@ package org.example.DataPreprocessing;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.Models.Course;
+import org.example.Models.Invigilator;
+import org.example.Utils.ArraylistHelper;
+import org.example.Utils.HTMLHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class RandomDataGenerator {
     /*
@@ -37,7 +42,8 @@ public class RandomDataGenerator {
     * */
 
     private static final Logger logger = LogManager.getLogger(RandomDataGenerator.class);
-    public HashMap<String, HashMap<String, ArrayList<Object>>> combineAllData() {
+    private static final Random random = new Random();
+    public static HashMap<String, HashMap<String, ArrayList<Object>>> combineAllData() {
         //Step 1,2,3
 
         String courseDataPath = "data/tum_dersler.xlsx";
@@ -50,19 +56,19 @@ public class RandomDataGenerator {
 
         HashMap<String, ArrayList<Object>> courseData = courseDataParser.parseCourseData();
         //logger.info(courseData);
-        logger.info("Course instances created successfully:)");
+        logger.info("Course infos extracted successfully:)");
 
         HashMap<String, ArrayList<Object>> studentData = personDataParser.parseStudentData();
         //logger.info(studentData);
-        logger.info("Student instances created successfully:)");
+        logger.info("Student infos extracted successfully:)");
 
         HashMap<String, ArrayList<Object>> invigilatorData = personDataParser.parseInvigilatorData();
-        logger.info(invigilatorData);
-        logger.info("Invigilator instances created successfully:)");
+        //logger.info(invigilatorData);
+        logger.info("Invigilator infos extracted successfully:)");
 
         HashMap<String, ArrayList<Object>> classroomData = classroomDataParser.parseClassroomData();
         //logger.info(classroomData);
-        logger.info("Classroom instances created successfully:)");
+        logger.info("Classroom infos extracted successfully:)");
 
         HashMap<String, HashMap<String, ArrayList<Object>>> result = new HashMap<>();
 
@@ -74,7 +80,116 @@ public class RandomDataGenerator {
         return result;
     }
 
-    public void generateRandomlyMappedData() {
-        //Step 4,5,6
+    public static ArrayList<Course> generateCourseInstances(HashMap<String, ArrayList<Object>> courseData) {
+        // create Course instances
+        ArrayList<Course> courses = new ArrayList<Course>();
+        for (HashMap.Entry<String, ArrayList<Object>> entry : courseData.entrySet()) {
+            String courseCode = entry.getKey();
+            String courseName = (String) entry.getValue().get(0);
+            int studentCapacity = (int) entry.getValue().get(1);
+            int beforeExamPrepTime = (int) entry.getValue().get(2);
+            int examDuration = (int) entry.getValue().get(3);
+            int afterExamPrepTime = (int) entry.getValue().get(4);
+
+            double pcExamProbability = 0.3; // 30%
+            double randomNumber = random.nextDouble();
+            boolean isPcExam = randomNumber < pcExamProbability;
+
+            Course course = new Course(courseCode, courseName, isPcExam, studentCapacity, beforeExamPrepTime, examDuration, afterExamPrepTime);
+            courses.add(course);
+        }
+        //logger.info(courses);
+        logger.info("Number of courses: " + courses.size());
+        logger.info("Course instances created successfully:)");
+        return courses;
+    }
+
+    public static ArrayList<Invigilator> generateInvigilatorInstances(HashMap<String, ArrayList<Object>> invigilatorData) {
+        // create Invigilator instances
+        ArrayList<Invigilator> invigilators = new ArrayList<Invigilator>();
+        for (HashMap.Entry<String, ArrayList<Object>> entry : invigilatorData.entrySet()) {
+            String id = entry.getKey();
+            String name = (String) entry.getValue().get(1);
+            String surname = (String) entry.getValue().get(0);
+            int maxCoursesMonitoredCount = random.nextInt(4);
+
+            Invigilator invigilator = new Invigilator(id, name, surname, maxCoursesMonitoredCount);
+            invigilators.add(invigilator);
+        }
+        //logger.info(invigilators);
+        logger.info("Invigilator instances created successfully:)");
+        logger.info("Number of invigilators: " + invigilators.size());
+        return invigilators;
+    }
+
+    public static HashMap<String, ArrayList<?>> mapInvigilatorsWithCourses(ArrayList<Course> courses, ArrayList<Invigilator> invigilators) {
+        // Step 5
+
+        // if studentCapacity :
+        // 0 - 75 : 2 invigilators
+        // 75 - 150 : 3 invigilators
+        // > 150 : 4 invigilators
+
+        // set course attribute "availableInvigilators"
+        // set invigilator attribute "monitoredCourses"
+
+        ArrayList<Integer> studentCapacities = new ArrayList<Integer>();
+        for(int i = 0; i < courses.size(); i++) {
+            Course course = courses.get(i);
+            int capacity = course.getStudentCapacity();
+            studentCapacities.add(capacity);
+            ArrayList<String> availableInvigilators = course.getAvailableInvigilators();
+            int invigilatorCount = capacity < 75 ? 2 : (capacity < 150 ? 3 : 4); // Determine the number of invigilators
+            //logger.info("Capacity: " + capacity + " Invigilator Count: " + invigilatorCount);
+            int counter = 0;
+            while(counter < invigilatorCount) {
+                int invigilator_index = ArraylistHelper.getRandomElement(invigilators);
+                Invigilator invigilator = invigilators.get(invigilator_index);
+                if(invigilator.isAvailable()) {
+                    availableInvigilators.add(invigilator.getID());
+                    ArrayList<String> monitoredCourses = invigilator.getMonitoredCourses();
+                    monitoredCourses.add(course.getCourseCode());
+                    invigilator.setMonitoredCourses(monitoredCourses);
+                    counter++;
+                    if(invigilator.getMonitoredCourses().size() == invigilator.getMaxCoursesMonitoredCount()) {
+                        invigilator.setAvailable(false);
+                    }
+                    invigilators.set(invigilator_index, invigilator);
+                }
+            }
+            course.setAvailableInvigilators(availableInvigilators);
+            courses.set(i, course);
+
+        }
+
+        // histogram is made to see distribution and decide invigilator numbers
+        HTMLHelper.generateHistogram(studentCapacities, "graphs/studentCapacityHistogram.html", "Student Capacity");
+
+        // return two arraylist
+        HashMap<String, ArrayList<?>> result = new HashMap<>();
+        logger.info("Course instances mapped with invigilators successfully :)");
+
+        logger.info(courses);
+        logger.info(invigilators);
+        HTMLHelper.generateReport(courses, "graphs/course_report.html", "Course Report",
+                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Available Invigilator IDs"},
+                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "availableInvigilators"});
+
+        // Generate invigilator report
+        HTMLHelper.generateReport(invigilators, "graphs/invigilator_report.html", "Invigilator Report",
+                new String[]{"ID", "Name", "Surname", "Maximum Number of Courses to Monitor", "Monitored Class IDs", "Available"},
+                new String[]{"ID", "name", "surname", "maxCoursesMonitoredCount", "monitoredCourses", "isAvailable"});
+
+        result.put("courses", courses);
+        result.put("invigilators", invigilators);
+        return result;
+    }
+
+    public static void mapStudentsWithCourses(){
+        // Step 4
+    }
+
+    public static void mapCoursesWithClassrooms() {
+        // Step 6
     }
 }
