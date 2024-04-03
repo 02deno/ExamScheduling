@@ -240,8 +240,7 @@ public class RandomDataGenerator {
                     .filter(classroom -> classroom.isPcLab() == isPcExam)
                     .filter(Classroom::isAvailable)
                     .collect(Collectors.toCollection(ArrayList::new));
-            if (filteredClassrooms.isEmpty()){continue;}
-            else {
+            if (!filteredClassrooms.isEmpty()) {
                 int ClassroomIndex = ArraylistHelper.getRandomElement(filteredClassrooms);
                 Classroom classroom = filteredClassrooms.get(ClassroomIndex);
                 classroom.setAvailable(false);
