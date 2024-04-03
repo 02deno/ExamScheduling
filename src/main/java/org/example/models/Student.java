@@ -18,16 +18,19 @@ public class Student extends Person{
      * surname : String, required
      * registeredCourses : Array, optional
      * maxCoursesTakenCount : int, range(1,11), required
+     * remainingStudentCapacity : int
      *
      * methods :
      *
      * */
     private ArrayList<String> registeredCourses = new ArrayList<>();
     private int maxCoursesTakenCount;
+    private int remainingCourseCapacity;
 
     public Student(String ID, String name, String surname, int maxCoursesTakenCount) {
         super(ID, name, surname);
         this.maxCoursesTakenCount = maxCoursesTakenCount;
+        this.remainingCourseCapacity = maxCoursesTakenCount;
     }
 
 

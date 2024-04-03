@@ -44,7 +44,7 @@ public class Classroom {
             if (classroom.getClassroomCode().equals(updatedClassroom.getClassroomCode())) {
                 classrooms.remove(i);
                 classrooms.add(i, updatedClassroom);
-                break;
+                return;
             }
         }
         logger.error("Classroom not found for update.");

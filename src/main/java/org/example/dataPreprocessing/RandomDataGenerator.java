@@ -154,7 +154,8 @@ public class RandomDataGenerator {
             String id = entry.getKey();
             String name = (String) entry.getValue().get(1);
             String surname = (String) entry.getValue().get(0);
-            int maxCoursesTakenCount = random.nextInt(5) + 1;
+            //int maxCoursesTakenCount = random.nextInt(6) + 1;
+            int maxCoursesTakenCount = 6;
 
             Student student = new Student(id, name, surname, maxCoursesTakenCount);
             students.add(student);
@@ -207,12 +208,11 @@ public class RandomDataGenerator {
         // histogram is made to see distribution and decide invigilator numbers
         HTMLHelper.generateHistogram(studentCapacities, "graphs/studentCapacityHistogram.html", "Student Capacity");
 
-        // return two arraylist
         logger.info("Course instances mapped with invigilators successfully :)");
 
         //logger.info(courses);
         //logger.info(invigilators);
-        HTMLHelper.generateCourseReport(courses, "graphs/course_report.html", "Course Report");
+        //HTMLHelper.generateCourseReport(courses, "graphs/course_report.html", "Course Report");
         HTMLHelper.generateInvigilatorReport(invigilators, "graphs/invigilator_report.html", "Invigilator Report");
 
         HashMap<String, ArrayList<?>> result = new HashMap<>();
@@ -241,8 +241,8 @@ public class RandomDataGenerator {
                     .filter(Classroom::isAvailable)
                     .collect(Collectors.toCollection(ArrayList::new));
             if (!filteredClassrooms.isEmpty()) {
-                int ClassroomIndex = ArraylistHelper.getRandomElement(filteredClassrooms);
-                Classroom classroom = filteredClassrooms.get(ClassroomIndex);
+                int classroomIndex = ArraylistHelper.getRandomElement(filteredClassrooms);
+                Classroom classroom = filteredClassrooms.get(classroomIndex);
                 classroom.setAvailable(false);
                 classroom.setCourseCode(course.getCourseCode());
                 course.setClassroomCode(classroom.getClassroomCode());
@@ -252,11 +252,11 @@ public class RandomDataGenerator {
             }
         }
         logger.info("Assigned Courses: "+ assignedCourses);
-
+        logger.info("Course instances mapped with classrooms successfully :)");
         HTMLHelper.generateHistogram(classroomCapacities, "graphs/classroomCapacityHistogram.html", "Clasroom Capacity");
 
         HTMLHelper.generateClassroomReport(classrooms, "graphs/classroom_report.html", "Classroom Report");
-        HTMLHelper.generateCourseReport(courses, "graphs/assigned_course_report.html", "Assigned Course Report");
+        //HTMLHelper.generateCourseReport(courses, "graphs/assigned_course_report.html", "Assigned Course Report");
 
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("courses", courses);
@@ -266,9 +266,39 @@ public class RandomDataGenerator {
 
     public static HashMap<String, ArrayList<?>> mapStudentsWithCourses(ArrayList<Course> courses, ArrayList<Student> students){
         // Step 6
+        for(int i = 0; i < courses.size() ; i++){
+            Course course = courses.get(i);
+            ArrayList<String> registeredStudents = course.getRegisteredStudents();
+            int remainingStudentCapacity = course.getRemainingStudentCapacity();
+            int studentCapacity = course.getStudentCapacity();
+            logger.info("Student Capacity: " + studentCapacity);
+            while(remainingStudentCapacity != 0 && studentCapacity < 100) {
+                int studentIndex = ArraylistHelper.getRandomElement(students);
+                Student student = students.get(studentIndex);
+                ArrayList<String> registeredCourses = student.getRegisteredCourses();
+                int remainingCourseCapacity = student.getRemainingCourseCapacity();
+                if(remainingCourseCapacity != 0 ) {
+                    registeredCourses.add(course.getCourseCode());
+                    remainingCourseCapacity--;
+                    student.setRegisteredCourses(registeredCourses);
+                    student.setRemainingCourseCapacity(remainingCourseCapacity);
+                    students.set(studentIndex, student);
+
+                    registeredStudents.add(student.getID());
+                    remainingStudentCapacity--;
+                    course.setRemainingStudentCapacity(remainingStudentCapacity);
+                    course.setRegisteredStudents(registeredStudents);
+                }
+            }
+            Course.updateCourse(courses, course);
+            logger.info(course.getRegisteredStudents());
+            //logger.info("Assigned students to the course");
+        }
+
 
         HTMLHelper.generateStudentReport(students, "graphs/assigned_students_report.html", "Assigned Students Report");
-
+        HTMLHelper.generateCourseReport(courses, "graphs/assigned_courses_report.html", "Assigned Courses Report");
+        logger.info("Course instances mapped with students successfully :)");
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("courses", courses);
         result.put("student", students);
