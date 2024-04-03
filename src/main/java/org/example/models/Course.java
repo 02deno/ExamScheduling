@@ -1,6 +1,8 @@
-package org.example.Models;
+package org.example.models;
 
 import lombok.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 
@@ -15,10 +17,13 @@ public class Course {
     /*
     * courseName : String
     * courseCode : String
-    * professor : Professor
-    * availableInvigilators : Array<Invigilator>
+    * availableInvigilators : Array<String>
     * isPcExam : boolean
     * studentCapacity : int
+    * beforeExamPrepTime : int
+    * examDuration : int
+    * afterExamPrepTime : int
+    * remainingStudentCapacity : int
     * */
     private String courseName;
     private String courseCode;
@@ -28,7 +33,10 @@ public class Course {
     private int beforeExamPrepTime;
     private int examDuration;
     private int afterExamPrepTime;
-
+    private String classroomCode;
+    private int remainingStudentCapacity;
+    private ArrayList<String> registeredStudents = new ArrayList<>();
+    private static final Logger logger = LogManager.getLogger(Course.class);
     public Course(String courseCode, String courseName, boolean isPcExam, int studentCapacity, int beforeExamPrepTime, int examDuration, int afterExamPrepTime) {
         this.courseName = courseName;
         this.courseCode = courseCode;
@@ -37,5 +45,18 @@ public class Course {
         this.beforeExamPrepTime = beforeExamPrepTime;
         this.examDuration = examDuration;
         this.afterExamPrepTime = afterExamPrepTime;
+        this.remainingStudentCapacity = studentCapacity;
+    }
+
+    public static void updateCourse(ArrayList<Course> courses, Course updatedCourse) {
+        for (int i = 0; i < courses.size(); i++) {
+            Course course = courses.get(i);
+            if (course.getCourseCode().equals(updatedCourse.getCourseCode())) {
+                courses.remove(i);
+                courses.add(i, updatedCourse);
+                return;
+            }
+        }
+        logger.error("Course not found for update.");
     }
 }

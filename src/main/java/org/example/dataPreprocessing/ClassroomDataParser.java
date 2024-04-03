@@ -1,4 +1,4 @@
-package org.example.DataPreprocessing;
+package org.example.dataPreprocessing;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.Utils.ExcelDataParserHelper;
+import org.example.utils.ExcelDataParserHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -30,21 +30,21 @@
 - [Helpful Links](#links)
 
 # Distribution of Tasks
-| Deniz  | Dilanur  | 
-|--------|----------|
-|  1. Generating(**in progress**) | 3. Initialization  | 
-|  2. Encoding | 5. Selection | 
-|  4. Fitness | 6. Crossover | 
-|  Helper Fuctions(no rank do it when needed simultaneously) | 7. Mutation | 
-|  10. Parameter | 8. Replacement | 
-|  12. Visualization | 9. Termination | 
-|  13. Pipeline | 11. Algorithm - Main| 
-|  14. Fitness Sharing | 16. Parameter Control and Tuning | 
-|  15. Elitism | 17. Hybrid Methods| 
-|  18. Adaptive Operations part 1 | 19. Adaptive Operations part 2 | 
+| Deniz                                                     | Dilanur                          | 
+|-----------------------------------------------------------|----------------------------------|
+| 1. Generating(**in progress**)                            | 3. Initialization                | 
+| 2. Encoding                                               | 5. Selection                     | 
+| 4. Fitness                                                | 6. Crossover                     | 
+| Helper Fuctions(no rank do it when needed simultaneously) | 7. Mutation                      | 
+| 10. Parameter                                             | 8. Replacement                   | 
+| 12. Visualization                                         | 9. Termination                   | 
+| 13. Pipeline                                              | 11. Algorithm - Main             | 
+| 14. Fitness Sharing                                       | 16. Parameter Control and Tuning | 
+| 15. Elitism                                               | 17. Hybrid Methods               | 
+| 18. Adaptive Operations part 1                            | 19. Adaptive Operations part 2   | 
 
 - [Random distribution link](https://wheeldecide.com/)  
-- ![image](../../ExamScheduling-main/tez/image.png)
+- ![image](../../ExamScheduling/docs/image.png)
 
 # Defining constant terms 
 ## Naming Convention
@@ -131,7 +131,7 @@
 # Functions to implement
 
 ## Generating data/input/constraints
-This is required for chromose encoding step. Dataset should contain student, teacher, class, classroom information. TAU data can be used for generation but it is not enough.<br>
+This is required for chromose encoding step. Dataset should contain student, teacher, class, classroom information. TAU data can be used for generation ,but it is not enough.<br>
 **Concept Terminology/Methods** : 
 * Artificial data generation - Small
 * Artificial data generation - Medium
@@ -243,7 +243,7 @@ Common functions that can be used by all team players.<br>
 # Advanced Methods to implement later 
 **Examples** : 
 * Parameter Control und Tuning : belongs to [Parameter](#parameter) chapter
-* Adaptive Operations : belongs to all of the operator chapters
+* Adaptive Operations : belongs to all the operator chapters
 * Hybrid Methods : belongs to all of these chapters
 * Elitism : belongs to [Replacement](#replacement) chapter
 * Fitness Sharing : belongs to [Fitness Calculation](#fitness-calculation) chapter 
@@ -255,7 +255,7 @@ Common functions that can be used by all team players.<br>
 * Early Convergence
 * Time Complexity
 * Memory Complexity
-* Fine Tuning of Parameters
+* Fine-Tuning of Parameters
 * ...
 
 # Experiments 

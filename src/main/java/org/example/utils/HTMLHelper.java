@@ -1,9 +1,12 @@
-package org.example.Utils;
+package org.example.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.models.Classroom;
+import org.example.models.Course;
+import org.example.models.Invigilator;
+import org.example.models.Student;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -61,12 +64,12 @@ public class HTMLHelper {
 
         // Write HTML content to file
         try {
-            FileWriter writer = new FileWriter(new File(outputFilePath));
+            FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            System.out.println("Histogram saved as HTML file: " + outputFilePath);
+            logger.info("Histogram saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
-            System.err.println("Error writing HTML file: " + e.getMessage());
+            logger.error("Error writing HTML file: " + e.getMessage());
         }
     }
 
@@ -74,10 +77,19 @@ public class HTMLHelper {
         StringBuilder htmlContent = new StringBuilder();
 
         // HTML head
-        htmlContent.append("<html>");
+        htmlContent.append("<!DOCTYPE html>");
+        htmlContent.append("<html lang=\"en\">");
         htmlContent.append("<head>");
+        htmlContent.append("<meta charset=\"UTF-8\">");
+        htmlContent.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
         htmlContent.append("<title>").append(reportTitle).append("</title>");
-        htmlContent.append("<meta charset=\"UTF-8\">"); // for Turkish characters
+        htmlContent.append("<style>");
+        // CSS styles
+        htmlContent.append("table { border-collapse: collapse; width: 100%; }");
+        htmlContent.append("th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }");
+        htmlContent.append("tr:hover { background-color: #f5f5f5; }");
+        htmlContent.append("th { background-color: #4CAF50; color: white; }");
+        htmlContent.append("</style>");
         htmlContent.append("</head>");
         htmlContent.append("<body>");
 
@@ -85,7 +97,7 @@ public class HTMLHelper {
         htmlContent.append("<h1>").append(reportTitle).append("</h1>");
 
         // Table to display data
-        htmlContent.append("<table border=\"1\">");
+        htmlContent.append("<table>");
         htmlContent.append("<tr>");
         for (String header : headers) {
             htmlContent.append("<th>").append(header).append("</th>");
@@ -93,8 +105,13 @@ public class HTMLHelper {
         htmlContent.append("</tr>");
 
         // Iterate over data and add rows to the table
-        for (Object obj : data) {
-            htmlContent.append("<tr>");
+        for (int i = 0; i < data.size(); i++) {
+            htmlContent.append("<tr");
+            if (i % 2 == 0) {
+                htmlContent.append(" style=\"background-color: #f2f2f2;\"");
+            }
+            htmlContent.append(">");
+            Object obj = data.get(i);
             for (String field : fields) {
                 try {
                     // Construct method name based on field
@@ -109,7 +126,7 @@ public class HTMLHelper {
                     Object value = method.invoke(obj);
                     htmlContent.append("<td>").append(value).append("</td>");
                 } catch (Exception e) {
-                    logger.error("An error occurred while creating the html report.", e);
+                    logger.error("An error occurred while creating html report.", e);
                 }
             }
             htmlContent.append("</tr>");
@@ -126,9 +143,33 @@ public class HTMLHelper {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            System.out.println("Report saved as HTML file: " + outputFilePath);
+            logger.info("Report saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
-            System.err.println("Error writing HTML file: " + e.getMessage());
+            logger.error("Error writing HTML file: " + e.getMessage());
         }
+    }
+
+    public static void generateInvigilatorReport(ArrayList<Invigilator> invigilators, String output, String title) {
+        HTMLHelper.generateReport(invigilators, output, title,
+                new String[]{"ID", "Name", "Surname", "Maximum Number of Courses to Monitor", "Monitored Class IDs", "Available"},
+                new String[]{"ID", "name", "surname", "maxCoursesMonitoredCount", "monitoredCourses", "isAvailable"});
+    }
+
+    public static void generateClassroomReport(ArrayList<Classroom> classrooms, String output, String title) {
+        HTMLHelper.generateReport(classrooms, output, title,
+                new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Available", "Course Code"},
+                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "isAvailable", "courseCode"});
+    }
+    public static void generateCourseReport(ArrayList<Course> courses, String output, String title) {
+        HTMLHelper.generateReport(courses, output, title,
+                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Available Invigilator IDs", "Classroom Code", "Remaining Student Capacity", "Registered Student IDs"},
+                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "availableInvigilators", "classroomCode", "remainingStudentCapacity", "registeredStudents"});
+    }
+
+    public static void generateStudentReport(ArrayList<Student> students, String output, String title){
+        HTMLHelper.generateReport(students, output, title,
+                new String[]{"Student ID", "Name", "Surname", "Max Number of Courses to take", "Registered Course Codes", "Remaining Course Capacity"},
+                new String[]{"ID", "name", "surname", "maxCoursesTakenCount", "registeredCourses", "remainingCourseCapacity"});
+
     }
 }
