@@ -1,4 +1,4 @@
-package org.example.Models;
+package org.example.models;
 
 import lombok.*;
 
@@ -8,9 +8,9 @@ import java.util.ArrayList;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @Data
-public class Invigilator {
+public class Invigilator extends Person{
     /*
     * id : String/UUID/int
     * name : String
@@ -19,22 +19,13 @@ public class Invigilator {
     * isAvailable : boolean
     * maxCoursesMonitoredCount : int
     * */
-    private String ID;
-    private String name;
-    private String surname;
     private ArrayList<String> monitoredCourses = new ArrayList<>();
     private boolean isAvailable;
     private int maxCoursesMonitoredCount;
 
     public Invigilator(String ID, String name, String surname, int maxCoursesMonitoredCount) {
-        this.ID = ID;
-        this.name = name;
-        this.surname = surname;
+        super(ID, name, surname);
         this.maxCoursesMonitoredCount = maxCoursesMonitoredCount;
-        if(maxCoursesMonitoredCount == 0) {
-            this.isAvailable = false;
-        }else {
-            this.isAvailable = true;
-        }
+        this.isAvailable = maxCoursesMonitoredCount != 0;
     }
 }

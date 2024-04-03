@@ -1,4 +1,4 @@
-package org.example.Models;
+package org.example.models;
 
 public class Schedule {
     /*
@@ -7,6 +7,6 @@ public class Schedule {
     * endTime
     * availableDays
     * Timeslots can be equal like each of them are 2 hours
-    * or they can vary like from 30 minutes to 3 hours
+    * ,or they can vary like from 30 minutes to 3 hours
     * */
 }

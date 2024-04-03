@@ -1,12 +1,18 @@
-package org.example.Models;
+package org.example.models;
 
 import lombok.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.example.dataPreprocessing.RandomDataGenerator;
+
+import java.util.ArrayList;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Data
 public class Classroom {
+    private static final Logger logger = LogManager.getLogger(Classroom.class);
 
     /*
     * classroomCode : String
@@ -32,5 +38,17 @@ public class Classroom {
         this.isPcLab = isPcLab;
         this.classroomProperties = classroomProperties;
         this.isAvailable = true;
+    }
+
+    public static void updateClassroom(ArrayList<Classroom> classrooms, Classroom updatedClassroom) {
+        for (int i = 0; i < classrooms.size(); i++) {
+            Classroom classroom = classrooms.get(i);
+            if (classroom.getClassroomCode().equals(updatedClassroom.getClassroomCode())) {
+                classrooms.remove(i);
+                classrooms.add(i, updatedClassroom);
+                break;
+            }
+        }
+        logger.error("Classroom not found for update.");
     }
 }

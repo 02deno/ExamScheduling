@@ -1,4 +1,4 @@
-package org.example.Models;
+package org.example.models;
 
 import lombok.*;
 
@@ -30,6 +30,8 @@ public class Course {
     private int beforeExamPrepTime;
     private int examDuration;
     private int afterExamPrepTime;
+    private String classroomCode;
+    private int remainingStudentCapacity;
 
     public Course(String courseCode, String courseName, boolean isPcExam, int studentCapacity, int beforeExamPrepTime, int examDuration, int afterExamPrepTime) {
         this.courseName = courseName;
@@ -39,5 +41,6 @@ public class Course {
         this.beforeExamPrepTime = beforeExamPrepTime;
         this.examDuration = examDuration;
         this.afterExamPrepTime = afterExamPrepTime;
+        this.remainingStudentCapacity = studentCapacity;
     }
 }

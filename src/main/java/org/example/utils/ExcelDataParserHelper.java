@@ -1,4 +1,4 @@
-package org.example.Utils;
+package org.example.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -57,7 +58,8 @@ public class ExcelDataParserHelper {
                     }
                     if (entry.getKey().equals(columnHeaderMap.get(keyHeader))) {
                         if (cell.getCellType() == CellType.NUMERIC) {
-                            keyValue = String.valueOf(BigDecimal.valueOf(cell.getNumericCellValue()));
+                            DecimalFormat decimalFormat = new DecimalFormat("#");
+                            keyValue = decimalFormat.format(cell.getNumericCellValue());
                         } else {
                             keyValue = cell.getStringCellValue();
                         }

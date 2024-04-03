@@ -1,7 +1,11 @@
-package org.example.Utils;
+package org.example.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.models.Classroom;
+import org.example.models.Course;
+import org.example.models.Invigilator;
+import org.example.models.Student;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -143,5 +147,29 @@ public class HTMLHelper {
         } catch (IOException e) {
             logger.error("Error writing HTML file: " + e.getMessage());
         }
+    }
+
+    public static void generateInvigilatorReport(ArrayList<Invigilator> invigilators, String output, String title) {
+        HTMLHelper.generateReport(invigilators, output, title,
+                new String[]{"ID", "Name", "Surname", "Maximum Number of Courses to Monitor", "Monitored Class IDs", "Available"},
+                new String[]{"ID", "name", "surname", "maxCoursesMonitoredCount", "monitoredCourses", "isAvailable"});
+    }
+
+    public static void generateClassroomReport(ArrayList<Classroom> classrooms, String output, String title) {
+        HTMLHelper.generateReport(classrooms, output, title,
+                new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Available", "Course Code"},
+                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "isAvailable", "courseCode"});
+    }
+    public static void generateCourseReport(ArrayList<Course> courses, String output, String title) {
+        HTMLHelper.generateReport(courses, output, title,
+                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Available Invigilator IDs", "Classroom Code"},
+                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "availableInvigilators", "classroomCode"});
+    }
+
+    public static void generateStudentReport(ArrayList<Student> students, String output, String title){
+        HTMLHelper.generateReport(students, output, title,
+                new String[]{"Student ID", "Name", "Surname", "Max Number of Courses to take", "Registered Course Codes"},
+                new String[]{"ID", "name", "surname", "maxCoursesTakenCount", "registeredCourses"});
+
     }
 }
