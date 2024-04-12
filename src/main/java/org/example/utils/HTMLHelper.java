@@ -162,8 +162,8 @@ public class HTMLHelper {
     }
     public static void generateCourseReport(ArrayList<Course> courses, String output, String title) {
         HTMLHelper.generateReport(courses, output, title,
-                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Available Invigilator IDs", "Classroom Code", "Remaining Student Capacity", "Registered Student IDs"},
-                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "availableInvigilators", "classroomCode", "remainingStudentCapacity", "registeredStudents"});
+                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Available Invigilator IDs", "Classroom Code", "Remaining Student Capacity", "Registered Student IDs", "Time", "Timeslots", "Before Exam", "Exam Duration", "After Exam"},
+                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "availableInvigilators", "classroomCode", "remainingStudentCapacity", "registeredStudents", "combinedTimeslot", "timeslots", "beforeExamPrepTime", "examDuration", "afterExamPrepTime"});
     }
 
     public static void generateStudentReport(ArrayList<Student> students, String output, String title){

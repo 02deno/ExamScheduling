@@ -36,6 +36,8 @@ public class Course {
     private String classroomCode;
     private int remainingStudentCapacity;
     private ArrayList<String> registeredStudents = new ArrayList<>();
+    private ArrayList<Timeslot> timeslots = new ArrayList<>();
+    private Timeslot combinedTimeslot;
     private static final Logger logger = LogManager.getLogger(Course.class);
     public Course(String courseCode, String courseName, boolean isPcExam, int studentCapacity, int beforeExamPrepTime, int examDuration, int afterExamPrepTime) {
         this.courseName = courseName;

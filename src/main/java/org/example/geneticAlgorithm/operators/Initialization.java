@@ -2,10 +2,7 @@ package org.example.geneticAlgorithm.operators;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.models.Classroom;
-import org.example.models.Course;
-import org.example.models.Invigilator;
-import org.example.models.Student;
+import org.example.models.*;
 import org.example.utils.ArraylistHelper;
 import org.example.utils.HTMLHelper;
 
@@ -15,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class Initialization {
     private static final Logger logger = LogManager.getLogger(Initialization.class);
-    public static HashMap<String, ArrayList<?>> heuristicMapInvigilatorsWithCourses(ArrayList<Course> courses, ArrayList<Invigilator> invigilators) {
+    public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithInvigilators(ArrayList<Course> courses, ArrayList<Invigilator> invigilators) {
         // Step 4
 
         // if studentCapacity :
@@ -114,7 +111,7 @@ public class Initialization {
         return result;
     }
 
-    public static HashMap<String, ArrayList<?>> heuristicMapStudentsWithCourses(ArrayList<Course> courses, ArrayList<Student> students){
+    public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithStudents(ArrayList<Course> courses, ArrayList<Student> students){
         // Step 6
         for(int i = 0; i < courses.size() ; i++){
             Course course = courses.get(i);
@@ -146,12 +143,50 @@ public class Initialization {
         }
 
 
-        HTMLHelper.generateStudentReport(students, "graphs/assigned_students_report.html", "Assigned Students Report");
-        HTMLHelper.generateCourseReport(courses, "graphs/assigned_courses_report.html", "Assigned Courses Report");
+        HTMLHelper.generateStudentReport(students, "graphs/students_report.html", "Assigned Students Report");
+        //HTMLHelper.generateCourseReport(courses, "graphs/assigned_courses_report.html", "Assigned Courses Report");
         logger.info("Course instances mapped with students successfully :)");
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("courses", courses);
         result.put("students", students);
+        return result;
+    }
+
+    public static HashMap<String, ArrayList<?>> randomMapCoursesWithTimeslots(ArrayList<Course> courses, ArrayList<Timeslot> timeslots){
+
+        ArrayList<Integer> timeslotCounts = new ArrayList<>();
+        for(int i = 0; i < courses.size(); i++) {
+            boolean found = false;
+            Course course = courses.get(i);
+            ArrayList<Timeslot> assignedTimeslots = new ArrayList<>();
+            int requiredTimeslotCount = course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime();
+            timeslotCounts.add(requiredTimeslotCount);
+            int timeslotStartIndex = 0;
+            while (!found) {
+                timeslotStartIndex = ArraylistHelper.getRandomElement(timeslots);
+                if (timeslotStartIndex - requiredTimeslotCount >= 0) {
+                    timeslotStartIndex = timeslotStartIndex - requiredTimeslotCount;
+                }
+                boolean sameDay = Timeslot.checkSameDay(timeslots.get(timeslotStartIndex), timeslots.get(timeslotStartIndex + requiredTimeslotCount - 1));
+                if (sameDay) {
+                    found = true;
+                }else {
+                    logger.info("Timeslots are not on the same day. Trying to find another random value...");
+                }
+            }
+            assignedTimeslots.add(timeslots.get(timeslotStartIndex));
+            for (int k = 1; k < requiredTimeslotCount; k++) {
+                assignedTimeslots.add(timeslots.get(timeslotStartIndex + k));
+            }
+            course.setTimeslots(assignedTimeslots);
+            course.setCombinedTimeslot(new Timeslot(assignedTimeslots.get(0).getStart(), assignedTimeslots.get(assignedTimeslots.size() - 1).getEnd()));
+        }
+
+        HTMLHelper.generateHistogram(timeslotCounts, "graphs/requiredTimeslotHistogram.html", "Timeslot histogram");
+
+        HTMLHelper.generateCourseReport(courses, "graphs/courses_report.html", "Courses Report");
+        HashMap<String, ArrayList<?>> result = new HashMap<>();
+        result.put("courses", courses);
         return result;
     }
 }

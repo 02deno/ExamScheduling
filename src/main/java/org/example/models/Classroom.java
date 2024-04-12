@@ -24,7 +24,7 @@ public class Classroom {
     private String classroomCode;
     private String classroomName;
     private int capacity;
-    private boolean isAvailable;
+    private boolean isAvailable; //TODO(DENİZ) -> availability doesnt matter because of the different timeslots
     private boolean isPcLab;
     private String courseCode;
     private String classroomProperties;

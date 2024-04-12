@@ -39,9 +39,7 @@ public class Schedule {
             while (timeSlotStart.isBefore(timeSlotEnd)) {
                 if (!timeSlotStart.toLocalTime().isBefore(startTime.toLocalTime()) &&
                         !timeSlotStart.toLocalTime().isAfter(endTime.toLocalTime())) {
-                    Timeslot timeslot = new Timeslot();
-                    timeslot.setStart(timeSlotStart);
-                    timeslot.setEnd(timeSlotStart.plusMinutes(60)); // Assuming each time slot is 30 minutes
+                    Timeslot timeslot = new Timeslot(timeSlotStart, timeSlotStart.plusMinutes(60));
                     availableTimeslots.add(timeslot);
                 }
                 timeSlotStart = timeSlotStart.plusMinutes(60);

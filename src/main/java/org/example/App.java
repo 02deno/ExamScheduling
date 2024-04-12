@@ -11,9 +11,10 @@ public class App
         final Logger logger = LogManager.getLogger(App.class);
         logger.info("Application started...");
 
+
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
         geneticAlgorithm.generateData();
-        geneticAlgorithm.heuristicInitialization();
+        geneticAlgorithm.initialization();
 
         logger.info("Application finished!");
     }

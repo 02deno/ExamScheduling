@@ -3,6 +3,7 @@ package org.example.dataPreprocessing;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.models.*;
+import org.example.utils.ConfigHelper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class RandomDataGenerator {
             int examDuration = (int) entry.getValue().get(3);
             int afterExamPrepTime = (int) entry.getValue().get(4);
 
-            double pcExamProbability = 0.3; // 30%, TODO(Deniz): Get this value from config.properties
+            double pcExamProbability = Double.parseDouble(ConfigHelper.getProperty("PC_EXAM")); // 30%
             double randomNumber = random.nextDouble();
             boolean isPcExam = randomNumber < pcExamProbability;
 
@@ -110,7 +111,7 @@ public class RandomDataGenerator {
             String id = entry.getKey();
             String name = (String) entry.getValue().get(1);
             String surname = (String) entry.getValue().get(0);
-            int maxCoursesMonitoredCount = random.nextInt(4); // TODO(Deniz): Get this value from config.properties
+            int maxCoursesMonitoredCount = random.nextInt(Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_MONITORED")));
 
             Invigilator invigilator = new Invigilator(id, name, surname, maxCoursesMonitoredCount);
             invigilators.add(invigilator);
@@ -129,7 +130,7 @@ public class RandomDataGenerator {
             String classroomName = (String) entry.getValue().get(2);
             int classroomCapacity = (int) entry.getValue().get(1);
             String classroomProperties = (String) entry.getValue().get(0);
-            double pcLabProbability = 0.35; // 10% TODO(Deniz): Get this value from config.properties
+            double pcLabProbability = Double.parseDouble(ConfigHelper.getProperty("PC_LAB")); // 35%
             double randomNumber = random.nextDouble();
             boolean isPcLab = randomNumber < pcLabProbability;
             Classroom classroom = new Classroom(classroomCode, classroomName, classroomCapacity, isPcLab, classroomProperties);
@@ -149,7 +150,7 @@ public class RandomDataGenerator {
             String name = (String) entry.getValue().get(1);
             String surname = (String) entry.getValue().get(0);
             //int maxCoursesTakenCount = random.nextInt(6) + 1;
-            int maxCoursesTakenCount = 6; // TODO(Deniz): Get this value from config.properties
+            int maxCoursesTakenCount = Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_TAKEN"));
 
             Student student = new Student(id, name, surname, maxCoursesTakenCount);
             students.add(student);
@@ -164,11 +165,11 @@ public class RandomDataGenerator {
 
         Schedule schedule = new Schedule(startDate, endDate, startTime, endTime);
         System.out.println("Max Time Slots: " + schedule.calculateMaxTimeSlots());
-        ArrayList<Timeslot> timeSlots = schedule.calculateTimeSlots();
+        // ArrayList<Timeslot> timeSlots = schedule.calculateTimeSlots();
 //        for(Timeslot timeslot : timeSlots){
 //            logger.info("Timeslot: " + timeslot);
 //        }
-        logger.info(timeSlots.size());
+        // logger.info(timeSlots.size());
         return schedule;
     }
 
