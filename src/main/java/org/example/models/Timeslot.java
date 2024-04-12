@@ -1,8 +1,20 @@
 package org.example.models;
 
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@Data
 public class Timeslot {
     /*
-    * startTime : Daytime object
-    * duration : Time object or int in minutes
+    * start : Daytime object
+    * end : Daytime object
     * */
+    private LocalDateTime start;
+    private LocalDateTime end;
 }
