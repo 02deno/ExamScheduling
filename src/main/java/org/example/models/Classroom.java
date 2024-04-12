@@ -25,7 +25,7 @@ public class Classroom {
     private String classroomName;
     private int capacity;
     private boolean isPcLab;
-    private String courseCode;
+    private ArrayList<String> courseCode = new ArrayList<>();
     private String classroomProperties;
 
     public Classroom(String classroomCode, String classroomName, int capacity, boolean isPcLab, String classroomProperties) {

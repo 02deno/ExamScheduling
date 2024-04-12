@@ -28,6 +28,12 @@ public class RandomDataGenerator {
     * Step 3 : generate classrooms
     * classroom = Classroom(classroomCode, capacity, isLab)
     *
+    * TODO(Deniz) : Remove outliers like courses that requires 7 timeslots
+    *  or courses that hava a student capacity more than 300 there are no classrooms
+    *  available in our school for this capacity. Instead of removing we can add artificial
+    *  classrooms that can contain more than 400 students.
+    *
+    * TODO(Deniz) : Add constraints like number of classroom that can be chosen.
     * */
 
     private static final Logger logger = LogManager.getLogger(RandomDataGenerator.class);

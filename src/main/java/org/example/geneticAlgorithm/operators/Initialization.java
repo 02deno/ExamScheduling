@@ -102,11 +102,15 @@ public class Initialization {
             if (!filteredClassrooms.isEmpty()) {
                 int classroomIndex = ArraylistHelper.getRandomElement(filteredClassrooms);
                 Classroom classroom = filteredClassrooms.get(classroomIndex);
-                classroom.setCourseCode(course.getCourseCode());
+                ArrayList<String> courseCodes = classroom.getCourseCode();
+                courseCodes.add(course.getCourseCode());
+                classroom.setCourseCode(courseCodes);
                 course.setClassroomCode(classroom.getClassroomCode());
                 courses.set(i, course);
                 Classroom.updateClassroom(classrooms, classroom);
                 assignedCourses++;
+            }else {
+                logger.info("Could not find a classroom for course " + course.getCourseName() + " with exam capacity " + course.getStudentCapacity());
             }
         }
         logger.info("Assigned Courses: "+ assignedCourses);
