@@ -8,12 +8,9 @@ import org.example.geneticAlgorithm.operators.Initialization;
 import org.example.models.*;
 import org.example.utils.ArraylistHelper;
 import org.example.utils.ConfigHelper;
-
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
 
 @Getter
 @Setter
@@ -63,7 +60,7 @@ public class GeneticAlgorithm {
         this.courses = ArraylistHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
         this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
 
-        HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.randomMapCoursesWithTimeslots(this.courses, this.timeslots);
+        HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapCoursesWithTimeslots(this.courses, this.timeslots);
         this.courses = ArraylistHelper.castArrayList(resultCoursesTimeslots.get("courses"), Course.class);
     }
 }

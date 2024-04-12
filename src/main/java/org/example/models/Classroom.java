@@ -24,7 +24,6 @@ public class Classroom {
     private String classroomCode;
     private String classroomName;
     private int capacity;
-    private boolean isAvailable; //TODO(DENİZ) -> availability doesnt matter because of the different timeslots
     private boolean isPcLab;
     private String courseCode;
     private String classroomProperties;
@@ -35,7 +34,6 @@ public class Classroom {
         this.capacity = capacity;
         this.isPcLab = isPcLab;
         this.classroomProperties = classroomProperties;
-        this.isAvailable = true;
     }
 
     public static void updateClassroom(ArrayList<Classroom> classrooms, Classroom updatedClassroom) {

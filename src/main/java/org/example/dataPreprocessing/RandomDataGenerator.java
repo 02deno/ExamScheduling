@@ -28,17 +28,6 @@ public class RandomDataGenerator {
     * Step 3 : generate classrooms
     * classroom = Classroom(classroomCode, capacity, isLab)
     *
-    * Step 5 : Randomly assign 2 or 3 invigilators to the courses
-    *
-    * Step 5 : Map courses with classrooms and generate exams
-    *
-    * Step 6 : Map students with courses in range(1,maxCoursesTakenCount)
-    * remove these courses from coursesWithNoProfessors list and continue
-    * this step until there is no Course left in this list
-    *
-    * Step 7 : Generate Exam Instances by
-    *
-    * This process of data generating can also be done by an Excel file
     * */
 
     private static final Logger logger = LogManager.getLogger(RandomDataGenerator.class);

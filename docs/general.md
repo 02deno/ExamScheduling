@@ -3,48 +3,48 @@
 
 - [Table of Contents](#table-of-contents)
 - [Distribution of Tasks](#distribution-of-tasks)
-- [Defining constant term](#defining-constant-terms)
+- [Defining constant term](#defining-constant-terms-)
   - [Naming Convention](#naming-convention)
 - [Comment Format](#comment-format)
-- [Automatic Documentation Extension](#documentation-extension)
-- [Folder Structure ](#folder-structure)
-- [Functions to implement](#)
-    - [Generating data/input/constraints](#generating-data)
-    - [Encoding of chromosomes, genes](#encoding)
-    - [Initialization of population ](#initialization-of-population) 
+- [Automatic Documentation Extension](#automatic-documentation-extension)
+- [Folder Structure](#folder-structure-)
+- [Functions to implement](#functions-to-implement)
+    - [Generating data/input/constraints](#generating-datainputconstraints)
+    - [Encoding of chromosomes, genes](#encoding-of-chromosomes-genes-constraints)
+    - [Initialization of population ](#initialization-of-population-) 
     - [Fitness Calculation](#fitness-calculation) 
     - [Selection](#selection)
     - [Crossover](#crossover)
     - [Mutation](#mutation)
-    - [Replacement](#replacement)
+    - [Replacement](#replacement-)
     - [Criteria of Termination](#criteria-of-termination)
     - [Parameter](#parameter)
-    - [Genetic Algorithm - Main](#genetic-algorithm)
-    - [Visualization of Results](#visualization-of-results)
-    - [Helper Functions - Utils](#helper-functions)
-    - [Pipeline](#pipeline)
-- [Advanced Methods to implement later](#advanced-methods)
-- [Expected Problems](#expected-problems)
-- [Experiments](#experiments)
-- [Performance Metrics](#performace-metrics)
-- [Helpful Links](#links)
+    - [Genetic Algorithm - Main](#genetic-algorithm---main)
+    - [Visualization of Results](#visualization-of-results-)
+    - [Helper Functions - Utils](#helper-functions---utils)
+    - [Pipeline](#pipeline-)
+- [Advanced Methods to implement later](#advanced-methods-to-implement-later-)
+- [Expected Problems](#expected-problems-)
+- [Experiments](#experiments-)
+- [Performance Metrics](#performance-metrics)
+- [Helpful Links](#helpful-links)
 
 # Distribution of Tasks
-| Deniz                                                     | Dilanur                          | 
-|-----------------------------------------------------------|----------------------------------|
-| 1. Generating(**in progress**)                            | 3. Initialization                | 
-| 2. Encoding                                               | 5. Selection                     | 
-| 4. Fitness                                                | 6. Crossover                     | 
-| Helper Fuctions(no rank do it when needed simultaneously) | 7. Mutation                      | 
-| 10. Parameter                                             | 8. Replacement                   | 
-| 12. Visualization                                         | 9. Termination                   | 
-| 13. Pipeline                                              | 11. Algorithm - Main             | 
-| 14. Fitness Sharing                                       | 16. Parameter Control and Tuning | 
-| 15. Elitism                                               | 17. Hybrid Methods               | 
-| 18. Adaptive Operations part 1                            | 19. Adaptive Operations part 2   | 
+| Deniz                                                                       | Dilanur                          | 
+|-----------------------------------------------------------------------------|----------------------------------|
+| 1. Generating(**in progress**)                                              | 2. Encoding                      | 
+| 3. Initialization (**in progress**)                                         | 5. Selection                     | 
+| 4. Fitness                                                                  | 6. Crossover                     | 
+| Helper Functions(no rank do it when needed simultaneously)(**in progress**) | 7. Mutation                      | 
+| 10. Parameter                                                               | 8. Replacement                   | 
+| 12. Visualization                                                           | 9. Termination                   | 
+| 13. Pipeline                                                                | 11. Algorithm - Main             | 
+| 14. Fitness Sharing                                                         | 16. Parameter Control and Tuning | 
+| 15. Elitism                                                                 | 17. Hybrid Methods               | 
+| 18. Adaptive Operations part 1                                              | 19. Adaptive Operations part 2   | 
 
 - [Random distribution link](https://wheeldecide.com/)  
-- ![image](../../ExamScheduling/docs/image.png)
+- ![image](image.png)
 
 # Defining constant terms 
 ## Naming Convention
@@ -63,7 +63,7 @@
 * The url argument must specify an absolute <a href="#{@link}">{@link URL}</a>. The name
 * argument is a specifier that is relative to the url argument. 
 * <p>
-* This method always returns immediately, whether or not the 
+* This method always returns immediately, whether the 
 * image exists. When this applet attempts to draw the image on
 * the screen, the data will be loaded. The graphics primitives 
 * that draw the image will incrementally paint on the screen. 
@@ -131,7 +131,7 @@
 # Functions to implement
 
 ## Generating data/input/constraints
-This is required for chromose encoding step. Dataset should contain student, teacher, class, classroom information. TAU data can be used for generation ,but it is not enough.<br>
+This is required for chrome encoding step. Dataset should contain student, teacher, class, classroom information. TAU data can be used for generation ,but it is not enough.<br>
 **Concept Terminology/Methods** : 
 * Artificial data generation - Small
 * Artificial data generation - Medium
@@ -179,7 +179,7 @@ This is required for chromose encoding step. Dataset should contain student, tea
 ## Mutation
 **Concept Terminology/Methods** :
 * Constant/adaptive Mutation Rate
-* Bitflip Mutation
+* A bit flip Mutation
 * Random Mutation
 * ...
 
@@ -221,7 +221,7 @@ This is required for chromose encoding step. Dataset should contain student, tea
 **Outputs** : 
 * Exam Scheduling Table(pretty table)
 * Graphics(plotly)
-* Constraint Chechklist
+* Constraint Checklist
 * ...
 
 ## Helper Functions - Utils
@@ -229,14 +229,14 @@ Common functions that can be used by all team players.<br>
 **Concept Terminology/Methods** :
 * Functions to mess time
 * Functions to plot graphs
-* Functions to string manupulation
+* Functions to string manipulation
 * Functions to run automatic pipelines
 * Functions to analyze, read, clean excel etc. formatted data
 * ...
 
 ## Pipeline 
 **Concept Terminology/Methods** :
-* Automic run at night
+* Atomic run at night
 * Automatic result file generation and saving to drive folder
 * ...
 
@@ -245,7 +245,7 @@ Common functions that can be used by all team players.<br>
 * Parameter Control und Tuning : belongs to [Parameter](#parameter) chapter
 * Adaptive Operations : belongs to all the operator chapters
 * Hybrid Methods : belongs to all of these chapters
-* Elitism : belongs to [Replacement](#replacement) chapter
+* Elitism : belongs to [Replacement](#replacement-) chapter
 * Fitness Sharing : belongs to [Fitness Calculation](#fitness-calculation) chapter 
 * ...
 
@@ -259,7 +259,7 @@ Common functions that can be used by all team players.<br>
 * ...
 
 # Experiments 
-* Different paramaters
+* Different parameters
 * Different methods of operators
 * Different sizes of artificial input data 
 * ...

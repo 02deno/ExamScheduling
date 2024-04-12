@@ -157,8 +157,8 @@ public class HTMLHelper {
 
     public static void generateClassroomReport(ArrayList<Classroom> classrooms, String output, String title) {
         HTMLHelper.generateReport(classrooms, output, title,
-                new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Available", "Course Code"},
-                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "isAvailable", "courseCode"});
+                new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Course Code"},
+                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "courseCode"});
     }
     public static void generateCourseReport(ArrayList<Course> courses, String output, String title) {
         HTMLHelper.generateReport(courses, output, title,

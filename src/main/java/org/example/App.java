@@ -8,15 +8,19 @@ public class App
 {
     public static void main( String[] args )
     {
+        long startTime = System.currentTimeMillis();
         final Logger logger = LogManager.getLogger(App.class);
         logger.info("Application started...");
-
 
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
         geneticAlgorithm.generateData();
         geneticAlgorithm.initialization();
 
-        logger.info("Application finished!");
+        long endTime = System.currentTimeMillis();
+        long durationMs = endTime - startTime;
+        long durationSeconds = durationMs / 1000;
+        long durationMinutes = durationSeconds / 60;
+        logger.info("Application finished! Time taken: " + durationMinutes + " minutes " + durationSeconds + " seconds");
     }
 
 }

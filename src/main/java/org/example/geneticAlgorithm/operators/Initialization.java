@@ -11,9 +11,22 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 public class Initialization {
+
+    /*
+     * Step 1 : Randomly assign 2 or 3 invigilators to the courses
+     *
+     * Step 2 : Map courses with classrooms
+     *
+     * Step 3 : Map students with courses in range(1,maxCoursesTakenCount)
+     * remove these courses from coursesWithNoProfessors list and continue
+     * this step until there is no Course left in this list
+     *
+     * Step 4 : Map courses with timeslots
+     *
+     * */
     private static final Logger logger = LogManager.getLogger(Initialization.class);
     public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithInvigilators(ArrayList<Course> courses, ArrayList<Invigilator> invigilators) {
-        // Step 4
+        // Step 1
 
         // if studentCapacity :
         // 0 - 75 : 2 invigilators
@@ -57,9 +70,9 @@ public class Initialization {
 
         logger.info("Course instances mapped with invigilators successfully :)");
 
-        //logger.info(courses);
-        //logger.info(invigilators);
-        //HTMLHelper.generateCourseReport(courses, "graphs/course_report.html", "Course Report");
+        // logger.info(courses);
+        // logger.info(invigilators);
+        // HTMLHelper.generateCourseReport(courses, "graphs/course_report.html", "Course Report");
         HTMLHelper.generateInvigilatorReport(invigilators, "graphs/invigilator_report.html", "Invigilator Report");
 
         HashMap<String, ArrayList<?>> result = new HashMap<>();
@@ -70,7 +83,7 @@ public class Initialization {
 
 
     public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithClassrooms(ArrayList<Course> courses, ArrayList<Classroom> classrooms) {
-        // Step 5
+        // Step 2
 
         ArrayList<Integer> classroomCapacities = new ArrayList<>();
         for (Classroom classroom : classrooms) {
@@ -85,12 +98,10 @@ public class Initialization {
             ArrayList<Classroom> filteredClassrooms = classrooms.stream()
                     .filter(classroom -> classroom.getCapacity() >= capacity)
                     .filter(classroom -> classroom.isPcLab() == isPcExam)
-                    .filter(Classroom::isAvailable)
                     .collect(Collectors.toCollection(ArrayList::new));
             if (!filteredClassrooms.isEmpty()) {
                 int classroomIndex = ArraylistHelper.getRandomElement(filteredClassrooms);
                 Classroom classroom = filteredClassrooms.get(classroomIndex);
-                classroom.setAvailable(false);
                 classroom.setCourseCode(course.getCourseCode());
                 course.setClassroomCode(classroom.getClassroomCode());
                 courses.set(i, course);
@@ -100,7 +111,7 @@ public class Initialization {
         }
         logger.info("Assigned Courses: "+ assignedCourses);
         logger.info("Course instances mapped with classrooms successfully :)");
-        HTMLHelper.generateHistogram(classroomCapacities, "graphs/classroomCapacityHistogram.html", "Clasroom Capacity");
+        HTMLHelper.generateHistogram(classroomCapacities, "graphs/classroomCapacityHistogram.html", "Classroom Capacity");
 
         HTMLHelper.generateClassroomReport(classrooms, "graphs/classroom_report.html", "Classroom Report");
         //HTMLHelper.generateCourseReport(courses, "graphs/assigned_course_report.html", "Assigned Course Report");
@@ -112,7 +123,7 @@ public class Initialization {
     }
 
     public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithStudents(ArrayList<Course> courses, ArrayList<Student> students){
-        // Step 6
+        // Step 3
         for(int i = 0; i < courses.size() ; i++){
             Course course = courses.get(i);
             ArrayList<String> registeredStudents = course.getRegisteredStudents();
@@ -138,8 +149,8 @@ public class Initialization {
                 }
             }
             Course.updateCourse(courses, course);
-            //logger.info(course.getRegisteredStudents());
-            //logger.info("Assigned students to the course");
+            // logger.info(course.getRegisteredStudents());
+            // logger.info("Assigned students to the course");
         }
 
 
@@ -152,12 +163,11 @@ public class Initialization {
         return result;
     }
 
-    public static HashMap<String, ArrayList<?>> randomMapCoursesWithTimeslots(ArrayList<Course> courses, ArrayList<Timeslot> timeslots){
-
+    public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithTimeslots(ArrayList<Course> courses, ArrayList<Timeslot> timeslots){
+        // Step 4
         ArrayList<Integer> timeslotCounts = new ArrayList<>();
-        for(int i = 0; i < courses.size(); i++) {
+        for (Course course : courses) {
             boolean found = false;
-            Course course = courses.get(i);
             ArrayList<Timeslot> assignedTimeslots = new ArrayList<>();
             int requiredTimeslotCount = course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime();
             timeslotCounts.add(requiredTimeslotCount);
@@ -170,8 +180,8 @@ public class Initialization {
                 boolean sameDay = Timeslot.checkSameDay(timeslots.get(timeslotStartIndex), timeslots.get(timeslotStartIndex + requiredTimeslotCount - 1));
                 if (sameDay) {
                     found = true;
-                }else {
-                    logger.info("Timeslots are not on the same day. Trying to find another random value...");
+                } else {
+                    //logger.info("Timeslots are not on the same day. Trying to find another random value...");
                 }
             }
             assignedTimeslots.add(timeslots.get(timeslotStartIndex));

@@ -39,6 +39,3 @@ build/
 
 # Ignore log files
 *.log
-
-# Ignore environment file
-.env
