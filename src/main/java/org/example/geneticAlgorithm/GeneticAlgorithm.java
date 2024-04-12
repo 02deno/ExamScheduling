@@ -10,7 +10,6 @@ import org.example.utils.ArraylistHelper;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -76,6 +75,6 @@ public class GeneticAlgorithm {
 
         HashMap<String, ArrayList<?>> resultCoursesStudents = Initialization.heuristicMapStudentsWithCourses(this.courses, this.students);
         this.courses = ArraylistHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
-        this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);;
+        this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
     }
 }

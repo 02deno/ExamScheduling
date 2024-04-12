@@ -1,19 +1,13 @@
 package org.example.dataPreprocessing;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.models.*;
-import org.example.utils.ArraylistHelper;
-import org.example.utils.HTMLHelper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class RandomDataGenerator {
     /*

@@ -3,8 +3,6 @@ package org.example.models;
 import lombok.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.App;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
