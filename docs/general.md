@@ -32,8 +32,8 @@
 # Distribution of Tasks
 | Deniz                                                     | Dilanur                          | 
 |-----------------------------------------------------------|----------------------------------|
-| 1. Generating(**in progress**)                            | 3. Initialization                | 
-| 2. Encoding                                               | 5. Selection                     | 
+| 1. Generating(**in progress**)                            | 2. Encoding                      | 
+| 3. Initialization                                         | 5. Selection                     | 
 | 4. Fitness                                                | 6. Crossover                     | 
 | Helper Fuctions(no rank do it when needed simultaneously) | 7. Mutation                      | 
 | 10. Parameter                                             | 8. Replacement                   | 
