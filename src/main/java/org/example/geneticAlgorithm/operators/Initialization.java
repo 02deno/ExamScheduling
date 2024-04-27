@@ -29,7 +29,6 @@ public class Initialization {
      *  and make HeuristicInitialization, RandomInitialization and
      *  HybridInitialization inherit that.
      *
-     * TODO(Deniz) : Add exam time slot
      * */
     private static final Logger logger = LogManager.getLogger(Initialization.class);
 
@@ -152,7 +151,7 @@ public class Initialization {
 
 
     public static HashMap<String, ArrayList<?>> heuristicMapExamsWithClassrooms(ArrayList<Exam> exams, ArrayList<Classroom> classrooms) {
-        // Step 2
+        // Step 4
 
         ArrayList<Integer> classroomCapacities = new ArrayList<>();
         for (Classroom classroom : classrooms) {
@@ -202,7 +201,7 @@ public class Initialization {
 
 
     public static HashMap<String, ArrayList<?>> heuristicMapExamsWithTimeslots(ArrayList<Exam> exams, ArrayList<Timeslot> timeslots) {
-        // Step 4
+        // Step 5
         ArrayList<Integer> timeslotCounts = new ArrayList<>();
         for (Exam exam : exams) {
             boolean found = false;
