@@ -3,6 +3,7 @@ package org.example.models;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Data
+@ToString
 public class Invigilator extends Person{
     /*
     * id : String/UUID/int
@@ -20,6 +22,7 @@ public class Invigilator extends Person{
     * maxCoursesMonitoredCount : int
     * */
     private ArrayList<String> monitoredCourses = new ArrayList<>();
+    private ArrayList<UUID> monitoredExams = new ArrayList<>();
     private boolean isAvailable;
     private int maxCoursesMonitoredCount;
 

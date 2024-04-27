@@ -1,19 +1,14 @@
 package org.example.dataPreprocessing;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.models.Classroom;
-import org.example.models.Course;
-import org.example.models.Invigilator;
-import org.example.models.Student;
-import org.example.utils.ArraylistHelper;
-import org.example.utils.HTMLHelper;
+import org.example.models.*;
+import org.example.utils.ConfigHelper;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class RandomDataGenerator {
     /*
@@ -33,17 +28,12 @@ public class RandomDataGenerator {
     * Step 3 : generate classrooms
     * classroom = Classroom(classroomCode, capacity, isLab)
     *
-    * Step 5 : Randomly assign 2 or 3 invigilators to the courses
+     * TODO(Deniz) : Remove or update "outliers like courses that requires 7 timeslots
+    *  or courses that hava a student capacity more than 300 there are no classrooms
+    *  available in our school for this capacity. Instead of removing we can add artificial
+    *  classrooms that can contain more than 400 students.
     *
-    * Step 5 : Map courses with classrooms and generate exams
-    *
-    * Step 6 : Map students with courses in range(1,maxCoursesTakenCount)
-    * remove these courses from coursesWithNoProfessors list and continue
-    * this step until there is no Course left in this list
-    *
-    * Step 7 : Generate Exam Instances by
-    *
-    * This process of data generating can also be done by an Excel file
+    * TODO(Deniz) : Add constraints like number of classroom that can be chosen.
     * */
 
     private static final Logger logger = LogManager.getLogger(RandomDataGenerator.class);
@@ -96,7 +86,7 @@ public class RandomDataGenerator {
             int examDuration = (int) entry.getValue().get(3);
             int afterExamPrepTime = (int) entry.getValue().get(4);
 
-            double pcExamProbability = 0.3; // 30%
+            double pcExamProbability = Double.parseDouble(ConfigHelper.getProperty("PC_EXAM")); // 30%
             double randomNumber = random.nextDouble();
             boolean isPcExam = randomNumber < pcExamProbability;
 
@@ -116,7 +106,7 @@ public class RandomDataGenerator {
             String id = entry.getKey();
             String name = (String) entry.getValue().get(1);
             String surname = (String) entry.getValue().get(0);
-            int maxCoursesMonitoredCount = random.nextInt(4);
+            int maxCoursesMonitoredCount = random.nextInt(Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_MONITORED")));
 
             Invigilator invigilator = new Invigilator(id, name, surname, maxCoursesMonitoredCount);
             invigilators.add(invigilator);
@@ -135,7 +125,7 @@ public class RandomDataGenerator {
             String classroomName = (String) entry.getValue().get(2);
             int classroomCapacity = (int) entry.getValue().get(1);
             String classroomProperties = (String) entry.getValue().get(0);
-            double pcLabProbability = 0.35; // 10%
+            double pcLabProbability = Double.parseDouble(ConfigHelper.getProperty("PC_LAB")); // 35%
             double randomNumber = random.nextDouble();
             boolean isPcLab = randomNumber < pcLabProbability;
             Classroom classroom = new Classroom(classroomCode, classroomName, classroomCapacity, isPcLab, classroomProperties);
@@ -155,7 +145,7 @@ public class RandomDataGenerator {
             String name = (String) entry.getValue().get(1);
             String surname = (String) entry.getValue().get(0);
             //int maxCoursesTakenCount = random.nextInt(6) + 1;
-            int maxCoursesTakenCount = 6;
+            int maxCoursesTakenCount = Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_TAKEN"));
 
             Student student = new Student(id, name, surname, maxCoursesTakenCount);
             students.add(student);
@@ -165,143 +155,18 @@ public class RandomDataGenerator {
         logger.info("Number of Students: " + students.size());
         return students;
     }
-    public static HashMap<String, ArrayList<?>> mapInvigilatorsWithCourses(ArrayList<Course> courses, ArrayList<Invigilator> invigilators) {
-        // Step 4
 
-        // if studentCapacity :
-        // 0 - 75 : 2 invigilators
-        // 75 - 150 : 3 invigilators
-        // > 150 : 4 invigilators
+    public static Schedule generateSchedule(LocalDateTime startDate, LocalDateTime endDate, LocalDateTime startTime, LocalDateTime endTime){
 
-        // set course attribute "availableInvigilators"
-        // set invigilator attribute "monitoredCourses"
-
-        ArrayList<Integer> studentCapacities = new ArrayList<>();
-        for(int i = 0; i < courses.size(); i++) {
-            Course course = courses.get(i);
-            int capacity = course.getStudentCapacity();
-            studentCapacities.add(capacity);
-            ArrayList<String> availableInvigilators = course.getAvailableInvigilators();
-            int invigilatorCount = capacity < 75 ? 2 : (capacity < 150 ? 3 : 4); // Determine the number of invigilators
-            //logger.info("Capacity: " + capacity + " Invigilator Count: " + invigilatorCount);
-            int counter = 0;
-            while(counter < invigilatorCount) {
-                int invigilatorIndex = ArraylistHelper.getRandomElement(invigilators);
-                Invigilator invigilator = invigilators.get(invigilatorIndex);
-                if(invigilator.isAvailable()) {
-                    availableInvigilators.add(invigilator.getID());
-                    ArrayList<String> monitoredCourses = invigilator.getMonitoredCourses();
-                    monitoredCourses.add(course.getCourseCode());
-                    invigilator.setMonitoredCourses(monitoredCourses);
-                    counter++;
-                    if(invigilator.getMonitoredCourses().size() == invigilator.getMaxCoursesMonitoredCount()) {
-                        invigilator.setAvailable(false);
-                    }
-                    invigilators.set(invigilatorIndex, invigilator);
-                }
-            }
-            course.setAvailableInvigilators(availableInvigilators);
-            courses.set(i, course);
-
-        }
-
-        // histogram is made to see distribution and decide invigilator numbers
-        HTMLHelper.generateHistogram(studentCapacities, "graphs/studentCapacityHistogram.html", "Student Capacity");
-
-        logger.info("Course instances mapped with invigilators successfully :)");
-
-        //logger.info(courses);
-        //logger.info(invigilators);
-        //HTMLHelper.generateCourseReport(courses, "graphs/course_report.html", "Course Report");
-        HTMLHelper.generateInvigilatorReport(invigilators, "graphs/invigilator_report.html", "Invigilator Report");
-
-        HashMap<String, ArrayList<?>> result = new HashMap<>();
-        result.put("courses", courses);
-        result.put("invigilators", invigilators);
-        return result;
+        Schedule schedule = new Schedule(startDate, endDate, startTime, endTime);
+        System.out.println("Max Time Slots: " + schedule.calculateMaxTimeSlots());
+        // ArrayList<Timeslot> timeSlots = schedule.calculateTimeSlots();
+//        for(Timeslot timeslot : timeSlots){
+//            logger.info("Timeslot: " + timeslot);
+//        }
+        // logger.info(timeSlots.size());
+        return schedule;
     }
 
 
-    public static HashMap<String, ArrayList<?>> mapCoursesWithClassrooms(ArrayList<Course> courses, ArrayList<Classroom> classrooms) {
-        // Step 5
-
-        ArrayList<Integer> classroomCapacities = new ArrayList<>();
-        for (Classroom classroom : classrooms) {
-            int capacity = classroom.getCapacity();
-            classroomCapacities.add(capacity);
-        }
-        int assignedCourses = 0;
-        for(int i = 0; i < courses.size(); i++) {
-            Course course = courses.get(i);
-            int capacity = course.getStudentCapacity();
-            boolean isPcExam = course.isPcExam();
-            ArrayList<Classroom> filteredClassrooms = classrooms.stream()
-                    .filter(classroom -> classroom.getCapacity() >= capacity)
-                    .filter(classroom -> classroom.isPcLab() == isPcExam)
-                    .filter(Classroom::isAvailable)
-                    .collect(Collectors.toCollection(ArrayList::new));
-            if (!filteredClassrooms.isEmpty()) {
-                int classroomIndex = ArraylistHelper.getRandomElement(filteredClassrooms);
-                Classroom classroom = filteredClassrooms.get(classroomIndex);
-                classroom.setAvailable(false);
-                classroom.setCourseCode(course.getCourseCode());
-                course.setClassroomCode(classroom.getClassroomCode());
-                courses.set(i, course);
-                Classroom.updateClassroom(classrooms, classroom);
-                assignedCourses++;
-            }
-        }
-        logger.info("Assigned Courses: "+ assignedCourses);
-        logger.info("Course instances mapped with classrooms successfully :)");
-        HTMLHelper.generateHistogram(classroomCapacities, "graphs/classroomCapacityHistogram.html", "Clasroom Capacity");
-
-        HTMLHelper.generateClassroomReport(classrooms, "graphs/classroom_report.html", "Classroom Report");
-        //HTMLHelper.generateCourseReport(courses, "graphs/assigned_course_report.html", "Assigned Course Report");
-
-        HashMap<String, ArrayList<?>> result = new HashMap<>();
-        result.put("courses", courses);
-        result.put("classrooms", classrooms);
-        return result;
-    }
-
-    public static HashMap<String, ArrayList<?>> mapStudentsWithCourses(ArrayList<Course> courses, ArrayList<Student> students){
-        // Step 6
-        for(int i = 0; i < courses.size() ; i++){
-            Course course = courses.get(i);
-            ArrayList<String> registeredStudents = course.getRegisteredStudents();
-            int remainingStudentCapacity = course.getRemainingStudentCapacity();
-            int studentCapacity = course.getStudentCapacity();
-            logger.info("Student Capacity: " + studentCapacity);
-            while(remainingStudentCapacity != 0 && studentCapacity < 100) {
-                int studentIndex = ArraylistHelper.getRandomElement(students);
-                Student student = students.get(studentIndex);
-                ArrayList<String> registeredCourses = student.getRegisteredCourses();
-                int remainingCourseCapacity = student.getRemainingCourseCapacity();
-                if(remainingCourseCapacity != 0 ) {
-                    registeredCourses.add(course.getCourseCode());
-                    remainingCourseCapacity--;
-                    student.setRegisteredCourses(registeredCourses);
-                    student.setRemainingCourseCapacity(remainingCourseCapacity);
-                    students.set(studentIndex, student);
-
-                    registeredStudents.add(student.getID());
-                    remainingStudentCapacity--;
-                    course.setRemainingStudentCapacity(remainingStudentCapacity);
-                    course.setRegisteredStudents(registeredStudents);
-                }
-            }
-            Course.updateCourse(courses, course);
-            logger.info(course.getRegisteredStudents());
-            //logger.info("Assigned students to the course");
-        }
-
-
-        HTMLHelper.generateStudentReport(students, "graphs/assigned_students_report.html", "Assigned Students Report");
-        HTMLHelper.generateCourseReport(courses, "graphs/assigned_courses_report.html", "Assigned Courses Report");
-        logger.info("Course instances mapped with students successfully :)");
-        HashMap<String, ArrayList<?>> result = new HashMap<>();
-        result.put("courses", courses);
-        result.put("student", students);
-        return result;
-    }
 }

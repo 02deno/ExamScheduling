@@ -2,10 +2,7 @@ package org.example.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.models.Classroom;
-import org.example.models.Course;
-import org.example.models.Invigilator;
-import org.example.models.Student;
+import org.example.models.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -157,19 +154,26 @@ public class HTMLHelper {
 
     public static void generateClassroomReport(ArrayList<Classroom> classrooms, String output, String title) {
         HTMLHelper.generateReport(classrooms, output, title,
-                new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Available", "Course Code"},
-                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "isAvailable", "courseCode"});
+                new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Course Codes"},
+                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "courseCodes"});
     }
     public static void generateCourseReport(ArrayList<Course> courses, String output, String title) {
         HTMLHelper.generateReport(courses, output, title,
-                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Available Invigilator IDs", "Classroom Code", "Remaining Student Capacity", "Registered Student IDs"},
-                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "availableInvigilators", "classroomCode", "remainingStudentCapacity", "registeredStudents"});
+                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Remaining Student Capacity", "Registered Student IDs", "Before Exam", "Exam Duration", "After Exam"},
+                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "remainingStudentCapacity", "registeredStudents", "beforeExamPrepTime", "examDuration", "afterExamPrepTime"});
     }
 
     public static void generateStudentReport(ArrayList<Student> students, String output, String title){
         HTMLHelper.generateReport(students, output, title,
                 new String[]{"Student ID", "Name", "Surname", "Max Number of Courses to take", "Registered Course Codes", "Remaining Course Capacity"},
                 new String[]{"ID", "name", "surname", "maxCoursesTakenCount", "registeredCourses", "remainingCourseCapacity"});
+
+    }
+
+    public static void generateExamReport(ArrayList<Exam> exams, String output, String title) {
+        HTMLHelper.generateReport(exams, output, title,
+                new String[]{"Exam ID", "Course", "Classroom", "Exam Invigilators", "Exam Timeslot", "Combined Timeslot(before and after included)"},
+                new String[]{"examCode", "course", "classroom", "examInvigilators", "examTimeslot", "combinedTimeslot"});
 
     }
 }
