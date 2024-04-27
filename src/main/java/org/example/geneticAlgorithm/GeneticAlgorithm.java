@@ -8,6 +8,7 @@ import org.example.geneticAlgorithm.operators.Initialization;
 import org.example.models.*;
 import org.example.utils.ArraylistHelper;
 import org.example.utils.ConfigHelper;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class GeneticAlgorithm {
     private ArrayList<Classroom> classrooms = new ArrayList<>();
     private ArrayList<Student> students = new ArrayList<>();
     private ArrayList<Timeslot> timeslots = new ArrayList<>();
+    private ArrayList<Exam> exams = new ArrayList<>();
     private Schedule schedule;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
@@ -48,19 +50,27 @@ public class GeneticAlgorithm {
     }
 
     public void initialization() {
-        HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapCoursesWithInvigilators(this.courses, this.invigilators);
-        this.courses = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("courses"), Course.class);
-        this.invigilators = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
-
-        HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapCoursesWithClassrooms(this.courses, this.classrooms);
-        this.courses = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("courses"), Course.class);
-        this.classrooms = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("classrooms"), Classroom.class);
-
         HashMap<String, ArrayList<?>> resultCoursesStudents = Initialization.heuristicMapCoursesWithStudents(this.courses, this.students);
         this.courses = ArraylistHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
         this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
+        logger.info("heuristicMapCoursesWithStudents finished.");
 
-        HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapCoursesWithTimeslots(this.courses, this.timeslots);
-        this.courses = ArraylistHelper.castArrayList(resultCoursesTimeslots.get("courses"), Course.class);
+        HashMap<String, ArrayList<?>> resultExams = Initialization.createExamInstances(this.courses);
+        this.exams = ArraylistHelper.castArrayList(resultExams.get("exams"), Exam.class);
+        logger.info(" createExamInstances finished.");
+
+        HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(this.exams, this.invigilators);
+        this.exams = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
+        this.invigilators = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
+        logger.info("heuristicMapExamsWithInvigilators finished.");
+
+        HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(this.exams, this.classrooms);
+        this.exams = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
+        this.classrooms = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("classrooms"), Classroom.class);
+        logger.info("heuristicMapExamsWithClassrooms finished.");
+
+        HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(this.exams, this.timeslots);
+        this.exams = ArraylistHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
+        logger.info("heuristicMapExamsWithTimeslots finished.");
     }
 }

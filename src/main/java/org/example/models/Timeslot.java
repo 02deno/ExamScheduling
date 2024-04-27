@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Data
+@ToString
 public class Timeslot {
     /*
     * start : Daytime object

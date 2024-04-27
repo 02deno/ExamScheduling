@@ -10,6 +10,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Data
+@ToString
 public class Student extends Person{
     /*
      * attributes :

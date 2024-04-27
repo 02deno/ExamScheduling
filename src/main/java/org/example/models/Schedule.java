@@ -3,6 +3,7 @@ package org.example.models;
 import lombok.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Data
+@ToString
 public class Schedule {
     /*
     * this class is for empty schedule generation
