@@ -8,10 +8,10 @@ import java.util.ArrayList;
 
 public class Encode {
 
-    public ArrayList<EncodedExam> encodeOperator(ArrayList<Exam> examsList){
+    public ArrayList<EncodedExam> encodeOperator(ArrayList<Exam> exams){
 
         ArrayList<EncodedExam> encodedExamList = new ArrayList<>();
-        for (Exam exam: examsList) {
+        for (Exam exam: exams) {
             String courseCode = exam.getCourse().getCourseCode();
             String classroomCode = exam.getClassroom().getClassroomCode();
             ArrayList<String> invigilators = exam.getExamInvigilators();
