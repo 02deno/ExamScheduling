@@ -49,7 +49,7 @@ public class GeneticAlgorithm {
         this.timeslots = schedule.calculateTimeSlots();
     }
 
-    public void initialization() {
+    public ArrayList<Exam> initialization() {
         HashMap<String, ArrayList<?>> resultCoursesStudents = Initialization.heuristicMapCoursesWithStudents(this.courses, this.students);
         this.courses = ArraylistHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
         this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
@@ -72,5 +72,7 @@ public class GeneticAlgorithm {
         HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(this.exams, this.timeslots);
         this.exams = ArraylistHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
         logger.info("heuristicMapExamsWithTimeslots finished.");
+
+        return exams;
     }
 }
