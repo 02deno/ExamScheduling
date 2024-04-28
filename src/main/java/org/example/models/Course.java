@@ -12,6 +12,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Data
+@ToString
 public class Course {
 
     /*
@@ -27,13 +28,11 @@ public class Course {
     * */
     private String courseName;
     private String courseCode;
-    private ArrayList<String> availableInvigilators = new ArrayList<>();
     private boolean isPcExam;
     private int studentCapacity;
     private int beforeExamPrepTime;
     private int examDuration;
     private int afterExamPrepTime;
-    private String classroomCode;
     private int remainingStudentCapacity;
     private ArrayList<String> registeredStudents = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(Course.class);
