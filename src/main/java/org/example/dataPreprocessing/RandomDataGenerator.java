@@ -5,7 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.example.models.*;
 import org.example.utils.ConfigHelper;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -94,8 +95,8 @@ public class RandomDataGenerator {
             courses.add(course);
         }
         //logger.info(courses);
+        //logger.info("Course instances created successfully:)");
         logger.info("Number of courses: " + courses.size());
-        logger.info("Course instances created successfully:)");
         return courses;
     }
 
@@ -112,7 +113,7 @@ public class RandomDataGenerator {
             invigilators.add(invigilator);
         }
         //logger.info(invigilators);
-        logger.info("Invigilator instances created successfully:)");
+        //logger.info("Invigilator instances created successfully:)");
         logger.info("Number of invigilators: " + invigilators.size());
         return invigilators;
     }
@@ -132,7 +133,7 @@ public class RandomDataGenerator {
             classrooms.add(classroom);
         }
         //logger.info(classrooms);
-        logger.info("Classroom instances created successfully:)");
+        //logger.info("Classroom instances created successfully:)");
         logger.info("Number of Classroom: " + classrooms.size());
         return classrooms;
     }
@@ -151,12 +152,12 @@ public class RandomDataGenerator {
             students.add(student);
         }
         //logger.info(invigilators);
-        logger.info("Student instances created successfully:)");
+        //logger.info("Student instances created successfully:)");
         logger.info("Number of Students: " + students.size());
         return students;
     }
 
-    public static Schedule generateSchedule(LocalDateTime startDate, LocalDateTime endDate, LocalDateTime startTime, LocalDateTime endTime){
+    public static Schedule generateSchedule(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
 
         Schedule schedule = new Schedule(startDate, endDate, startTime, endTime);
         System.out.println("Max Time Slots: " + schedule.calculateMaxTimeSlots());
