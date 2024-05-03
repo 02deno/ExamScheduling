@@ -102,7 +102,7 @@ public class GeneticAlgorithm {
     public void visualization() {
         // this will visualize a random exam schedule from population
         Random rand = new Random();
-        logger.info("Population Size " + population.size());
+        //logger.info("Population Size " + population.size());
         int n = rand.nextInt(population.size());
         ArrayList<Exam> randomExamSchedule = ArraylistHelper.castArrayList(this.population.get(n).get("exams"), Exam.class);
         HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, randomExamSchedule);
