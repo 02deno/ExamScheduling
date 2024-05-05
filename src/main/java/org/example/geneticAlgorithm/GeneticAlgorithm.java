@@ -83,11 +83,15 @@ public class GeneticAlgorithm {
             this.exams = ArraylistHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
             logger.info("heuristicMapExamsWithTimeslots finished.");
 
-            this.chromosome.put("courses", courses);
-            this.chromosome.put("students", students);
-            this.chromosome.put("exams", exams);
-            this.chromosome.put("invigilators", invigilators);
-            this.chromosome.put("classrooms", classrooms);
+            encode();
+
+            /*Optional<Course> filteredCourseOpt = courses.stream().filter(course -> course.getCourseCode().equals("KKW219")).findAny();
+            Course filteredCourse = filteredCourseOpt.orElse(null);
+
+            assert filteredCourse != null;
+            logger.info("####" + filteredCourse.getRegisteredStudents());*/
+
+            this.chromosome.put("exams", encodedExams);
             this.population.add(chromosome);
             //visualization();
             generateData();
@@ -104,7 +108,7 @@ public class GeneticAlgorithm {
         Random rand = new Random();
         //logger.info("Population Size " + population.size());
         int n = rand.nextInt(population.size());
-        ArrayList<Exam> randomExamSchedule = ArraylistHelper.castArrayList(this.population.get(n).get("exams"), Exam.class);
+        ArrayList<EncodedExam> randomExamSchedule = ArraylistHelper.castArrayList(this.population.get(n).get("exams"), EncodedExam.class);
         HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, randomExamSchedule);
         logger.info("Exam Table with random UUID is generated.");
     }

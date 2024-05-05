@@ -180,7 +180,7 @@ public class HTMLHelper {
 
     }
 
-    public static void generateExamTable(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, ArrayList<Exam> exams) {
+    public static void generateExamTable(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, ArrayList<EncodedExam> exams) {
 
         String baseFileName = "graphs/exam_schedule.html";
         UUID randomUUID = UUID.randomUUID();
@@ -226,9 +226,9 @@ public class HTMLHelper {
                 // Check if any exams are scheduled at the current time slot
                 StringBuilder courseCodesHTML = new StringBuilder();
                 Set<String> uniqueCourseCodes = new HashSet<>(); // To keep track of unique course codes in the time slot
-                for (Exam exam : exams) {
-                    if (isInTimeInterval(exam.getExamTimeslot().getStart(), exam.getExamTimeslot().getEnd(), currentDate, currentTime, intervalHours)) {
-                        String courseCode = exam.getCourse().getCourseCode();
+                for (EncodedExam exam : exams) {
+                    if (isInTimeInterval(exam.getTimeSlot().getStart(), exam.getTimeSlot().getEnd(), currentDate, currentTime, intervalHours)) {
+                        String courseCode = exam.getCourseCode();
                         uniqueCourseCodes.add(courseCode); // Add course code to set
                     }
                 }
@@ -274,9 +274,9 @@ public class HTMLHelper {
         htmlContent.append("<tr><th>Ders Kodu</th><th>Sınıf</th></tr>");
 
         // Ders ve sınıf tablosunu doldur
-        for (Exam exam : exams) {
-            String courseCode = StringEscapeUtils.escapeHtml4(exam.getCourse().getCourseCode()); // Özel karakterleri HTML etiketlerine dönüştür
-            String classroom = StringEscapeUtils.escapeHtml4(exam.getClassroom().getClassroomName()); // Özel karakterleri HTML etiketlerine dönüştür
+        for (EncodedExam exam : exams) {
+            String courseCode = StringEscapeUtils.escapeHtml4(exam.getCourseCode()); // Özel karakterleri HTML etiketlerine dönüştür
+            String classroom = StringEscapeUtils.escapeHtml4(exam.getClassroomCode()); // Özel karakterleri HTML etiketlerine dönüştür
             String color = courseCodeColors.computeIfAbsent(courseCode, key -> generateColor(courseCode)); // Ders kodu rengini al
             String textColor = getContrastColor(color); // Karşıt metin rengini al
             htmlContent.append("<tr><td><span class=\"course-code\" style=\"background-color: ").append(color).append("; color: ").append(textColor).append(";\">")
