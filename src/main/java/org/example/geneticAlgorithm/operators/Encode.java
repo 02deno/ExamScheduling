@@ -13,7 +13,12 @@ public class Encode {
         ArrayList<EncodedExam> encodedExamList = new ArrayList<>();
         for (Exam exam: exams) {
             String courseCode = exam.getCourse().getCourseCode();
-            String classroomCode = exam.getClassroom().getClassroomCode();
+            String classroomCode = null;
+
+            if (exam.getClassroom() != null) {
+                classroomCode = exam.getClassroom().getClassroomCode();
+            }
+
             ArrayList<String> invigilators = exam.getExamInvigilators();
             Timeslot timeslot = exam.getCombinedTimeslot();
 
