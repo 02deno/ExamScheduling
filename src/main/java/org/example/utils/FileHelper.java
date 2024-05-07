@@ -17,7 +17,7 @@ public class FileHelper {
                 for (File file : files) {
                     if (file.isDirectory()) {
                         deleteFolderContents(file);
-                    } else {
+                    } else if (!file.getName().equals(".gitkeep")) {
                         result = file.delete();
                     }
                 }
