@@ -30,6 +30,7 @@ public class Schedule {
     private LocalDate endDate;
     private LocalTime startTime;
     private LocalTime endTime;
+    private int interval;
     private static final Logger logger = LogManager.getLogger(Schedule.class);
 
     public ArrayList<Timeslot> calculateTimeSlots() {
@@ -43,10 +44,10 @@ public class Schedule {
             while (timeSlotStart.isBefore(timeSlotEnd)) {
                 if (!timeSlotStart.toLocalTime().isBefore(startTime) &&
                         !timeSlotStart.toLocalTime().isAfter(endTime)) {
-                    Timeslot timeslot = new Timeslot(timeSlotStart, timeSlotStart.plusMinutes(60));
+                    Timeslot timeslot = new Timeslot(timeSlotStart, timeSlotStart.plusMinutes(interval));
                     availableTimeslots.add(timeslot);
                 }
-                timeSlotStart = timeSlotStart.plusMinutes(60);
+                timeSlotStart = timeSlotStart.plusMinutes(interval);
             }
             currentDate = currentDate.plusDays(1);
         }

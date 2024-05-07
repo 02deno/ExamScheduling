@@ -3,7 +3,6 @@ package org.example.models;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,7 +21,7 @@ public class Invigilator extends Person{
     * maxCoursesMonitoredCount : int
     * */
     private ArrayList<String> monitoredCourses = new ArrayList<>();
-    private ArrayList<UUID> monitoredExams = new ArrayList<>();
+    private ArrayList<Integer> monitoredExams = new ArrayList<>();
     private boolean isAvailable;
     private int maxCoursesMonitoredCount;
 

@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -31,7 +30,7 @@ public class Classroom {
     private int capacity;
     private boolean isPcLab;
     private ArrayList<String> courseCodes = new ArrayList<>();
-    private ArrayList<UUID> placedExams = new ArrayList<>();
+    private ArrayList<Integer> placedExams = new ArrayList<>();
     private String classroomProperties;
 
     public Classroom(String classroomCode, String classroomName, int capacity, boolean isPcLab, String classroomProperties) {
