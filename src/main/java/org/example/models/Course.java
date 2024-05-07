@@ -58,4 +58,14 @@ public class Course {
         }
         logger.error("Course not found for update.");
     }
+
+    public static Course findByCourseCode(ArrayList<Course> courses, String courseCode) {
+        for (Course course : courses) {
+            if (course.getCourseCode().equals(courseCode)) {
+                return course;
+            }
+        }
+        logger.error("Could not find a course with course code: " + courseCode);
+        return null;
+    }
 }

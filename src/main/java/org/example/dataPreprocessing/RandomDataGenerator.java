@@ -96,7 +96,6 @@ public class RandomDataGenerator {
         }
         //logger.info(courses);
         //logger.info("Course instances created successfully:)");
-        logger.info("Number of courses: " + courses.size());
         return courses;
     }
 
@@ -107,14 +106,13 @@ public class RandomDataGenerator {
             String id = entry.getKey();
             String name = (String) entry.getValue().get(1);
             String surname = (String) entry.getValue().get(0);
-            int maxCoursesMonitoredCount = random.nextInt(Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_MONITORED")));
+            int maxCoursesMonitoredCount = random.nextInt(Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_MONITORED"))) + 1;
 
             Invigilator invigilator = new Invigilator(id, name, surname, maxCoursesMonitoredCount);
             invigilators.add(invigilator);
         }
         //logger.info(invigilators);
         //logger.info("Invigilator instances created successfully:)");
-        logger.info("Number of invigilators: " + invigilators.size());
         return invigilators;
     }
 
@@ -134,7 +132,6 @@ public class RandomDataGenerator {
         }
         //logger.info(classrooms);
         //logger.info("Classroom instances created successfully:)");
-        logger.info("Number of Classroom: " + classrooms.size());
         return classrooms;
     }
 
@@ -145,27 +142,24 @@ public class RandomDataGenerator {
             String id = entry.getKey();
             String name = (String) entry.getValue().get(1);
             String surname = (String) entry.getValue().get(0);
-            //int maxCoursesTakenCount = random.nextInt(6) + 1;
-            int maxCoursesTakenCount = Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_TAKEN"));
+            // int maxCoursesTakenCount = random.nextInt(6) + 1;
+            // maxCoursesTakenCount between 6 and 12
+            int minCoursesTaken = Integer.parseInt(ConfigHelper.getProperty("MIN_COURSES_TAKEN"));
+            int maxCoursesTaken = Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_TAKEN"));
+            int coursesTaken = random.nextInt(maxCoursesTaken - (minCoursesTaken - 1)) + (maxCoursesTaken - minCoursesTaken);
 
-            Student student = new Student(id, name, surname, maxCoursesTakenCount);
+            Student student = new Student(id, name, surname, coursesTaken);
             students.add(student);
         }
         //logger.info(invigilators);
         //logger.info("Student instances created successfully:)");
-        logger.info("Number of Students: " + students.size());
         return students;
     }
 
-    public static Schedule generateSchedule(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
+    public static Schedule generateSchedule(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, int interval) {
 
-        Schedule schedule = new Schedule(startDate, endDate, startTime, endTime);
-        System.out.println("Max Time Slots: " + schedule.calculateMaxTimeSlots());
-        // ArrayList<Timeslot> timeSlots = schedule.calculateTimeSlots();
-//        for(Timeslot timeslot : timeSlots){
-//            logger.info("Timeslot: " + timeslot);
-//        }
-        // logger.info(timeSlots.size());
+        Schedule schedule = new Schedule(startDate, endDate, startTime, endTime, interval);
+        //logger.info("Max Time Slots: " + schedule.calculateMaxTimeSlots());
         return schedule;
     }
 

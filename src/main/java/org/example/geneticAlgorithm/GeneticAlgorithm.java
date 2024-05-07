@@ -10,10 +10,12 @@ import org.example.models.*;
 import org.example.utils.ArraylistHelper;
 import org.example.utils.ConfigHelper;
 import org.example.utils.HTMLHelper;
+import org.example.utils.VisualizationHelper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -32,13 +34,16 @@ public class GeneticAlgorithm {
     private ArrayList<Timeslot> timeslots = new ArrayList<>();
     private ArrayList<Exam> exams = new ArrayList<>();
     private ArrayList<EncodedExam> encodedExams = new ArrayList<>();
-    private HashMap<String, ArrayList<?>> chromosome = new HashMap<>();
-    private ArrayList<HashMap<String, ArrayList<?>>> population = new ArrayList<>();
+    private ArrayList<EncodedExam> chromosome;
+    private HashMap<String, ArrayList<?>> chromosomeForVisualization = new HashMap<>();
+    private ArrayList<ArrayList<EncodedExam>> population = new ArrayList<>();
+    private ArrayList<HashMap<String, ArrayList<?>>> populationForVisualization = new ArrayList<>();
     private Schedule schedule;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalTime startTime;
     private LocalTime endTime;
+    private int interval;
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
 
 
@@ -46,40 +51,60 @@ public class GeneticAlgorithm {
         HashMap<String, HashMap<String, ArrayList<Object>>> randomData = RandomDataGenerator.combineAllData();
         this.courses = RandomDataGenerator.generateCourseInstances(randomData.get("courseData"));
         this.invigilators = RandomDataGenerator.generateInvigilatorInstances(randomData.get("invigilatorData"));
+        // to decide invigilator number
+        //this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(100, invigilators.size())));
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
         this.students = RandomDataGenerator.generateStudentInstances(randomData.get("studentData"));
         this.startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
         this.endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE")); // this date is not included
         this.startTime = LocalTime.parse(ConfigHelper.getProperty("START_TIME"));
         this.endTime = LocalTime.parse(ConfigHelper.getProperty("END_TIME"));
-        this.schedule = RandomDataGenerator.generateSchedule(startDate, endDate, startTime, endTime);
+        this.interval = Integer.parseInt(ConfigHelper.getProperty("TIME_SLOT_INTERVAL"));
+        this.schedule = RandomDataGenerator.generateSchedule(startDate, endDate, startTime, endTime, interval);
         this.timeslots = schedule.calculateTimeSlots();
+
+        logger.info("Number of Students: " + students.size());
+        logger.info("Number of Classroom: " + classrooms.size());
+        logger.info("Number of invigilators: " + invigilators.size());
+        logger.info("Number of courses: " + courses.size());
+        logger.info("Number of timeslots: " + schedule.calculateMaxTimeSlots());
+
+        HashMap<String, ArrayList<?>> resultCoursesStudents = Initialization.heuristicMapCoursesWithStudents(this.courses, this.students);
+        this.courses = ArraylistHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
+        this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
+        logger.info("heuristicMapCoursesWithStudents finished.");
+
+
     }
 
-    public void initialization() {
-        generateData();
+    public void initializationAndEncode() {
         int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
         for (int i = 0; i < populationSize; i++) {
-            HashMap<String, ArrayList<?>> resultCoursesStudents = Initialization.heuristicMapCoursesWithStudents(this.courses, this.students);
-            this.courses = ArraylistHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
-            this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
-            logger.info("heuristicMapCoursesWithStudents finished.");
+
+            logger.info("Population " + i);
 
             HashMap<String, ArrayList<?>> resultExams = Initialization.createExamInstances(this.courses);
             this.exams = ArraylistHelper.castArrayList(resultExams.get("exams"), Exam.class);
-            logger.info(" createExamInstances finished.");
+            logger.info("createExamInstances finished.");
+            Random rand = new Random();
 
-            HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(this.exams, this.invigilators);
+            Collections.shuffle(this.exams, new Random(rand.nextInt(10000)));
+            Collections.shuffle(this.invigilators, new Random(rand.nextInt(10000)));
+            Collections.shuffle(this.classrooms, new Random(rand.nextInt(10000)));
+
+            HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(exams, invigilators);
             this.exams = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
             this.invigilators = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
+            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithInvigilators finished.");
 
-            HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(this.exams, this.classrooms);
+            HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(exams, classrooms);
             this.exams = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
             this.classrooms = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("classrooms"), Classroom.class);
+            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithClassrooms finished.");
 
-            HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(this.exams, this.timeslots);
+            HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(exams, timeslots);
             this.exams = ArraylistHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
             logger.info("heuristicMapExamsWithTimeslots finished.");
 
@@ -91,25 +116,76 @@ public class GeneticAlgorithm {
             assert filteredCourse != null;
             logger.info("####" + filteredCourse.getRegisteredStudents());*/
 
-            this.chromosome.put("exams", encodedExams);
-            this.population.add(chromosome);
-            //visualization();
-            generateData();
+            // for visualization purposes and reduce complexity
+            this.chromosomeForVisualization.put("exams", new ArrayList<>(exams));
+            this.chromosomeForVisualization.put("invigilators", new ArrayList<>(invigilators));
+            this.chromosomeForVisualization.put("classrooms", new ArrayList<>(classrooms));
+            this.populationForVisualization.add(new HashMap<>(chromosomeForVisualization));
+            reset();
         }
-        //logger.info(population);
     }
 
     public void encode() {
         this.encodedExams = Encode.encodeOperator(this.exams);
+        this.chromosome = encodedExams;
+        this.population.add(chromosome);
+        logger.info("Encode is finished.");
     }
 
     public void visualization() {
+
+        VisualizationHelper.generateReports(courses, students, classrooms, interval);
+
+        // Exam Schedule :
         // this will visualize a random exam schedule from population
+
+        // this exam schedule is for invigilators not for students
         Random rand = new Random();
-        //logger.info("Population Size " + population.size());
-        int n = rand.nextInt(population.size());
-        ArrayList<EncodedExam> randomExamSchedule = ArraylistHelper.castArrayList(this.population.get(n).get("exams"), EncodedExam.class);
-        HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, randomExamSchedule);
-        logger.info("Exam Table with random UUID is generated.");
+        int n = rand.nextInt(populationForVisualization.size());
+        HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
+        ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encodeOperator(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class));
+        HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, "Exam Schedule-" + n + " for Invigilators");
+
+        // TODO(Deniz) : add an exam schedule for students.
+        //  Before and after exam timeslots are not important for them
+        ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
+        for (EncodedExam encodedExam : randomExamScheduleForInvigilators) {
+            Course course = Course.findByCourseCode(courses, encodedExam.getCourseCode());
+            if (course != null) {
+                int beforeExam = course.getBeforeExamPrepTime();
+                int afterExam = course.getAfterExamPrepTime();
+                Timeslot combinedTimeslot = encodedExam.getTimeSlot();
+                Timeslot examTimeslot = new Timeslot(combinedTimeslot.getStart().plusHours(beforeExam), combinedTimeslot.getEnd().minusHours(afterExam));
+                randomExamScheduleForStudents.add(new EncodedExam(encodedExam.getCourseCode(),
+                        encodedExam.getClassroomCode(),
+                        examTimeslot,
+                        encodedExam.getInvigilators()));
+            }
+        }
+        HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, "Exam Schedule-" + n + " for Students");
+
+
+        // Reports that are changing : invigilators, classrooms, exam schedules
+        HTMLHelper.generateInvigilatorReport(ArraylistHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), "graphs/invigilator_report_" + n + ".html", "Invigilator Report");
+        HTMLHelper.generateClassroomReport(ArraylistHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), "graphs/classroom_report_" + n + ".html", "Classroom Report");
+        HTMLHelper.generateExamReport(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class), "graphs/exams_" + n + ".html", "Exam Schedule");
+
+    }
+
+    public void reset() {
+        // reset classrooms and invigilators
+        ArrayList<Invigilator> resetInvigilators = new ArrayList<>();
+        ArrayList<Classroom> resetClassrooms = new ArrayList<>();
+        for (Invigilator originalInvigilator : this.invigilators) {
+            Invigilator invigilator = new Invigilator(originalInvigilator.getID(), originalInvigilator.getName(), originalInvigilator.getSurname(), originalInvigilator.getMaxCoursesMonitoredCount());
+            resetInvigilators.add(invigilator);
+        }
+
+        for (Classroom originalClassroom : this.classrooms) {
+            Classroom classroom = new Classroom(originalClassroom.getClassroomCode(), originalClassroom.getClassroomName(), originalClassroom.getCapacity(), originalClassroom.isPcLab(), originalClassroom.getClassroomProperties());
+            resetClassrooms.add(classroom);
+        }
+        this.invigilators = resetInvigilators;
+        this.classrooms = resetClassrooms;
     }
 }
