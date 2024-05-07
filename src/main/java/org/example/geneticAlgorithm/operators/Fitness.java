@@ -35,4 +35,11 @@ public class Fitness {
      * exponential
      *
      * */
+
+    public static double FitnessScore() {
+        double fitnessScore = 0;
+        return fitnessScore;
+    }
+
+
 }

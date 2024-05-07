@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dataPreprocessing.RandomDataGenerator;
 import org.example.geneticAlgorithm.operators.Encode;
+import org.example.geneticAlgorithm.operators.Fitness;
 import org.example.geneticAlgorithm.operators.Initialization;
 import org.example.models.*;
 import org.example.utils.ArraylistHelper;
@@ -14,10 +15,7 @@ import org.example.utils.VisualizationHelper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 @Getter
 @Setter
@@ -26,6 +24,9 @@ import java.util.Random;
 @EqualsAndHashCode
 @Data
 public class GeneticAlgorithm {
+
+    // TODO(Deniz) : Chromosome and Population classes can be avoid to
+    //  reduce complexity
 
     private ArrayList<Course> courses = new ArrayList<>();
     private ArrayList<Invigilator> invigilators = new ArrayList<>();
@@ -44,6 +45,7 @@ public class GeneticAlgorithm {
     private LocalTime startTime;
     private LocalTime endTime;
     private int interval;
+    private TreeMap<Double, ArrayList<EncodedExam>> fitnessScores = new TreeMap<>();
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
 
 
@@ -132,43 +134,44 @@ public class GeneticAlgorithm {
         logger.info("Encode is finished.");
     }
 
-    public void visualization() {
+    public void visualization(int wantedExamScheduleCount) {
+        for (int k = 0; k < wantedExamScheduleCount; k++) {
+            VisualizationHelper.generateReports(courses, students, classrooms, interval);
 
-        VisualizationHelper.generateReports(courses, students, classrooms, interval);
+            // Exam Schedule :
+            // this will visualize a random exam schedule from population
 
-        // Exam Schedule :
-        // this will visualize a random exam schedule from population
+            // this exam schedule is for invigilators not for students
+            Random rand = new Random();
+            int n = rand.nextInt(populationForVisualization.size());
+            HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
+            ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encodeOperator(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class));
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, "Exam Schedule-" + n + " for Invigilators");
 
-        // this exam schedule is for invigilators not for students
-        Random rand = new Random();
-        int n = rand.nextInt(populationForVisualization.size());
-        HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
-        ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encodeOperator(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class));
-        HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, "Exam Schedule-" + n + " for Invigilators");
-
-        // TODO(Deniz) : add an exam schedule for students.
-        //  Before and after exam timeslots are not important for them
-        ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
-        for (EncodedExam encodedExam : randomExamScheduleForInvigilators) {
-            Course course = Course.findByCourseCode(courses, encodedExam.getCourseCode());
-            if (course != null) {
-                int beforeExam = course.getBeforeExamPrepTime();
-                int afterExam = course.getAfterExamPrepTime();
-                Timeslot combinedTimeslot = encodedExam.getTimeSlot();
-                Timeslot examTimeslot = new Timeslot(combinedTimeslot.getStart().plusHours(beforeExam), combinedTimeslot.getEnd().minusHours(afterExam));
-                randomExamScheduleForStudents.add(new EncodedExam(encodedExam.getCourseCode(),
-                        encodedExam.getClassroomCode(),
-                        examTimeslot,
-                        encodedExam.getInvigilators()));
+            // TODO(Deniz) : add an exam schedule for students.
+            //  Before and after exam timeslots are not important for them
+            ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
+            for (EncodedExam encodedExam : randomExamScheduleForInvigilators) {
+                Course course = Course.findByCourseCode(courses, encodedExam.getCourseCode());
+                if (course != null) {
+                    int beforeExam = course.getBeforeExamPrepTime();
+                    int afterExam = course.getAfterExamPrepTime();
+                    Timeslot combinedTimeslot = encodedExam.getTimeSlot();
+                    Timeslot examTimeslot = new Timeslot(combinedTimeslot.getStart().plusHours(beforeExam), combinedTimeslot.getEnd().minusHours(afterExam));
+                    randomExamScheduleForStudents.add(new EncodedExam(encodedExam.getCourseCode(),
+                            encodedExam.getClassroomCode(),
+                            examTimeslot,
+                            encodedExam.getInvigilators()));
+                }
             }
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, "Exam Schedule-" + n + " for Students");
+
+
+            // Reports that are changing : invigilators, classrooms, exam schedules
+            HTMLHelper.generateInvigilatorReport(ArraylistHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), "graphs/invigilator_report_" + n + ".html", "Invigilator Report");
+            HTMLHelper.generateClassroomReport(ArraylistHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), "graphs/classroom_report_" + n + ".html", "Classroom Report");
+            HTMLHelper.generateExamReport(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class), "graphs/exams_" + n + ".html", "Exam Schedule");
         }
-        HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, "Exam Schedule-" + n + " for Students");
-
-
-        // Reports that are changing : invigilators, classrooms, exam schedules
-        HTMLHelper.generateInvigilatorReport(ArraylistHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), "graphs/invigilator_report_" + n + ".html", "Invigilator Report");
-        HTMLHelper.generateClassroomReport(ArraylistHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), "graphs/classroom_report_" + n + ".html", "Classroom Report");
-        HTMLHelper.generateExamReport(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class), "graphs/exams_" + n + ".html", "Exam Schedule");
 
     }
 
@@ -187,5 +190,19 @@ public class GeneticAlgorithm {
         }
         this.invigilators = resetInvigilators;
         this.classrooms = resetClassrooms;
+    }
+
+    public void calculateFitness() {
+        // make a hashmap with encoded exam as a key
+        // and fitness score as a value
+
+        for (ArrayList<EncodedExam> chromosome : population) {
+            double fitnessScore = Fitness.FitnessScore();
+            this.fitnessScores.put(fitnessScore, chromosome);
+        }
+
+        // sort this hashmap based on fitness scores
+        // TreeMap is already sorted
+
     }
 }
