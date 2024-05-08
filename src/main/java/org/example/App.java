@@ -25,7 +25,7 @@ public class App
         geneticAlgorithm.generateData();
         geneticAlgorithm.initializationAndEncode();
         geneticAlgorithm.visualization(wantedExamScheduleCount);
-        //geneticAlgorithm.calculateFitness();
+        geneticAlgorithm.calculateFitness();
 
         long endTime = System.currentTimeMillis();
         long durationMs = endTime - startTime;

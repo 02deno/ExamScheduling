@@ -15,7 +15,10 @@ import org.example.utils.VisualizationHelper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Random;
 
 @Getter
 @Setter
@@ -45,7 +48,7 @@ public class GeneticAlgorithm {
     private LocalTime startTime;
     private LocalTime endTime;
     private int interval;
-    private TreeMap<Double, ArrayList<EncodedExam>> fitnessScores = new TreeMap<>();
+    private HashMap<Integer, Double> fitnessScores = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
 
 
@@ -148,8 +151,6 @@ public class GeneticAlgorithm {
             ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encodeOperator(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class));
             HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, "Exam Schedule-" + n + " for Invigilators");
 
-            // TODO(Deniz) : add an exam schedule for students.
-            //  Before and after exam timeslots are not important for them
             ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
             for (EncodedExam encodedExam : randomExamScheduleForInvigilators) {
                 Course course = Course.findByCourseCode(courses, encodedExam.getCourseCode());
@@ -196,13 +197,14 @@ public class GeneticAlgorithm {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
 
+        Fitness fitness = new Fitness(courses, students);
         for (ArrayList<EncodedExam> chromosome : population) {
-            double fitnessScore = Fitness.FitnessScore();
-            this.fitnessScores.put(fitnessScore, chromosome);
+            double fitnessScore = fitness.fitnessScore(chromosome);
+            fitnessScores.put(chromosome.hashCode(), fitnessScore);
         }
 
         // sort this hashmap based on fitness scores
-        // TreeMap is already sorted
+        logger.info(fitnessScores);
 
     }
 }

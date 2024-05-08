@@ -1,5 +1,25 @@
 package org.example.geneticAlgorithm.operators;
 
+import lombok.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.example.models.Course;
+import org.example.models.EncodedExam;
+import org.example.models.Student;
+import org.example.models.Timeslot;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@Data
+@ToString
 public class Fitness {
     /*
      * Overall Check of Schedule
@@ -13,6 +33,7 @@ public class Fitness {
      * */
 
 
+    private static final Logger logger = LogManager.getLogger(Fitness.class);
     /*
      * Constraint Check and Penalty
      * Hard Constraints
@@ -32,13 +53,66 @@ public class Fitness {
      * score = (1 / (1 + number_of_constraint_violations))
      * score can be at most 1 if everything is perfect
      *
-     * exponential
-     *
+     * TODO(Deniz) : directly eliminate a chromosome if a hard constraint is violated
+     *  we can do this by multiplying with zero or a negative number
      * */
+    private ArrayList<Course> courses;
+    private ArrayList<Student> students;
 
-    public static double FitnessScore() {
-        double fitnessScore = 0;
+    public double fitnessScore(ArrayList<EncodedExam> encodedExams) {
+        double fitnessScore;
+        fitnessScore = checkCourseExamCompatibility(encodedExams);
         return fitnessScore;
+    }
+
+    public double checkCourseExamCompatibility(ArrayList<EncodedExam> chromosome) {
+        // During Initialization all chromosomes are going to be best(fitness score = 1)
+        // because of heuristic initialization, but after crossover or/and mutation
+        // it can be changed. That's why this function is implemented.
+
+        // Hard Constraints
+        // all courses have just one exam
+        // all courses have the required timeslot for both invigilators and students
+        // all courses have the required number of invigilators to observe the exam
+        Set<String> uniqueCourseCodes = new HashSet<>();
+        int duplicatedCoursesPunishment = 0;
+        int requiredTimeslotPunishment = 0;
+        int invigilatorCountPunishment = 0;
+        for (EncodedExam exam : chromosome) {
+            String courseCode = exam.getCourseCode();
+            Course course = Course.findByCourseCode(courses, courseCode);
+            assert course != null;
+
+            int invigilatorCount = exam.getInvigilators().size();
+            Timeslot timeslots = exam.getTimeSlot();
+            int examTimeslotCount = (int) Duration.between(timeslots.getStart(), timeslots.getEnd()).toHours();
+            int timeslotCountForInvigilator = course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime();
+            int timeslotCountForStudent = course.getExamDuration();
+
+            // all courses have just one exam
+            duplicatedCoursesPunishment += (uniqueCourseCodes.add(courseCode)) ? 0 : 1;
+
+            // all courses have the required number of invigilators to observe the exam
+            // if there are more invigilator than it is supposed to be is that okay ?
+            int capacity = course.getRegisteredStudents().size();
+            int requiredInvigilator = capacity < 20 ? 1 : capacity < 75 ? 2 : (capacity < 150 ? 3 : 4);
+            invigilatorCountPunishment = Math.abs(requiredInvigilator - invigilatorCount);
+
+            // all courses have the required timeslot for both invigilators and students
+            // punish it proportional to the difference
+            int differenceInvigilator = Math.abs(examTimeslotCount - timeslotCountForInvigilator);
+            int differenceStudent = Math.abs((examTimeslotCount - (course.getBeforeExamPrepTime() + course.getAfterExamPrepTime())) - timeslotCountForStudent);
+            requiredTimeslotPunishment += differenceInvigilator;
+            requiredTimeslotPunishment += differenceStudent;
+        }
+
+//        logger.info("Duplicated Course Punishment: " + duplicatedCoursesPunishment);
+//        logger.info("Required Timeslot Punishment: " + requiredTimeslotPunishment);
+//        logger.info("Invigilator Count Punishment: " + invigilatorCountPunishment);
+        return (double) 1 / (1 + duplicatedCoursesPunishment +
+                requiredTimeslotPunishment +
+                invigilatorCountPunishment);
+
     }
 
 
