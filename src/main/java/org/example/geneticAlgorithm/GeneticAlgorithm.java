@@ -8,8 +8,8 @@ import org.example.geneticAlgorithm.operators.Encode;
 import org.example.geneticAlgorithm.operators.Fitness;
 import org.example.geneticAlgorithm.operators.Initialization;
 import org.example.models.*;
-import org.example.utils.ArraylistHelper;
 import org.example.utils.ConfigHelper;
+import org.example.utils.DataStructureHelper;
 import org.example.utils.HTMLHelper;
 import org.example.utils.VisualizationHelper;
 
@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
+
+import static org.example.utils.DataStructureHelper.sortByValueDescending;
 
 @Getter
 @Setter
@@ -75,8 +77,8 @@ public class GeneticAlgorithm {
         logger.info("Number of timeslots: " + schedule.calculateMaxTimeSlots());
 
         HashMap<String, ArrayList<?>> resultCoursesStudents = Initialization.heuristicMapCoursesWithStudents(this.courses, this.students);
-        this.courses = ArraylistHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
-        this.students = ArraylistHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
+        this.courses = DataStructureHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
+        this.students = DataStructureHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
         logger.info("heuristicMapCoursesWithStudents finished.");
 
 
@@ -89,7 +91,7 @@ public class GeneticAlgorithm {
             logger.info("Population " + i);
 
             HashMap<String, ArrayList<?>> resultExams = Initialization.createExamInstances(this.courses);
-            this.exams = ArraylistHelper.castArrayList(resultExams.get("exams"), Exam.class);
+            this.exams = DataStructureHelper.castArrayList(resultExams.get("exams"), Exam.class);
             logger.info("createExamInstances finished.");
             Random rand = new Random();
 
@@ -98,19 +100,19 @@ public class GeneticAlgorithm {
             Collections.shuffle(this.classrooms, new Random(rand.nextInt(10000)));
 
             HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(exams, invigilators);
-            this.exams = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
-            this.invigilators = ArraylistHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
+            this.exams = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
+            this.invigilators = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithInvigilators finished.");
 
             HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(exams, classrooms);
-            this.exams = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
-            this.classrooms = ArraylistHelper.castArrayList(resultCoursesClassrooms.get("classrooms"), Classroom.class);
+            this.exams = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
+            this.classrooms = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("classrooms"), Classroom.class);
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithClassrooms finished.");
 
             HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(exams, timeslots);
-            this.exams = ArraylistHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
+            this.exams = DataStructureHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
             logger.info("heuristicMapExamsWithTimeslots finished.");
 
             encode();
@@ -148,7 +150,7 @@ public class GeneticAlgorithm {
             Random rand = new Random();
             int n = rand.nextInt(populationForVisualization.size());
             HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
-            ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encodeOperator(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class));
+            ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encodeOperator(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class));
             HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, "Exam Schedule-" + n + " for Invigilators");
 
             ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
@@ -169,9 +171,9 @@ public class GeneticAlgorithm {
 
 
             // Reports that are changing : invigilators, classrooms, exam schedules
-            HTMLHelper.generateInvigilatorReport(ArraylistHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), "graphs/invigilator_report_" + n + ".html", "Invigilator Report");
-            HTMLHelper.generateClassroomReport(ArraylistHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), "graphs/classroom_report_" + n + ".html", "Classroom Report");
-            HTMLHelper.generateExamReport(ArraylistHelper.castArrayList(randomInfo.get("exams"), Exam.class), "graphs/exams_" + n + ".html", "Exam Schedule");
+            HTMLHelper.generateInvigilatorReport(DataStructureHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), "graphs/invigilator_report_" + n + ".html", "Invigilator Report");
+            HTMLHelper.generateClassroomReport(DataStructureHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), "graphs/classroom_report_" + n + ".html", "Classroom Report");
+            HTMLHelper.generateExamReport(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class), "graphs/exams_" + n + ".html", "Exam Schedule");
         }
 
     }
@@ -204,6 +206,8 @@ public class GeneticAlgorithm {
         }
 
         // sort this hashmap based on fitness scores
+        logger.info(fitnessScores);
+        fitnessScores = sortByValueDescending(fitnessScores);
         logger.info(fitnessScores);
 
     }

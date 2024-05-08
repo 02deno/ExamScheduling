@@ -37,7 +37,7 @@ public class Fitness {
     /*
      * Constraint Check and Penalty
      * Hard Constraints
-     * All lessons must have exams assigned to them
+     * All lessons that have registered students must have exams assigned to them
      * No classroom can be assigned to more than one exam at the same moment.
      * No student can be assigned to more than one exam at the same moment.
      * No invigilator can be assigned to more than one exam at the same moment.
@@ -61,7 +61,11 @@ public class Fitness {
 
     public double fitnessScore(ArrayList<EncodedExam> encodedExams) {
         double fitnessScore;
-        fitnessScore = checkCourseExamCompatibility(encodedExams);
+        // use f1 score to calculate average, harmonic average
+        // n = fitness function count
+        int n = 2;
+        fitnessScore = 2 / ((1 / checkCourseExamCompatibility(encodedExams)) +
+                (1 / classroomOverlapped(encodedExams)));
         return fitnessScore;
     }
 
@@ -74,6 +78,7 @@ public class Fitness {
         // all courses have just one exam
         // all courses have the required timeslot for both invigilators and students
         // all courses have the required number of invigilators to observe the exam
+        // all courses have exactly one classroom assigned to them if no sessions
         Set<String> uniqueCourseCodes = new HashSet<>();
         int duplicatedCoursesPunishment = 0;
         int requiredTimeslotPunishment = 0;
@@ -104,6 +109,8 @@ public class Fitness {
             int differenceStudent = Math.abs((examTimeslotCount - (course.getBeforeExamPrepTime() + course.getAfterExamPrepTime())) - timeslotCountForStudent);
             requiredTimeslotPunishment += differenceInvigilator;
             requiredTimeslotPunishment += differenceStudent;
+
+            // all courses have exactly one classroom assigned to them if no sessions
         }
 
 //        logger.info("Duplicated Course Punishment: " + duplicatedCoursesPunishment);
@@ -113,6 +120,41 @@ public class Fitness {
                 requiredTimeslotPunishment +
                 invigilatorCountPunishment);
 
+    }
+
+    public double classroomOverlapped(ArrayList<EncodedExam> chromosome) {
+        // No classroom can be assigned to more than one exam at the same moment.
+        int classroomPunishment = 0;
+
+        return (double) 1 / (1 + classroomPunishment);
+    }
+
+    public double studentOverlapped() {
+        // No student can be assigned to more than one exam at the same moment.
+        int studentPunishment = 0;
+
+        return (double) 1 / (1 + studentPunishment);
+    }
+
+    public double invigilatorOverlapped() {
+        // No invigilator can be assigned to more than one exam at the same moment.
+        int invigilatorPunishment = 0;
+
+        return (double) 1 / (1 + invigilatorPunishment);
+    }
+
+    public double startAndEndTimeViolated() {
+        // No exam can be held before or after the defined time frame
+        int startAndEndTimPunishment = 0;
+
+        return (double) 1 / (1 + startAndEndTimPunishment);
+    }
+
+    public double allExamsHaveClassrooms() {
+        // All exams must have classrooms assigned to them
+        int allExamsHaveClassroomsPunishment = 0;
+
+        return (double) 1 / (1 + allExamsHaveClassroomsPunishment);
     }
 
 
