@@ -3,11 +3,12 @@ package org.example.geneticAlgorithm.operators;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.models.*;
-import org.example.utils.ArraylistHelper;
+import org.example.utils.DataStructureHelper;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 public class Initialization {
 
@@ -38,7 +39,7 @@ public class Initialization {
             int studentCapacity = course.getStudentCapacity();
             double randomRatio = Math.random();
             while (registeredStudents.size() < studentCapacity * randomRatio) {
-                int studentIndex = ArraylistHelper.getRandomElement(students);
+                int studentIndex = DataStructureHelper.getRandomElement(students);
                 Student student = students.get(studentIndex);
                 ArrayList<String> registeredCourses = student.getRegisteredCourses();
                 int remainingCourseCapacity = student.getRemainingCourseCapacity();
@@ -109,7 +110,7 @@ public class Initialization {
                         .collect(Collectors.toCollection(ArrayList::new));
                 //logger.info("Invigilators available: " + course.getCourseName() + ": "+filteredInvigilators.size());
                 if (!filteredInvigilators.isEmpty()) {
-                    int invigilatorIndex = ArraylistHelper.getRandomElement(filteredInvigilators);
+                    int invigilatorIndex = DataStructureHelper.getRandomElement(filteredInvigilators);
                     Invigilator invigilator = filteredInvigilators.get(invigilatorIndex);
                     availableInvigilators.add(invigilator.getID());
 
@@ -159,7 +160,7 @@ public class Initialization {
                     .collect(Collectors.toCollection(ArrayList::new));
 
             if (!filteredClassrooms.isEmpty()) {
-                int classroomIndex = ArraylistHelper.getRandomElement(filteredClassrooms);
+                int classroomIndex = DataStructureHelper.getRandomElement(filteredClassrooms);
                 Classroom classroom = filteredClassrooms.get(classroomIndex);
 
                 ArrayList<String> courseCodes = new ArrayList<>(classroom.getCourseCodes());
@@ -199,7 +200,7 @@ public class Initialization {
             int requiredTimeslotCount = (course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime()) * 60 / interval;
             int timeslotStartIndex = 0;
             while (!found) {
-                timeslotStartIndex = ArraylistHelper.getRandomElement(timeslots);
+                timeslotStartIndex = DataStructureHelper.getRandomElement(timeslots);
                 if (timeslotStartIndex - requiredTimeslotCount >= 0) {
                     timeslotStartIndex = timeslotStartIndex - requiredTimeslotCount;
                 }

@@ -17,20 +17,20 @@ public class FileHelper {
                 for (File file : files) {
                     if (file.isDirectory()) {
                         deleteFolderContents(file);
-                    } else {
+                    } else if (!file.getName().equals(".gitkeep")) {
                         result = file.delete();
                     }
                 }
             } else {
                 logger.info("Graphs folder is already empty");
-                result = true;
+                return;
             }
         }
 
         if (result) {
             logger.info("Some error occurred during folder deletion Folder contents is deleted successfully :)");
         } else {
-            logger.error("Some error occurred during folder deletionç");
+            logger.error("Some error occurred during folder deletion");
         }
     }
 }

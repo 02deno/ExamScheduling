@@ -15,26 +15,23 @@ public class App
         long startTime = System.currentTimeMillis();
         final Logger logger = LogManager.getLogger(App.class);
         int wantedExamScheduleCount = 3;
-        boolean removeFolderContents = true; // Set this to true if you want to remove folder contents of graph
         String folderPath = "graphs/";
-        if (removeFolderContents) {
-            deleteFolderContents(new File(folderPath));
-        }
+        deleteFolderContents(new File(folderPath));
+
 
         logger.info("Application started...");
 
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-
         geneticAlgorithm.generateData();
         geneticAlgorithm.initializationAndEncode();
-        for (int k = 0; k < wantedExamScheduleCount; k++) {
-            geneticAlgorithm.visualization();
-        }
+        geneticAlgorithm.visualization(wantedExamScheduleCount);
+        geneticAlgorithm.calculateFitness();
 
         long endTime = System.currentTimeMillis();
         long durationMs = endTime - startTime;
         long durationSeconds = durationMs / 1000;
         long durationMinutes = durationSeconds / 60;
+
         logger.info("Application finished! Time taken: " + durationMinutes + " minutes " + durationSeconds + " seconds");
     }
 
