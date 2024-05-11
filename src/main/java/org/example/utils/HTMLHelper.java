@@ -167,7 +167,7 @@ public class HTMLHelper {
                 new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "remainingStudentCapacity", "registeredStudents", "beforeExamPrepTime", "examDuration", "afterExamPrepTime"});
     }
 
-    public static void generateStudentReport(ArrayList<Student> students, String output, String title){
+    public static void generateStudentReport(ArrayList<Student> students, String output, String title) {
         HTMLHelper.generateReport(students, output, title,
                 new String[]{"Student ID", "Name", "Surname", "Max Number of Courses to take", "Registered Course Codes", "Remaining Course Capacity"},
                 new String[]{"ID", "name", "surname", "maxCoursesTakenCount", "registeredCourses", "remainingCourseCapacity"});
@@ -280,6 +280,109 @@ public class HTMLHelper {
                     .append(courseCode).append("</span></td><td>").append(classroom).append("</td></tr>");
         }
 
+        htmlContent.append("</table>");
+        htmlContent.append("</div>");
+        htmlContent.append("</body></html>");
+
+        htmlContent.append("</table></body></html>");
+
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            fileWriter.write(htmlContent.toString());
+            logger.info("HTML exam schedule generated successfully. File saved as " + fileName);
+        } catch (IOException e) {
+            logger.error("An error occurred while writing the HTML file: " + e.getMessage());
+        }
+
+    }
+
+    public static void generateExamTableDila(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, int interval, ArrayList<EncodedExam> exams, String title) {
+
+        String baseFileName = "graphs/" + title;
+        UUID randomUUID = UUID.randomUUID();
+        //String fileName = baseFileName + "_" + randomUUID + ".html";
+        String fileName = baseFileName + ".html";
+
+        // Create HTML content
+        StringBuilder htmlContent = new StringBuilder();
+        htmlContent.append("<!DOCTYPE html>");
+        htmlContent.append("<html lang=\"en\">");
+        htmlContent.append("<head>");
+        htmlContent.append("<meta charset=\"UTF-8\">");
+        htmlContent.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+        htmlContent.append("<title>").append(title).append("</title>");
+        htmlContent.append("<style>");
+        htmlContent.append("table { border-collapse: collapse; width: 100%; }");
+        htmlContent.append("th, td { border: 1px solid black; padding: 8px; text-align: center; }");
+        htmlContent.append("th { background-color: #f2f2f2; }");
+        htmlContent.append("</style>");
+        htmlContent.append("<script>");
+        htmlContent.append("function getContrastYIQ(hexcolor){var r=parseInt(hexcolor.substr(1,2),16),g=parseInt(hexcolor.substr(3,2),16),b=parseInt(hexcolor.substr(5,2),16),yiq=(r*299+g*587+b*114)/1000;return(yiq>=128)?'black':'white';}");
+        htmlContent.append("</script>");
+        htmlContent.append("</head><body>");
+        htmlContent.append("<h1>").append(title).append("</h1>");
+        htmlContent.append("<table>");
+        htmlContent.append("<tr><th>Course Codes</th>");
+
+        LocalDate currentDate = startDate;
+        while (!currentDate.isEqual(endDate)) {
+            htmlContent.append("<th>").append(currentDate.getDayOfWeek()).append("<br>").append(currentDate).append("</th>");
+            currentDate = currentDate.plusDays(1);
+        }
+        htmlContent.append("</tr>");
+
+        StringBuilder courseCodesHTML = new StringBuilder();
+        Comparator<EncodedExam> comparator = new Comparator<EncodedExam>() {
+            @Override
+            public int compare(EncodedExam exam1, EncodedExam exam2) {
+                return exam1.getCourseCode().compareTo(exam2.getCourseCode());
+            }
+        };
+
+        exams.sort(comparator);
+        Timeslot timeslot = null;
+        String classroomCode = "";
+        for (EncodedExam exam : exams) {
+            String courseCode = exam.getCourseCode();
+            String color = generateColor(courseCode);
+            String textColor = getContrastColor(color); // Get contrast text color
+            courseCodesHTML.append("<span style=\"background-color: ").append(color).append("; color: ").append(textColor).append(";\">")
+                    .append(courseCode).append("</span><br>");
+            htmlContent.append("<tr><td>").append(courseCodesHTML).append("</td>");
+            courseCodesHTML.delete(0, courseCodesHTML.length());
+            currentDate = startDate;
+            while (!currentDate.isEqual(endDate)) {
+                if (exam.getTimeSlot().toString().contains(currentDate.toString())) {
+                    timeslot = exam.getTimeSlot();
+                    classroomCode = exam.getClassroomCode();
+                    htmlContent.append("<td>").append(timeslot.getStart().toLocalTime()).append("-").append(timeslot.getEnd().toLocalTime()).append("<br>").append(classroomCode).append("</td>");
+                } else {
+                    htmlContent.append("<td>").append("</td>");
+                }
+
+                currentDate = currentDate.plusDays(1);
+            }
+            htmlContent.append("</tr>");
+        }
+
+
+        // Close HTML tags
+        htmlContent.append("</table></body></html>");
+
+        htmlContent.append("</br>");
+        htmlContent.append("</br>");
+        htmlContent.append("</br>");
+
+        htmlContent.append("<html><head><title>Courses and Classrooms</title>");
+        htmlContent.append("<meta charset=\"UTF-8\">");
+        htmlContent.append("<style>");
+        htmlContent.append(".container { display: flex; justify-content: space-between; }");
+        htmlContent.append(".table { border-collapse: collapse; width: 45%; }");
+        htmlContent.append("th, td { border: 1px solid black; padding: 8px; text-align: center; }");
+        htmlContent.append("th { background-color: #f2f2f2; }");
+        htmlContent.append("</style>");
+        htmlContent.append("</head><body>");
+        htmlContent.append("<div class=\"container\">");
+        htmlContent.append("<table class=\"table\">");
         htmlContent.append("</table>");
         htmlContent.append("</div>");
         htmlContent.append("</body></html>");

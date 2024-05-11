@@ -161,14 +161,14 @@ public class GeneticAlgorithm {
                     int afterExam = course.getAfterExamPrepTime();
                     Timeslot combinedTimeslot = encodedExam.getTimeSlot();
                     Timeslot examTimeslot = new Timeslot(combinedTimeslot.getStart().plusHours(beforeExam), combinedTimeslot.getEnd().minusHours(afterExam));
-                    randomExamScheduleForStudents.add(new EncodedExam(encodedExam.getCourseCode(),
+                    randomExamScheduleForStudents.add(new EncodedExam( encodedExam.getCourseCode(),
                             encodedExam.getClassroomCode(),
                             examTimeslot,
                             encodedExam.getInvigilators()));
                 }
             }
             HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, "Exam Schedule-" + n + " for Students");
-
+            HTMLHelper.generateExamTableDila(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, "Exam ScheduleDila-" + n + " for Students");
 
             // Reports that are changing : invigilators, classrooms, exam schedules
             HTMLHelper.generateInvigilatorReport(DataStructureHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), "graphs/invigilator_report_" + n + ".html", "Invigilator Report");
@@ -201,12 +201,13 @@ public class GeneticAlgorithm {
 
         Fitness fitness = new Fitness(courses, students);
         for (ArrayList<EncodedExam> chromosome : population) {
+            //System.out.println("$$$" + chromosome);
             double fitnessScore = fitness.fitnessScore(chromosome);
             fitnessScores.put(chromosome.hashCode(), fitnessScore);
         }
 
         // sort this hashmap based on fitness scores
-        logger.info(fitnessScores);
+        //logger.info("$$$$$$$$$" + fitnessScores);
         fitnessScores = sortByValueDescending(fitnessScores);
         logger.info(fitnessScores);
 

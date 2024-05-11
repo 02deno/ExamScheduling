@@ -1,5 +1,7 @@
 package org.example.geneticAlgorithm.operators;
 
+import org.example.utils.ConfigHelper;
+
 public class Selection {
 
     /*
@@ -20,4 +22,11 @@ public class Selection {
     * change number of selected parents
     * use one of these selection methods and additionally use rank selection when algo get closer to end
     */
+
+    private int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
+
+    public void rouletteWheelSelection() {
+
+    }
+
 }
