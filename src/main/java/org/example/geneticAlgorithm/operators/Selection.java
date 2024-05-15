@@ -1,5 +1,15 @@
 package org.example.geneticAlgorithm.operators;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.example.geneticAlgorithm.GeneticAlgorithm;
+import org.example.utils.ConfigHelper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 public class Selection {
 
     /*
@@ -20,4 +30,45 @@ public class Selection {
     * change number of selected parents
     * use one of these selection methods and additionally use rank selection when algo get closer to end
     */
+
+    private int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
+    private HashMap<Integer, Double> fitnessScores = new HashMap<>();
+    private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
+    private Random random = new Random();
+    private ArrayList<Integer> parents = new ArrayList<Integer>();
+
+    public void rouletteWheelSelection(HashMap<Integer, Double> fitnessScores) {
+        int i = 0;
+        while (i <= populationSize/2){
+            double totalScore = 0;
+            for (Double fitnessScore : fitnessScores.values()) {
+                totalScore += fitnessScore;
+            }
+            logger.info(totalScore);
+            for (Map.Entry<Integer, Double> entry : fitnessScores.entrySet()) {//normalized scores
+                entry.setValue(entry.getValue() / totalScore);
+                //logger.info(entry);
+            }
+            logger.info(fitnessScores);
+            double randomValue = random.nextDouble() * totalScore;
+            //logger.info("randomValue" + randomValue);
+
+            double temp = 0;
+            for (Map.Entry<Integer, Double> entry : fitnessScores.entrySet()) {//normalized scores
+                temp += entry.getValue();
+                if (randomValue < temp) {
+                    parents.add(entry.getKey());
+                    break;
+                }
+            }
+            i++;
+        }
+        /*logger.info(parents.get(0));
+        logger.info(parents.get(1));
+        logger.info(parents.get(2));
+        logger.info(parents.get(3));
+        logger.info(parents.size());*/
+
+    }
+
 }
