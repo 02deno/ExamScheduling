@@ -1,5 +1,7 @@
 package org.example.utils;
 
+import org.example.models.EncodedExam;
+
 import java.util.*;
 
 public class DataStructureHelper {
@@ -34,5 +36,9 @@ public class DataStructureHelper {
         }
 
         return result;
+    }
+
+    public static Comparator<EncodedExam> sortExamsByCourseCode() {
+        return (exam1, exam2) -> exam1.getCourseCode().compareTo(exam2.getCourseCode());
     }
 }

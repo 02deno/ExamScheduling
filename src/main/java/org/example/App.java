@@ -30,6 +30,7 @@ public class App
         geneticAlgorithm.visualization(wantedExamScheduleCount);
         geneticAlgorithm.calculateFitness();
         geneticAlgorithm.selectParents();
+        geneticAlgorithm.crossover();
 
         long endTime = System.currentTimeMillis();
         long durationMs = endTime - startTime;

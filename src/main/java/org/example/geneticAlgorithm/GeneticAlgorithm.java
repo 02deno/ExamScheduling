@@ -4,10 +4,7 @@ import lombok.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.dataPreprocessing.RandomDataGenerator;
-import org.example.geneticAlgorithm.operators.Encode;
-import org.example.geneticAlgorithm.operators.Fitness;
-import org.example.geneticAlgorithm.operators.Initialization;
-import org.example.geneticAlgorithm.operators.Selection;
+import org.example.geneticAlgorithm.operators.*;
 import org.example.models.*;
 import org.example.utils.ConfigHelper;
 import org.example.utils.DataStructureHelper;
@@ -51,8 +48,9 @@ public class GeneticAlgorithm {
     private LocalTime startTime;
     private LocalTime endTime;
     private int interval;
-    private HashMap<Integer, Double> fitnessScores = new HashMap<>();
+    private HashMap<ArrayList<EncodedExam>, Double> fitnessScores = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
+    private ArrayList<ArrayList<EncodedExam>> parents = new ArrayList<>();
 
 
     public void generateData() {
@@ -89,7 +87,7 @@ public class GeneticAlgorithm {
         int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
         for (int i = 0; i < populationSize; i++) {
 
-            logger.info("Population " + i);
+            //logger.info("Population " + i);
 
             HashMap<String, ArrayList<?>> resultExams = Initialization.createExamInstances(this.courses);
             this.exams = DataStructureHelper.castArrayList(resultExams.get("exams"), Exam.class);
@@ -200,23 +198,25 @@ public class GeneticAlgorithm {
     public void calculateFitness() {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
-        logger.info(courses);
         Fitness fitness = new Fitness(courses, students);
         for (ArrayList<EncodedExam> chromosome : population) {
-            //System.out.println("$$$" + chromosome);
             double fitnessScore = fitness.fitnessScore(chromosome);
-            fitnessScores.put(chromosome.hashCode(), fitnessScore);
+            fitnessScores.put(chromosome, fitnessScore);
         }
 
         // sort this hashmap based on fitness scores
-        //logger.info("$$$$$$$$$" + fitnessScores);
         fitnessScores = sortByValueDescending(fitnessScores);
-        logger.info(fitnessScores);
+        //logger.info(fitnessScores);
     }
 
     public void selectParents() {
         calculateFitness();
         Selection selection = new Selection();
-        selection.rouletteWheelSelection(fitnessScores);
+        parents = selection.rouletteWheelSelection(fitnessScores);
+    }
+
+    public void crossover() {
+        Crossover crossover = new Crossover();
+        crossover.onePointCrossover(parents);
     }
 }
