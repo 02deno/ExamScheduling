@@ -6,10 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.example.dataPreprocessing.RandomDataGenerator;
 import org.example.geneticAlgorithm.operators.*;
 import org.example.models.*;
-import org.example.utils.ConfigHelper;
-import org.example.utils.DataStructureHelper;
-import org.example.utils.HTMLHelper;
-import org.example.utils.VisualizationHelper;
+import org.example.utils.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -198,8 +195,11 @@ public class GeneticAlgorithm {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
         Fitness fitness = new Fitness(courses, students, classrooms, invigilators);
+        ArrayList<double[]> scoresList = new ArrayList<>();
         for (ArrayList<EncodedExam> chromosome : population) {
-            double fitnessScore = fitness.fitnessScore(chromosome);
+            double[] scores = fitness.fitnessScore(chromosome);
+            scoresList.add(scores);
+            double fitnessScore = scores[scores.length - 1];
             fitnessScores.put(chromosome, fitnessScore);
         }
 
@@ -209,6 +209,7 @@ public class GeneticAlgorithm {
         for (ArrayList<EncodedExam> chromosome : fitnessScores.keySet()) {
             logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
         }
+        FileHelper.writeFitnessScoresToFile(scoresList, "graphs/fitness_scores.csv");
     }
 
     public void selectParents() {

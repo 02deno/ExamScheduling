@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class FileHelper {
 
@@ -28,9 +31,41 @@ public class FileHelper {
         }
 
         if (result) {
-            logger.info("Some error occurred during folder deletion Folder contents is deleted successfully :)");
+            logger.info("Folder contents is deleted successfully :)");
         } else {
             logger.error("Some error occurred during folder deletion");
         }
     }
+
+    public static void writeFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
+        try (FileWriter writer = new FileWriter(filePath, true)) {
+            String[] header = {"checkCourseExamCompatibility", "classroomOverlapped", "allExamsHaveClassrooms",
+                    "classroomsHasCapacity", "invigilatorOverlapped", "studentOverlapped", "fitnessScore"};
+            for (int i = 0; i < header.length; i++) {
+                writer.write(header[i]);
+                // Add comma if it's not the last header element
+                if (i < header.length - 1) {
+                    writer.write(",");
+                }
+            }
+            writer.write("\n");
+            // Write each row of scores
+            for (double[] row : scoresList) {
+                // Write scores as a new row, separated by commas
+                for (int i = 0; i < row.length; i++) {
+                    writer.write(Double.toString(row[i]));
+                    // Add comma if it's not the last score
+                    if (i < row.length - 1) {
+                        writer.write(",");
+                    }
+                }
+                // Add new line after each row
+                writer.write("\n");
+            }
+            System.out.println("Rows appended to CSV file: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error appending rows to CSV file: " + e.getMessage());
+        }
+    }
+
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,8 +31,6 @@ public class Fitness {
      * decoding schedules or processing them encoded somehow
      * */
 
-
-    private static final Logger logger = LogManager.getLogger(Fitness.class);
     /*
      * Constraint Check and Penalty
      * Hard Constraints
@@ -59,25 +58,42 @@ public class Fitness {
      *  hashcode - overall fitness - checkCourseExamCompatibility - allExamsHaveClassrooms ...
      *
      * TODO(Deniz) : return also a checklist of contraints
+     *
+     * TODO(Deniz) : add violation hashmap/excel table
      * */
+
+    private static final Logger logger = LogManager.getLogger(Fitness.class);
     private ArrayList<Course> courses;
     private ArrayList<Student> students;
     private ArrayList<Classroom> classrooms;
     private ArrayList<Invigilator> invigilators;
 
-    public double fitnessScore(ArrayList<EncodedExam> encodedExams) {
-        double fitnessScore;
+    public double[] fitnessScore(ArrayList<EncodedExam> encodedExams) {
+
+        double checkCourseExamCompatibility = (double) 1 / (1 + checkCourseExamCompatibility(encodedExams));
+        double classroomOverlapped = (double) 1 / (1 + classroomOverlapped(encodedExams));
+        double allExamsHaveClassrooms = (double) 1 / (1 + allExamsHaveClassrooms(encodedExams));
+        double classroomsHasCapacity = (double) 1 / (1 + classroomsHasCapacity(encodedExams));
+        double invigilatorOverlapped = (double) 1 / (1 + invigilatorOverlapped(encodedExams));
+        double studentOverlapped = (double) 1 / (1 + studentOverlapped(encodedExams));
+
+
         // use f1 score to calculate average, harmonic average
         // n = fitness function count
-        int n = 4;
-        fitnessScore = n / (1 / checkCourseExamCompatibility(encodedExams) +
-                1 / classroomOverlapped(encodedExams) +
-                1 / allExamsHaveClassrooms(encodedExams) +
-                1 / classroomsHasCapacity(encodedExams)
+        int n = 6;
+        double fitnessScore = n / (
+                1 / checkCourseExamCompatibility +
+                        1 / classroomOverlapped +
+                        1 / allExamsHaveClassrooms +
+                        1 / classroomsHasCapacity +
+                        1 / invigilatorOverlapped +
+                        1 / studentOverlapped
         );
-        return fitnessScore;
+        return new double[]{checkCourseExamCompatibility, classroomOverlapped, allExamsHaveClassrooms,
+                classroomsHasCapacity, invigilatorOverlapped, studentOverlapped, fitnessScore};
     }
 
+    // Hard Constraints
     public double checkCourseExamCompatibility(ArrayList<EncodedExam> chromosome) {
         // During Initialization all chromosomes are going to be best(fitness score = 1)
         // because of heuristic initialization, but after crossover or/and mutation
@@ -125,9 +141,10 @@ public class Fitness {
 //        logger.info("Duplicated Course Punishment: " + duplicatedCoursesPunishment);
 //        logger.info("Required Timeslot Punishment: " + requiredTimeslotPunishment);
 //        logger.info("Invigilator Count Punishment: " + invigilatorCountPunishment);
-        return (double) 1 / (1 + duplicatedCoursesPunishment +
+        return duplicatedCoursesPunishment +
                 requiredTimeslotPunishment +
-                invigilatorCountPunishment);
+                invigilatorCountPunishment;
+
 
     }
 
@@ -162,12 +179,12 @@ public class Fitness {
                 for (int j = i + 1; j < timeslots.size(); j++) {
                     long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
                     if (minutes != 0) {
-                        logger.info("Timeslots overlap!!!!!!!!!!");
+                        logger.info("Timeslots overlap for classroom!!!!!!!!!!");
                         logger.info("Classroom Code: " + classroom);
                         logger.info("Exams: " + assignedExams);
                         logger.info(timeslots.get(i));
                         logger.info(timeslots.get(j));
-                        logger.info(minutes);
+                        logger.info("Overlapped minutes: " + minutes);
                     }
                     classroomPunishment = classroomPunishment + (double) minutes / 60;
                 }
@@ -175,25 +192,118 @@ public class Fitness {
         }
 
 
-
-        return (double) 1 / (1 + classroomPunishment);
+        return classroomPunishment;
     }
 
-    public double studentOverlapped() {
+    public double studentOverlapped(ArrayList<EncodedExam> chromosome) {
         // No student can be assigned to more than one exam at the same moment.
-        int studentOverlappedPunishment = 0;
+        double studentOverlappedPunishment = 0;
         // hashmap : student id - assigned exams
         // timeslots must be adjusted for student
         // before and after exam time must be removed
-        return (double) 1 / (1 + studentOverlappedPunishment);
+        HashMap<String, ArrayList<EncodedExam>> studentExams = new HashMap<>();
+        for (EncodedExam encodedExam : chromosome) {
+            String courseCode = encodedExam.getCourseCode();
+            Course course = Course.findByCourseCode(courses, courseCode);
+            if (course != null) {
+                ArrayList<String> studentIds = course.getRegisteredStudents();
+                for (String studentId : studentIds) {
+                    if (studentExams.containsKey(studentId)) {
+                        ArrayList<EncodedExam> exams = studentExams.get(studentId);
+                        exams.add(encodedExam);
+                        studentExams.put(studentId, exams);
+                    } else {
+                        ArrayList<EncodedExam> initialExams = new ArrayList<>();
+                        initialExams.add(encodedExam);
+                        studentExams.put(studentId, initialExams);
+                    }
+                }
+            }
+        }
+
+        for (String studentId : studentExams.keySet()) {
+            ArrayList<EncodedExam> assignedExams = studentExams.get(studentId);
+            ArrayList<Timeslot> timeslots = new ArrayList<>();
+            for (EncodedExam exam : assignedExams) {
+                Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+                if (course != null) {
+                    int beforeExamPrep = course.getBeforeExamPrepTime();
+                    int afterExamPrep = course.getAfterExamPrepTime();
+                    Timeslot timeslot = exam.getTimeSlot();
+                    timeslot.setStart(timeslot.getStart().plusHours(beforeExamPrep));
+                    timeslot.setEnd(timeslot.getEnd().minusHours(afterExamPrep));
+                    timeslots.add(timeslot);
+                }
+            }
+
+            for (int i = 0; i < timeslots.size(); i++) {
+                for (int j = i + 1; j < timeslots.size(); j++) {
+                    long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
+                    if (minutes != 0) {
+                        logger.info("Timeslots overlap for student!!!!!!!!!!");
+                        logger.info("Student Id: " + studentId);
+                        logger.info("Exams: " + assignedExams);
+                        logger.info(timeslots.get(i));
+                        logger.info(timeslots.get(j));
+                        logger.info("Overlapped minutes: " + minutes);
+                    }
+                    studentOverlappedPunishment = studentOverlappedPunishment + (double) minutes / 60;
+                }
+            }
+
+        }
+
+
+        return studentOverlappedPunishment;
     }
 
-    public double invigilatorOverlapped() {
+    public double invigilatorOverlapped(ArrayList<EncodedExam> chromosome) {
         // No invigilator can be assigned to more than one exam at the same moment.
-        int invigilatorOverlappedPunishment = 0;
+        double invigilatorOverlappedPunishment = 0;
         // hashmap : invigilator id - assigned exams
+        HashMap<String, ArrayList<EncodedExam>> invigilatorExams = new HashMap<>();
+        for (EncodedExam encodedExam : chromosome) {
+            ArrayList<String> invigilatorIds = encodedExam.getInvigilators();
+            for (String invigilatorId : invigilatorIds) {
+                if (invigilatorExams.containsKey(invigilatorId)) {
+                    ArrayList<EncodedExam> exams = invigilatorExams.get(invigilatorId);
+                    exams.add(encodedExam);
+                    invigilatorExams.put(invigilatorId, exams);
+                } else {
+                    ArrayList<EncodedExam> initialExams = new ArrayList<>();
+                    initialExams.add(encodedExam);
+                    invigilatorExams.put(invigilatorId, initialExams);
+                }
+            }
 
-        return (double) 1 / (1 + invigilatorOverlappedPunishment);
+        }
+        //logger.info(invigilatorExams);
+        for (String invigilatorId : invigilatorExams.keySet()) {
+            ArrayList<EncodedExam> assignedExams = invigilatorExams.get(invigilatorId);
+            ArrayList<Timeslot> timeslots = new ArrayList<>();
+            for (EncodedExam exam : assignedExams) {
+                Timeslot timeslot = exam.getTimeSlot();
+                timeslots.add(timeslot);
+            }
+
+            for (int i = 0; i < timeslots.size(); i++) {
+                for (int j = i + 1; j < timeslots.size(); j++) {
+                    long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
+                    if (minutes != 0) {
+                        logger.info("Timeslots overlap for invigilator!!!!!!!!!!");
+                        logger.info("Invigilator Id: " + invigilatorId);
+                        logger.info("Exams: " + assignedExams);
+                        logger.info(timeslots.get(i));
+                        logger.info(timeslots.get(j));
+                        logger.info("Overlapped minutes: " + minutes);
+                    }
+                    invigilatorOverlappedPunishment = invigilatorOverlappedPunishment + (double) minutes / 60;
+                }
+            }
+
+        }
+
+        return invigilatorOverlappedPunishment;
     }
 
     public double invigilatorAvailable() {
@@ -201,14 +311,14 @@ public class Fitness {
         int invigilatorAvailablePunishment = 0;
         // hashmap : invigilator id - assigned exams
 
-        return (double) 1 / (1 + invigilatorAvailablePunishment);
+        return invigilatorAvailablePunishment;
     }
 
     public double startAndEndTimeViolated() {
         // No exam can be held before or after the defined time frame
         int startAndEndTimPunishment = 0;
 
-        return (double) 1 / (1 + startAndEndTimPunishment);
+        return startAndEndTimPunishment;
     }
 
     public double allExamsHaveClassrooms(ArrayList<EncodedExam> chromosome) {
@@ -221,7 +331,7 @@ public class Fitness {
             }
         }
 
-        return (double) 1 / (1 + allExamsHaveClassroomsPunishment);
+        return allExamsHaveClassroomsPunishment;
     }
 
     public double classroomsHasCapacity(ArrayList<EncodedExam> chromosome) {
@@ -247,7 +357,7 @@ public class Fitness {
             }
         }
 
-        return (double) 1 / (1 + classroomsHasCapacityPunishment);
+        return classroomsHasCapacityPunishment;
     }
 
     // Soft Constraints
