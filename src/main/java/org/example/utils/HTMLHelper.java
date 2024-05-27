@@ -331,14 +331,9 @@ public class HTMLHelper {
         htmlContent.append("</tr>");
 
         StringBuilder courseCodesHTML = new StringBuilder();
-        Comparator<EncodedExam> comparator = new Comparator<EncodedExam>() {
-            @Override
-            public int compare(EncodedExam exam1, EncodedExam exam2) {
-                return exam1.getCourseCode().compareTo(exam2.getCourseCode());
-            }
-        };
-
+        Comparator<EncodedExam> comparator = DataStructureHelper.sortExamsByCourseCode();
         exams.sort(comparator);
+
         Timeslot timeslot = null;
         String classroomCode = "";
         for (EncodedExam exam : exams) {
