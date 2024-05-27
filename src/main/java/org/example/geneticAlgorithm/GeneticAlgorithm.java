@@ -83,7 +83,7 @@ public class GeneticAlgorithm {
 
     }
 
-    public ArrayList<ArrayList<EncodedExam>> initializationAndEncode() {
+    public void initializationAndEncode() {
         int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
         for (int i = 0; i < populationSize; i++) {
 
@@ -129,7 +129,6 @@ public class GeneticAlgorithm {
             this.populationForVisualization.add(new HashMap<>(chromosomeForVisualization));
             reset();
         }
-        return population;
     }
 
     public void encode() {
@@ -198,7 +197,7 @@ public class GeneticAlgorithm {
     public void calculateFitness() {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
-        Fitness fitness = new Fitness(courses, students);
+        Fitness fitness = new Fitness(courses, students, classrooms, invigilators);
         for (ArrayList<EncodedExam> chromosome : population) {
             double fitnessScore = fitness.fitnessScore(chromosome);
             fitnessScores.put(chromosome, fitnessScore);
@@ -206,13 +205,15 @@ public class GeneticAlgorithm {
 
         // sort this hashmap based on fitness scores
         fitnessScores = sortByValueDescending(fitnessScores);
-        //logger.info(fitnessScores);
+        // visualize
+        for (ArrayList<EncodedExam> chromosome : fitnessScores.keySet()) {
+            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
+        }
     }
 
     public void selectParents() {
-        calculateFitness();
         Selection selection = new Selection();
-        parents = selection.rouletteWheelSelection(fitnessScores);
+        parents = selection.rouletteWheelSelection(this.fitnessScores);
     }
 
     public void crossover() {

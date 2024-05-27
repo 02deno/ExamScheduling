@@ -52,4 +52,14 @@ public class Classroom {
         }
         logger.error("Classroom not found for update.");
     }
+
+    public static Classroom findByClassroomCode(ArrayList<Classroom> classrooms, String classroomCode) {
+        for (Classroom classroom : classrooms) {
+            if (classroom.getClassroomCode().equals(classroomCode)) {
+                return classroom;
+            }
+        }
+        //logger.error("Could not find a classroom with classroom code: " + classroomCode);
+        return null;
+    }
 }

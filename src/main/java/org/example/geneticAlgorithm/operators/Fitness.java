@@ -3,13 +3,11 @@ package org.example.geneticAlgorithm.operators;
 import lombok.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.models.Course;
-import org.example.models.EncodedExam;
-import org.example.models.Student;
-import org.example.models.Timeslot;
+import org.example.models.*;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,17 +53,28 @@ public class Fitness {
      *
      * TODO(Deniz) : directly eliminate a chromosome if a hard constraint is violated
      *  we can do this by multiplying with zero or a negative number
+     *
+     * TODO(Deniz) : save fitness function scores of exam schedules into an excel table
+     *  columns should be like this :
+     *  hashcode - overall fitness - checkCourseExamCompatibility - allExamsHaveClassrooms ...
+     *
+     * TODO(Deniz) : return also a checklist of contraints
      * */
     private ArrayList<Course> courses;
     private ArrayList<Student> students;
+    private ArrayList<Classroom> classrooms;
+    private ArrayList<Invigilator> invigilators;
 
     public double fitnessScore(ArrayList<EncodedExam> encodedExams) {
         double fitnessScore;
         // use f1 score to calculate average, harmonic average
         // n = fitness function count
-        int n = 2;
-        fitnessScore = 2 / ((1 / checkCourseExamCompatibility(encodedExams)) +
-                (1 / classroomOverlapped(encodedExams)));
+        int n = 4;
+        fitnessScore = n / (1 / checkCourseExamCompatibility(encodedExams) +
+                1 / classroomOverlapped(encodedExams) +
+                1 / allExamsHaveClassrooms(encodedExams) +
+                1 / classroomsHasCapacity(encodedExams)
+        );
         return fitnessScore;
     }
 
@@ -124,23 +133,75 @@ public class Fitness {
 
     public double classroomOverlapped(ArrayList<EncodedExam> chromosome) {
         // No classroom can be assigned to more than one exam at the same moment.
-        int classroomPunishment = 0;
+        double classroomPunishment = 0;
+        // hashmap : classroom code - assigned exams
+        HashMap<String, ArrayList<EncodedExam>> classroomExams = new HashMap<>();
+        for (EncodedExam encodedExam : chromosome) {
+            String classroomCode = encodedExam.getClassroomCode();
+            if (classroomExams.containsKey(classroomCode)) {
+                ArrayList<EncodedExam> exams = classroomExams.get(classroomCode);
+                exams.add(encodedExam);
+                classroomExams.put(classroomCode, exams);
+            } else {
+                ArrayList<EncodedExam> initialExams = new ArrayList<>();
+                initialExams.add(encodedExam);
+                classroomExams.put(classroomCode, initialExams);
+            }
+        }
+
+        for (String classroom : classroomExams.keySet()) {
+            ArrayList<Timeslot> timeslots = new ArrayList<>();
+            ArrayList<EncodedExam> assignedExams = classroomExams.get(classroom);
+            // save timeslots of each exam and compare them
+            for (EncodedExam exam : assignedExams) {
+                Timeslot timeslot = exam.getTimeSlot();
+                timeslots.add(timeslot);
+            }
+
+            for (int i = 0; i < timeslots.size(); i++) {
+                for (int j = i + 1; j < timeslots.size(); j++) {
+                    long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
+                    if (minutes != 0) {
+                        logger.info("Timeslots overlap!!!!!!!!!!");
+                        logger.info("Classroom Code: " + classroom);
+                        logger.info("Exams: " + assignedExams);
+                        logger.info(timeslots.get(i));
+                        logger.info(timeslots.get(j));
+                        logger.info(minutes);
+                    }
+                    classroomPunishment = classroomPunishment + (double) minutes / 60;
+                }
+            }
+        }
+
+
 
         return (double) 1 / (1 + classroomPunishment);
     }
 
     public double studentOverlapped() {
         // No student can be assigned to more than one exam at the same moment.
-        int studentPunishment = 0;
-
-        return (double) 1 / (1 + studentPunishment);
+        int studentOverlappedPunishment = 0;
+        // hashmap : student id - assigned exams
+        // timeslots must be adjusted for student
+        // before and after exam time must be removed
+        return (double) 1 / (1 + studentOverlappedPunishment);
     }
 
     public double invigilatorOverlapped() {
         // No invigilator can be assigned to more than one exam at the same moment.
-        int invigilatorPunishment = 0;
+        int invigilatorOverlappedPunishment = 0;
+        // hashmap : invigilator id - assigned exams
 
-        return (double) 1 / (1 + invigilatorPunishment);
+        return (double) 1 / (1 + invigilatorOverlappedPunishment);
+    }
+
+    public double invigilatorAvailable() {
+        // No invigilator can be assigned to more than her/his capacity.
+        int invigilatorAvailablePunishment = 0;
+        // hashmap : invigilator id - assigned exams
+
+        return (double) 1 / (1 + invigilatorAvailablePunishment);
     }
 
     public double startAndEndTimeViolated() {
@@ -150,12 +211,50 @@ public class Fitness {
         return (double) 1 / (1 + startAndEndTimPunishment);
     }
 
-    public double allExamsHaveClassrooms() {
+    public double allExamsHaveClassrooms(ArrayList<EncodedExam> chromosome) {
         // All exams must have classrooms assigned to them
         int allExamsHaveClassroomsPunishment = 0;
+        for (EncodedExam exam : chromosome) {
+            if (exam.getClassroomCode() == null) {
+                logger.info("Exam " + exam.getCourseCode() + " has no classroom assigned!!!!!!!");
+                allExamsHaveClassroomsPunishment++;
+            }
+        }
 
         return (double) 1 / (1 + allExamsHaveClassroomsPunishment);
     }
+
+    public double classroomsHasCapacity(ArrayList<EncodedExam> chromosome) {
+        // classroom has the capacity to hold all the students
+        int classroomsHasCapacityPunishment = 0;
+        for (EncodedExam exam : chromosome) {
+            Classroom classroom = Classroom.findByClassroomCode(classrooms, exam.getClassroomCode());
+            Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+
+            if (classroom == null) {
+                //logger.error("Classroom with code " + exam.getClassroomCode() + " not found.");
+                continue;
+            }
+
+            if (course == null) {
+                //logger.error("Course with code " + exam.getCourseCode() + " not found.");
+                continue;
+            }
+
+            if (classroom.getCapacity() < course.getRegisteredStudents().size()) {
+                logger.info("Classroom " + classroom.getClassroomCode() + " does not have the required capacity!!!!!");
+                classroomsHasCapacityPunishment++;
+            }
+        }
+
+        return (double) 1 / (1 + classroomsHasCapacityPunishment);
+    }
+
+    // Soft Constraints
+    // No invigilator should monitor her/his max capacity
+    // No student should enter more than two exam in one day
+    // If student has more than one exam, they should have at least 1 hour between
+    // No invigilator should monitor more than three exam in one day
 
 
 }
