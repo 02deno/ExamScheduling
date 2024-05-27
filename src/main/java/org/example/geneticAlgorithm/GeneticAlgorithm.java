@@ -57,7 +57,10 @@ public class GeneticAlgorithm {
         // to decide invigilator number
         //this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(100, invigilators.size())));
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
+
         this.students = RandomDataGenerator.generateStudentInstances(randomData.get("studentData"));
+        this.students = new ArrayList<>(students.subList(0, Math.min(100, students.size())));
+
         this.startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
         this.endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE")); // this date is not included
         this.startTime = LocalTime.parse(ConfigHelper.getProperty("START_TIME"));

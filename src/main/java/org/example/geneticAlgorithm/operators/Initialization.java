@@ -32,6 +32,7 @@ public class Initialization {
 
     public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithStudents(ArrayList<Course> courses, ArrayList<Student> students) {
         // Step 1
+        // TODO(Deniz) : update this for loop so that it run until students are done not courses
         for (int i = 0; i < courses.size(); i++) {
             Course course = courses.get(i);
             ArrayList<String> registeredStudents = course.getRegisteredStudents();

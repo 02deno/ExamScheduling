@@ -230,9 +230,7 @@ public class Fitness {
                     int beforeExamPrep = course.getBeforeExamPrepTime();
                     int afterExamPrep = course.getAfterExamPrepTime();
                     Timeslot timeslot = exam.getTimeSlot();
-                    timeslot.setStart(timeslot.getStart().plusHours(beforeExamPrep));
-                    timeslot.setEnd(timeslot.getEnd().minusHours(afterExamPrep));
-                    timeslots.add(timeslot);
+                    timeslots.add(new Timeslot(timeslot.getStart().plusHours(beforeExamPrep), timeslot.getEnd().minusHours(afterExamPrep)));
                 }
             }
 
