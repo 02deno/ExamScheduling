@@ -59,7 +59,7 @@ public class GeneticAlgorithm {
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
 
         this.students = RandomDataGenerator.generateStudentInstances(randomData.get("studentData"));
-        this.students = new ArrayList<>(students.subList(0, Math.min(100, students.size())));
+        //this.students = new ArrayList<>(students.subList(0, Math.min(100, students.size())));
 
         this.startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
         this.endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE")); // this date is not included
@@ -197,7 +197,7 @@ public class GeneticAlgorithm {
     public void calculateFitness() {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
-        Fitness fitness = new Fitness(courses, students, classrooms, invigilators);
+        Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
         ArrayList<double[]> scoresList = new ArrayList<>();
         for (ArrayList<EncodedExam> chromosome : population) {
             double[] scores = fitness.fitnessScore(chromosome);

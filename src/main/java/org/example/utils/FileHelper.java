@@ -40,7 +40,8 @@ public class FileHelper {
     public static void writeFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
         try (FileWriter writer = new FileWriter(filePath, true)) {
             String[] header = {"checkCourseExamCompatibility", "classroomOverlapped", "allExamsHaveClassrooms",
-                    "classroomsHasCapacity", "invigilatorOverlapped", "studentOverlapped", "fitnessScore"};
+                    "classroomsHasCapacity", "invigilatorOverlapped", "studentOverlapped", "invigilatorAvailable",
+                    "fitnessScore"};
             for (int i = 0; i < header.length; i++) {
                 writer.write(header[i]);
                 // Add comma if it's not the last header element
