@@ -53,13 +53,15 @@ public class GeneticAlgorithm {
     public void generateData() {
         HashMap<String, HashMap<String, ArrayList<Object>>> randomData = RandomDataGenerator.combineAllData();
         this.courses = RandomDataGenerator.generateCourseInstances(randomData.get("courseData"));
+        this.courses = new ArrayList<>(courses.subList(0, Math.min(70, courses.size())));
+
         this.invigilators = RandomDataGenerator.generateInvigilatorInstances(randomData.get("invigilatorData"));
-        // to decide invigilator number
-        //this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(100, invigilators.size())));
+        this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(20, invigilators.size())));
+
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
 
         this.students = RandomDataGenerator.generateStudentInstances(randomData.get("studentData"));
-        //this.students = new ArrayList<>(students.subList(0, Math.min(100, students.size())));
+        this.students = new ArrayList<>(students.subList(0, Math.min(100, students.size())));
 
         this.startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
         this.endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE")); // this date is not included
@@ -100,16 +102,14 @@ public class GeneticAlgorithm {
 
             HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(exams, invigilators);
             this.exams = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
-            this.invigilators = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
-            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithInvigilators finished.");
 
+            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(exams, classrooms);
             this.exams = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
-            this.classrooms = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("classrooms"), Classroom.class);
-            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithClassrooms finished.");
 
+            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(exams, timeslots);
             this.exams = DataStructureHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
             logger.info("heuristicMapExamsWithTimeslots finished.");

@@ -32,35 +32,40 @@ public class Initialization {
 
     public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithStudents(ArrayList<Course> courses, ArrayList<Student> students) {
         // Step 1
-        // TODO(Deniz) : update this for loop so that it run until students are done not courses
-        for (int i = 0; i < courses.size(); i++) {
-            Course course = courses.get(i);
-            ArrayList<String> registeredStudents = course.getRegisteredStudents();
-            int remainingStudentCapacity = course.getRemainingStudentCapacity();
-            int studentCapacity = course.getStudentCapacity();
-            double randomRatio = Math.random();
-            while (registeredStudents.size() < studentCapacity * randomRatio) {
-                int studentIndex = DataStructureHelper.getRandomElement(students);
-                Student student = students.get(studentIndex);
-                ArrayList<String> registeredCourses = student.getRegisteredCourses();
-                int remainingCourseCapacity = student.getRemainingCourseCapacity();
-                if (remainingCourseCapacity != 0) {
-                    registeredCourses.add(course.getCourseCode());
-                    remainingCourseCapacity--;
-                    student.setRegisteredCourses(registeredCourses);
-                    student.setRemainingCourseCapacity(remainingCourseCapacity);
-                    students.set(studentIndex, student);
-
+        for (int i = 0; i < students.size(); i++) {
+            Student student = students.get(i);
+            ArrayList<String> registeredCourses = student.getRegisteredCourses();
+            int remainingCourseCapacity = student.getRemainingCourseCapacity();
+            int studentCapacity = student.getMaxCoursesTakenCount();
+            double randomValue = Math.random();
+            // Scale to the range 0.0 to 0.2
+            double scaledValue = randomValue * 0.2;
+            // Shift to the range 0.8 to 1.0
+            double randomRatio = 0.8 + scaledValue;
+            while (registeredCourses.size() < studentCapacity * randomRatio) {
+                int courseIndex = DataStructureHelper.getRandomElement(courses);
+                Course course = courses.get(courseIndex);
+                int remainingStudentCapacity = course.getRemainingStudentCapacity();
+                if (remainingStudentCapacity != 0) {
+                    // update course
+                    ArrayList<String> registeredStudents = course.getRegisteredStudents();
                     registeredStudents.add(student.getID());
                     remainingStudentCapacity--;
                     course.setRemainingStudentCapacity(remainingStudentCapacity);
                     course.setRegisteredStudents(registeredStudents);
+                    courses.set(courseIndex, course);
+
+                    // update student
+                    registeredCourses.add(course.getCourseCode());
+                    remainingCourseCapacity--;
+                    student.setRemainingCourseCapacity(remainingCourseCapacity);
+                    student.setRegisteredCourses(registeredCourses);
                 }
             }
-            Course.updateCourse(courses, course);
+            Student.updateStudent(students, student);
         }
 
-        logger.info("Course instances mapped with students successfully :)");
+        logger.info("Student instances mapped with courses successfully :)");
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("courses", courses);
         result.put("students", students);
@@ -126,7 +131,6 @@ public class Initialization {
                     if (invigilator.getMonitoredCourses().size() == invigilator.getMaxCoursesMonitoredCount()) {
                         invigilator.setAvailable(false);
                     }
-                    invigilators.set(invigilatorIndex, invigilator);
                     counter++;
                 } else {
                     break;
@@ -139,7 +143,6 @@ public class Initialization {
 
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("exams", exams);
-        result.put("invigilators", invigilators);
         return result;
     }
 
@@ -170,7 +173,6 @@ public class Initialization {
                 ArrayList<Integer> placedExams = new ArrayList<>(classroom.getPlacedExams());
                 placedExams.add(exam.getExamCode());
                 classroom.setPlacedExams(placedExams);
-                Classroom.updateClassroom(classrooms, classroom);
 
                 exam.setClassroom(classroom);
                 assignedCourses++;
@@ -185,7 +187,6 @@ public class Initialization {
 
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("exams", exams);
-        result.put("classrooms", classrooms);
         return result;
     }
 

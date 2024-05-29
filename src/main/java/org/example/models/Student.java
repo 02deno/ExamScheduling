@@ -1,6 +1,8 @@
 package org.example.models;
 
 import lombok.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 
@@ -27,6 +29,7 @@ public class Student extends Person{
     private ArrayList<String> registeredCourses = new ArrayList<>();
     private int maxCoursesTakenCount;
     private int remainingCourseCapacity;
+    private static final Logger logger = LogManager.getLogger(Student.class);
 
     public Student(String ID, String name, String surname, int maxCoursesTakenCount) {
         super(ID, name, surname);
@@ -34,5 +37,16 @@ public class Student extends Person{
         this.remainingCourseCapacity = maxCoursesTakenCount;
     }
 
+    public static void updateStudent(ArrayList<Student> students, Student updatedStudent) {
+        for (int i = 0; i < students.size(); i++) {
+            Student student = students.get(i);
+            if (student.getID().equals(updatedStudent.getID())) {
+                students.remove(i);
+                students.add(i, updatedStudent);
+                return;
+            }
+        }
+        logger.error("Student not found for update.");
+    }
 
 }

@@ -40,3 +40,4 @@ build/
 # Ignore log files
 *.log
 *.html
+*.csv

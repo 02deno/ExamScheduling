@@ -58,6 +58,9 @@ public class Fitness {
      * TODO(Deniz) : return also a checklist of constraints
      *
      * TODO(Deniz) : add violation hashmap/excel table
+     *
+     * TODO(Deniz) : Return true/false array for constraints
+     *  or if score is not one == violation
      * */
 
     private static final Logger logger = LogManager.getLogger(Fitness.class);
