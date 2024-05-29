@@ -22,7 +22,7 @@ public class Invigilator extends Person{
     * isAvailable : boolean
     * maxCoursesMonitoredCount : int
     * */
-    private ArrayList<String> monitoredCourses = new ArrayList<>();
+
     private ArrayList<Integer> monitoredExams = new ArrayList<>();
     private boolean isAvailable;
     private int maxCoursesMonitoredCount;

@@ -39,8 +39,9 @@ public class FileHelper {
 
     public static void writeFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            String[] header = {"checkCourseExamCompatibility", "classroomOverlapped", "allExamsHaveClassrooms",
-                    "classroomsHasCapacity", "invigilatorOverlapped", "studentOverlapped", "invigilatorAvailable",
+            String[] header = {"allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
+                    "allExamsHaveClassrooms", "classroomsHasCapacity", "invigilatorOverlapped",
+                    "studentOverlapped", "invigilatorAvailable",
                     "fitnessScore"};
             for (int i = 0; i < header.length; i++) {
                 writer.write(header[i]);

@@ -56,7 +56,7 @@ public class GeneticAlgorithm {
         this.courses = new ArrayList<>(courses.subList(0, Math.min(70, courses.size())));
 
         this.invigilators = RandomDataGenerator.generateInvigilatorInstances(randomData.get("invigilatorData"));
-        this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(20, invigilators.size())));
+        this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(40, invigilators.size())));
 
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
 

@@ -10,8 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Getter
@@ -52,15 +50,14 @@ public class Fitness {
      * score = (1 / (1 + number_of_constraint_violations))
      * score can be at most 1 if everything is perfect
      *
-     * TODO(Deniz) : directly eliminate a chromosome if a hard constraint is violated
-     *  we can do this by multiplying with zero or a negative number
-     *
      * TODO(Deniz) : return also a checklist of constraints
      *
      * TODO(Deniz) : add violation hashmap/excel table
      *
      * TODO(Deniz) : Return true/false array for constraints
      *  or if score is not one == violation
+     *
+     * TODO(Deniz) : Give punishment if exam day is a holiday or a weekend(?)
      * */
 
     private static final Logger logger = LogManager.getLogger(Fitness.class);
@@ -91,21 +88,24 @@ public class Fitness {
 
         prepareDataForFitness(encodedExams);
 
-        double checkCourseExamCompatibility = (double) 1 / (1 + checkCourseExamCompatibility(encodedExams));
-        double classroomOverlapped = 1 - classroomOverlapped();
-        double allExamsHaveClassrooms = 1 - (allExamsHaveClassrooms(encodedExams) / courses.size());
-        double classroomsHasCapacity = 1 - (classroomsHasCapacity(encodedExams) / encodedExams.size());
-        double invigilatorOverlapped = 1 - invigilatorOverlapped();
-        double studentOverlapped = 1 - studentOverlapped();
-        double invigilatorAvailable = 1 - (invigilatorAvailable() / invigilatorExams.size());
+        double allExamsHaveRequiredTime = (double) 1 / (1 + allExamsHaveRequiredTime(encodedExams));
+        double allExamHaveRequiredInvigilatorCount = (double) 1 / (1 + allExamHaveRequiredInvigilatorCount(encodedExams));
+        double classroomOverlapped = (double) 1 / (1 + classroomOverlapped());
+        double allExamsHaveClassrooms = (double) 1 / (1 + allExamsHaveClassrooms(encodedExams));
+        double classroomsHasCapacity = (double) 1 / (1 + classroomsHasCapacity(encodedExams));
+        double invigilatorOverlapped = (double) 1 / (1 + invigilatorOverlapped());
+        double studentOverlapped = (double) 1 / (1 + studentOverlapped());
+        double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailable());
 
 
 
         // use f1 score to calculate average, harmonic average
+        // we can also use weight/priority based average calculation
         // n = fitness function count
         int n = 7;
         double fitnessScore = n / (
-                1 / checkCourseExamCompatibility +
+                1 / allExamsHaveRequiredTime +
+                        1 / allExamHaveRequiredInvigilatorCount +
                         1 / classroomOverlapped +
                         1 / allExamsHaveClassrooms +
                         1 / classroomsHasCapacity +
@@ -113,8 +113,9 @@ public class Fitness {
                         1 / studentOverlapped +
                         1 / invigilatorAvailable
         );
-        return new double[]{checkCourseExamCompatibility, classroomOverlapped, allExamsHaveClassrooms,
-                classroomsHasCapacity, invigilatorOverlapped, studentOverlapped, invigilatorAvailable,
+        return new double[]{allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
+                allExamsHaveClassrooms, classroomsHasCapacity, invigilatorOverlapped,
+                studentOverlapped, invigilatorAvailable,
                 fitnessScore};
     }
 
@@ -147,8 +148,6 @@ public class Fitness {
                 generateHashmap(invigilatorExams, encodedExam, invigilatorId);
             }
         }
-
-
         this.invigilatorExams = invigilatorExams;
         this.classroomExams = classroomExams;
         this.studentExams = studentExams;
@@ -167,65 +166,64 @@ public class Fitness {
     }
 
     // Hard Constraints
-    public double checkCourseExamCompatibility(ArrayList<EncodedExam> chromosome) {
-        // During Initialization all chromosomes are going to be best(fitness score = 1)
-        // because of heuristic initialization, but after crossover or/and mutation
-        // it can be changed. That's why this function is implemented.
-
-        // Hard Constraints
-        // all courses have just one exam
-        // all courses have the required timeslot for both invigilators and students
-        // all courses have the required number of invigilators to observe the exam
-        // all courses have exactly one classroom assigned to them if no sessions
-        Set<String> uniqueCourseCodes = new HashSet<>();
-        int duplicatedCoursesPunishment = 0;
+    public double allExamsHaveRequiredTime(ArrayList<EncodedExam> chromosome) {
+        // all exams have the required timeslot for both invigilators and students
         int requiredTimeslotPunishment = 0;
+        for (EncodedExam exam : chromosome) {
+            String courseCode = exam.getCourseCode();
+            Course course = Course.findByCourseCode(courses, courseCode);
+            if (course != null) {
+                Timeslot timeslots = exam.getTimeSlot();
+                int examTimeslotCount = (int) Duration.between(timeslots.getStart(), timeslots.getEnd()).toHours();
+                int timeslotCountForInvigilator = course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime();
+                int timeslotCountForStudent = course.getExamDuration();
+
+                // all courses have the required timeslot for both invigilators and students
+                // punish it proportional to the difference
+                int differenceInvigilator = Math.abs(examTimeslotCount - timeslotCountForInvigilator);
+                int differenceStudent = Math.abs((examTimeslotCount - (course.getBeforeExamPrepTime() + course.getAfterExamPrepTime())) - timeslotCountForStudent);
+                requiredTimeslotPunishment += differenceInvigilator;
+                requiredTimeslotPunishment += differenceStudent;
+                if (differenceInvigilator != 0) {
+                    logger.info("This is not the required time for invigilator");
+                }
+                if (differenceStudent != 0) {
+                    logger.info("This is not the required time for student");
+                }
+            }
+        }
+        return requiredTimeslotPunishment;
+    }
+
+    public double allExamHaveRequiredInvigilatorCount(ArrayList<EncodedExam> chromosome) {
+        // all exams have the required number of invigilators to observe the exam
         int invigilatorCountPunishment = 0;
         for (EncodedExam exam : chromosome) {
             String courseCode = exam.getCourseCode();
             Course course = Course.findByCourseCode(courses, courseCode);
-            assert course != null;
+            if (course != null) {
+                int invigilatorCount = exam.getInvigilators().size();
 
-            int invigilatorCount = exam.getInvigilators().size();
-            Timeslot timeslots = exam.getTimeSlot();
-            int examTimeslotCount = (int) Duration.between(timeslots.getStart(), timeslots.getEnd()).toHours();
-            int timeslotCountForInvigilator = course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime();
-            int timeslotCountForStudent = course.getExamDuration();
-
-            // all courses have just one exam
-            duplicatedCoursesPunishment += (uniqueCourseCodes.add(courseCode)) ? 0 : 1;
-
-            // all courses have the required number of invigilators to observe the exam
-            // if there are more invigilator than it is supposed to be is that okay ?
-            int capacity = course.getRegisteredStudents().size();
-            int requiredInvigilator = capacity < 20 ? 1 : capacity < 75 ? 2 : (capacity < 150 ? 3 : 4);
-            invigilatorCountPunishment = Math.abs(requiredInvigilator - invigilatorCount);
-
-            // all courses have the required timeslot for both invigilators and students
-            // punish it proportional to the difference
-            int differenceInvigilator = Math.abs(examTimeslotCount - timeslotCountForInvigilator);
-            int differenceStudent = Math.abs((examTimeslotCount - (course.getBeforeExamPrepTime() + course.getAfterExamPrepTime())) - timeslotCountForStudent);
-            requiredTimeslotPunishment += differenceInvigilator;
-            requiredTimeslotPunishment += differenceStudent;
-
-            // all courses have exactly one classroom assigned to them if no sessions
+                // all courses have the required number of invigilators to observe the exam
+                // if there are more invigilator than it is supposed to be is that okay ?
+                int capacity = course.getRegisteredStudents().size();
+                int requiredInvigilator = capacity < 20 ? 1 : capacity < 75 ? 2 : (capacity < 150 ? 3 : 4);
+                int difference = Math.abs(requiredInvigilator - invigilatorCount);
+                invigilatorCountPunishment += difference;
+                if (difference != 0) {
+                    logger.info("The invigilator count is missing :(");
+                    logger.info("Course: " + course);
+                    logger.info("Required invigilator count: " + requiredInvigilator);
+                    logger.info("Current invigilator count: " + invigilatorCount);
+                }
+            }
         }
-
-//        logger.info("Duplicated Course Punishment: " + duplicatedCoursesPunishment);
-//        logger.info("Required Timeslot Punishment: " + requiredTimeslotPunishment);
-//        logger.info("Invigilator Count Punishment: " + invigilatorCountPunishment);
-        return duplicatedCoursesPunishment +
-                requiredTimeslotPunishment +
-                invigilatorCountPunishment;
-
-
+        return invigilatorCountPunishment;
     }
 
     public double classroomOverlapped() {
         // No classroom can be assigned to more than one exam at the same moment.
         double classroomPunishment = 0;
-        long totalExamDuration = 0;
-        double totalOverlap = 0;
         for (String classroom : classroomExams.keySet()) {
             ArrayList<Timeslot> timeslots = new ArrayList<>();
             ArrayList<EncodedExam> assignedExams = classroomExams.get(classroom);
@@ -235,9 +233,6 @@ public class Fitness {
                 timeslots.add(timeslot);
             }
 
-            for (Timeslot timeslot : timeslots) {
-                totalExamDuration += Duration.between(timeslot.getStart(), timeslot.getEnd()).toMinutes();
-            }
             int length = timeslots.size();
             for (int i = 0; i < length; i++) {
                 for (int j = i + 1; j < length; j++) {
@@ -249,18 +244,11 @@ public class Fitness {
                         logger.info(timeslots.get(i));
                         logger.info(timeslots.get(j));
                         logger.info("Overlapped minutes: " + minutes);
-                        totalOverlap += (double) minutes;
+                        classroomPunishment += (double) minutes / 60;
                     }
                 }
             }
         }
-        if (totalExamDuration != 0) {
-            logger.info("Total overlap in minutes: " + totalOverlap);
-            logger.info("Total exam duration in minutes: " + totalExamDuration);
-            classroomPunishment += totalOverlap / totalExamDuration;
-            logger.info(classroomPunishment);
-        }
-
 
         return classroomPunishment;
     }
@@ -271,8 +259,6 @@ public class Fitness {
 
         // timeslots must be adjusted for student
         // before and after exam time must be removed
-        long totalExamDuration = 0;
-        double totalOverlap = 0;
         for (String studentId : studentExams.keySet()) {
             ArrayList<EncodedExam> assignedExams = studentExams.get(studentId);
             ArrayList<Timeslot> timeslots = new ArrayList<>();
@@ -285,33 +271,22 @@ public class Fitness {
                     timeslots.add(new Timeslot(timeslot.getStart().plusHours(beforeExamPrep), timeslot.getEnd().minusHours(afterExamPrep)));
                 }
             }
-
-            for (Timeslot timeslot : timeslots) {
-                totalExamDuration += Duration.between(timeslot.getStart(), timeslot.getEnd()).toMinutes();
-            }
             int length = timeslots.size();
             for (int i = 0; i < length; i++) {
                 for (int j = i + 1; j < length; j++) {
                     long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
                     if (minutes != 0) {
                         logger.info("Timeslots overlap for student!!!!!!!!!!");
-                        logger.info("Student Id: " + studentId);
-                        logger.info("Exams: " + assignedExams);
-                        logger.info(timeslots.get(i));
-                        logger.info(timeslots.get(j));
-                        logger.info("Overlapped minutes: " + minutes);
-                        totalOverlap += (double) minutes;
+//                        logger.info("Student Id: " + studentId);
+//                        logger.info("Exams: " + assignedExams);
+//                        logger.info(timeslots.get(i));
+//                        logger.info(timeslots.get(j));
+//                        logger.info("Overlapped minutes: " + minutes);
+                        studentOverlappedPunishment += (double) minutes / 60;
                     }
                 }
             }
         }
-        if (totalExamDuration != 0) {
-            logger.info("Total overlap in minutes: " + totalOverlap);
-            logger.info("Total exam duration in minutes: " + totalExamDuration);
-            studentOverlappedPunishment += totalOverlap / totalExamDuration;
-            logger.info(studentOverlappedPunishment);
-        }
-
         return studentOverlappedPunishment;
     }
 
@@ -319,8 +294,6 @@ public class Fitness {
         // No invigilator can be assigned to more than one exam at the same moment.
         double invigilatorOverlappedPunishment = 0;
 
-        long totalExamDuration = 0;
-        double totalOverlap = 0;
         for (String invigilatorId : invigilatorExams.keySet()) {
             ArrayList<EncodedExam> assignedExams = invigilatorExams.get(invigilatorId);
             ArrayList<Timeslot> timeslots = new ArrayList<>();
@@ -329,32 +302,22 @@ public class Fitness {
                 timeslots.add(timeslot);
             }
 
-            for (Timeslot timeslot : timeslots) {
-                totalExamDuration += Duration.between(timeslot.getStart(), timeslot.getEnd()).toMinutes();
-            }
             int length = timeslots.size();
-
             for (int i = 0; i < length; i++) {
                 for (int j = i + 1; j < length; j++) {
                     long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
                     if (minutes != 0) {
                         logger.info("Timeslots overlap for invigilator!!!!!!!!!!");
-                        logger.info("Invigilator Id: " + invigilatorId);
-                        logger.info("Exams: " + assignedExams);
-                        logger.info(timeslots.get(i));
-                        logger.info(timeslots.get(j));
-                        logger.info("Overlapped minutes: " + minutes);
-                        totalOverlap += (double) minutes;
+//                        logger.info("Invigilator Id: " + invigilatorId);
+//                        logger.info("Exams: " + assignedExams);
+//                        logger.info(timeslots.get(i));
+//                        logger.info(timeslots.get(j));
+//                        logger.info("Overlapped minutes: " + minutes);
+                        invigilatorOverlappedPunishment += (double) minutes / 60;
                     }
                 }
             }
 
-        }
-        if (totalExamDuration != 0) {
-            logger.info("Total overlap in minutes: " + totalOverlap);
-            logger.info("Total exam duration in minutes: " + totalExamDuration);
-            invigilatorOverlappedPunishment += totalOverlap / totalExamDuration;
-            logger.info(invigilatorOverlappedPunishment);
         }
 
         return invigilatorOverlappedPunishment;
@@ -372,10 +335,10 @@ public class Fitness {
                 int monitoredExamCount = monitoredExams.size();
                 if (maxMonitoredExamCount < monitoredExamCount) {
                     logger.info("Invigilator is over her/his capacity!!!!!!!!!!");
-                    logger.info("Invigilator Id: " + invigilatorId);
-                    logger.info("Max Capacity:" + maxMonitoredExamCount);
-                    logger.info("Monitored Exam count:" + monitoredExamCount);
-                    logger.info("Exams: " + monitoredExams);
+//                    logger.info("Invigilator Id: " + invigilatorId);
+//                    logger.info("Max Capacity:" + maxMonitoredExamCount);
+//                    logger.info("Monitored Exam count:" + monitoredExamCount);
+//                    logger.info("Exams: " + monitoredExams);
                     invigilatorAvailablePunishment++;
                 }
             }
@@ -384,12 +347,6 @@ public class Fitness {
         return invigilatorAvailablePunishment;
     }
 
-    public double startAndEndTimeViolated() {
-        // No exam can be held before or after the defined time frame
-        int startAndEndTimPunishment = 0;
-
-        return startAndEndTimPunishment;
-    }
 
     public double allExamsHaveClassrooms(ArrayList<EncodedExam> chromosome) {
         // All exams must have classrooms assigned to them
@@ -429,6 +386,30 @@ public class Fitness {
 
         return classroomsHasCapacityPunishment;
     }
+
+    public double startAndEndTimeViolated() {
+        // No exam can be held before or after the defined time frame
+        int startAndEndTimePunishment = 0;
+
+        return startAndEndTimePunishment;
+    }
+
+
+    // The classroom has the required equipments(computer) if necessary like
+    public double allExamsHaveRequiredEquipments() {
+        // No exam can be held before or after the defined time frame
+        int allExamsHaveRequiredEquipmentsPunishment = 0;
+
+        return allExamsHaveRequiredEquipmentsPunishment;
+    }
+
+    // No exam at the weekend or holidays
+    public double noExamsWeekendAndHolidays() {
+        int noExamsWeekendAndHolidaysPunishment = 0;
+
+        return noExamsWeekendAndHolidaysPunishment;
+    }
+
 
     // Soft Constraints
     // No invigilator should monitor her/his max capacity

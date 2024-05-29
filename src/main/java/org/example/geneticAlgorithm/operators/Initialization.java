@@ -53,7 +53,6 @@ public class Initialization {
                     remainingStudentCapacity--;
                     course.setRemainingStudentCapacity(remainingStudentCapacity);
                     course.setRegisteredStudents(registeredStudents);
-                    courses.set(courseIndex, course);
 
                     // update student
                     registeredCourses.add(course.getCourseCode());
@@ -62,7 +61,6 @@ public class Initialization {
                     student.setRegisteredCourses(registeredCourses);
                 }
             }
-            Student.updateStudent(students, student);
         }
 
         logger.info("Student instances mapped with courses successfully :)");
@@ -107,10 +105,9 @@ public class Initialization {
         for (Exam exam : exams) {
             Course course = exam.getCourse();
             int capacity = course.getRegisteredStudents().size();
-            ArrayList<String> availableInvigilators = new ArrayList<>();
+            ArrayList<String> availableInvigilators = exam.getExamInvigilators();
             int invigilatorCount = capacity < 20 ? 1 : capacity < 75 ? 2 : (capacity < 150 ? 3 : 4); // Determine the number of invigilators
-            int counter = 0;
-            while (counter < invigilatorCount) {
+            while (availableInvigilators.size() < invigilatorCount) {
                 ArrayList<Invigilator> filteredInvigilators = invigilators.stream()
                         .filter(Invigilator::isAvailable)
                         .collect(Collectors.toCollection(ArrayList::new));
@@ -120,23 +117,19 @@ public class Initialization {
                     Invigilator invigilator = filteredInvigilators.get(invigilatorIndex);
                     availableInvigilators.add(invigilator.getID());
 
-                    ArrayList<String> monitoredCourses = invigilator.getMonitoredCourses();
-                    monitoredCourses.add(course.getCourseCode());
-                    invigilator.setMonitoredCourses(monitoredCourses);
-
                     ArrayList<Integer> monitoredExams = invigilator.getMonitoredExams();
                     monitoredExams.add(exam.getExamCode());
                     invigilator.setMonitoredExams(monitoredExams);
 
-                    if (invigilator.getMonitoredCourses().size() == invigilator.getMaxCoursesMonitoredCount()) {
+                    if (invigilator.getMonitoredExams().size() == invigilator.getMaxCoursesMonitoredCount()) {
                         invigilator.setAvailable(false);
                     }
-                    counter++;
                 } else {
+                    logger.info("No more invigilator could be found :(");
                     break;
                 }
+                exam.setExamInvigilators(availableInvigilators);
             }
-            exam.setExamInvigilators(availableInvigilators);
 
         }
         logger.info("Exam instances mapped with courses and invigilators successfully :)");
@@ -167,14 +160,14 @@ public class Initialization {
                 int classroomIndex = DataStructureHelper.getRandomElement(filteredClassrooms);
                 Classroom classroom = filteredClassrooms.get(classroomIndex);
 
-                ArrayList<String> courseCodes = new ArrayList<>(classroom.getCourseCodes());
-                courseCodes.add(exam.getCourse().getCourseCode());
-                classroom.setCourseCodes(courseCodes);
+                // update classroom
                 ArrayList<Integer> placedExams = new ArrayList<>(classroom.getPlacedExams());
                 placedExams.add(exam.getExamCode());
                 classroom.setPlacedExams(placedExams);
 
+                // update exam
                 exam.setClassroom(classroom);
+
                 assignedCourses++;
 
             } else {
