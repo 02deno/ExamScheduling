@@ -474,10 +474,28 @@ public class Fitness {
 
 
     // Soft Constraints
-    // No invigilator should monitor her/his max capacity
-    // No student should enter more than two exam in one day
-    // If student has more than one exam, they should have at least 1 hour between
-    // No invigilator should monitor more than three exam in one day
+    public double studentMoreThanTwoExamSameDay(ArrayList<EncodedExam> chromosome) {
+        // No student should enter more than two exam in one day
+        int studentMoreThanTwoExamSameDayPunishment = 0;
+        return studentMoreThanTwoExamSameDayPunishment;
+    }
 
+    public double minimumGapBetweenExamsStudent(ArrayList<EncodedExam> chromosome) {
+        // If student has more than one exam in the same day , they should have at least 1 hour between
+        int minimumGapBetweenExamsStudentPunishment = 0;
+        return minimumGapBetweenExamsStudentPunishment;
+    }
+
+    public double invigilatorMoreThanThreeExamSameDay(ArrayList<EncodedExam> chromosome) {
+        // No invigilator should monitor more than three exam in one day
+        int invigilatorMoreThanThreeExamSameDayPunishment = 0;
+        return invigilatorMoreThanThreeExamSameDayPunishment;
+    }
+
+    public double minimumGapBetweenExamsInvigilator(ArrayList<EncodedExam> chromosome) {
+        // If student has more than one exam in the same day , they should have at least 1 hour between
+        int minimumGapBetweenExamsInvigilatorPunishment = 0;
+        return minimumGapBetweenExamsInvigilatorPunishment;
+    }
 
 }
