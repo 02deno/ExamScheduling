@@ -152,14 +152,14 @@ public class HTMLHelper {
 
     public static void generateInvigilatorReport(ArrayList<Invigilator> invigilators, String output, String title) {
         HTMLHelper.generateReport(invigilators, output, title,
-                new String[]{"ID", "Name", "Surname", "Maximum Number of Courses to Monitor", "Monitored Class IDs", "Available"},
-                new String[]{"ID", "name", "surname", "maxCoursesMonitoredCount", "monitoredCourses", "isAvailable"});
+                new String[]{"ID", "Name", "Surname", "Maximum Number of Courses to Monitor", "Monitored Course IDs", "Available"},
+                new String[]{"ID", "name", "surname", "maxCoursesMonitoredCount", "monitoredExams", "isAvailable"});
     }
 
     public static void generateClassroomReport(ArrayList<Classroom> classrooms, String output, String title) {
         HTMLHelper.generateReport(classrooms, output, title,
                 new String[]{"Code", "Name", "Capacity(#Studens)", "PC Lab", "Properties", "Course Codes"},
-                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "courseCodes"});
+                new String[]{"classroomCode", "classroomName", "capacity", "isPcLab", "classroomProperties", "placedExams"});
     }
     public static void generateCourseReport(ArrayList<Course> courses, String output, String title) {
         HTMLHelper.generateReport(courses, output, title,

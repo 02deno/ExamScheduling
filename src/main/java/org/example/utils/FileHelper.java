@@ -1,16 +1,24 @@
 package org.example.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FileHelper {
 
     private static final Logger logger = LogManager.getLogger(FileHelper.class);
+    public static final String holidayFilePath = "data/holidays.json";
+    private static int population_number = 1;
 
     public static void deleteFolderContents(File folder) {
         boolean result = false;
@@ -39,9 +47,10 @@ public class FileHelper {
 
     public static void writeFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            String[] header = {"allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
+            String[] header = {"Exam id", "Population Number", "allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
                     "allExamsHaveClassrooms", "classroomsHasCapacity", "invigilatorOverlapped",
-                    "studentOverlapped", "invigilatorAvailable",
+                    "studentOverlapped", "invigilatorAvailable", "startAndEndTimeDateViolated",
+                    "allExamsHaveRequiredEquipments", "noExamsWeekendAndHolidays", "examStartAndEndDateSame",
                     "fitnessScore"};
             for (int i = 0; i < header.length; i++) {
                 writer.write(header[i]);
@@ -51,8 +60,12 @@ public class FileHelper {
                 }
             }
             writer.write("\n");
-            // Write each row of scores
+            int id = 1;
             for (double[] row : scoresList) {
+                writer.write(Integer.toString(id++));
+                writer.write(",");
+                writer.write(Integer.toString(population_number));
+                writer.write(",");
                 // Write scores as a new row, separated by commas
                 for (int i = 0; i < row.length; i++) {
                     writer.write(Double.toString(row[i]));
@@ -64,10 +77,48 @@ public class FileHelper {
                 // Add new line after each row
                 writer.write("\n");
             }
-            System.out.println("Rows appended to CSV file: " + filePath);
+            population_number++;
+            logger.info("Rows appended to CSV file: " + filePath);
         } catch (IOException e) {
-            System.err.println("Error appending rows to CSV file: " + e.getMessage());
+            logger.error("Error appending rows to CSV file: " + e.getMessage());
         }
+
+    }
+
+    public static void saveHolidaysToFile() {
+        Set<LocalDate> holidays = APIHelper.fetchHolidays();
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode holidaysArray = mapper.createArrayNode();
+
+        for (LocalDate holiday : holidays) {
+            holidaysArray.add(holiday.toString());
+        }
+
+        try {
+            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(holidayFilePath), holidaysArray);
+        } catch (IOException e) {
+            logger.error("Error saving holidays to file: " + e.getMessage());
+        }
+    }
+
+    public static Set<LocalDate> loadHolidaysFromFile() {
+        Set<LocalDate> holidays = new HashSet<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            File file = new File(holidayFilePath);
+            if (file.exists()) {
+                JsonNode holidaysArray = mapper.readTree(file);
+
+                for (JsonNode dateNode : holidaysArray) {
+                    holidays.add(LocalDate.parse(dateNode.asText()));
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error loading holidays from file: " + e.getMessage());
+        }
+
+        return holidays;
     }
 
 }
