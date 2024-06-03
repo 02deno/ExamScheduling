@@ -4,12 +4,12 @@ import lombok.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.models.*;
+import org.example.utils.FileHelper;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 
 @Getter
@@ -52,12 +52,13 @@ public class Fitness {
      *
      * TODO(Deniz) : return also a checklist of constraints
      *
-     * TODO(Deniz) : add violation hashmap/excel table
+     * TODO(Deniz) : add graphs for fitness function, like their
+     *  progress in different generations, or their avarage in one
+     *  population, ..
      *
      * TODO(Deniz) : Return true/false array for constraints
      *  or if score is not one == violation
      *
-     * TODO(Deniz) : Give punishment if exam day is a holiday or a weekend(?)
      * */
 
     private static final Logger logger = LogManager.getLogger(Fitness.class);
@@ -96,13 +97,15 @@ public class Fitness {
         double invigilatorOverlapped = (double) 1 / (1 + invigilatorOverlapped());
         double studentOverlapped = (double) 1 / (1 + studentOverlapped());
         double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailable());
-
-
+        double startAndEndTimeDateViolated = (double) 1 / (1 + startAndEndTimeDateViolated(encodedExams));
+        double allExamsHaveRequiredEquipments = (double) 1 / (1 + allExamsHaveRequiredEquipments(encodedExams));
+        double noExamsWeekendAndHolidays = (double) 1 / (1 + noExamsWeekendAndHolidays(encodedExams));
+        double examStartAndEndDateSame = (double) 1 / (1 + examStartAndEndDateSame(encodedExams));
 
         // use f1 score to calculate average, harmonic average
         // we can also use weight/priority based average calculation
         // n = fitness function count
-        int n = 7;
+        int n = 12;
         double fitnessScore = n / (
                 1 / allExamsHaveRequiredTime +
                         1 / allExamHaveRequiredInvigilatorCount +
@@ -111,11 +114,16 @@ public class Fitness {
                         1 / classroomsHasCapacity +
                         1 / invigilatorOverlapped +
                         1 / studentOverlapped +
-                        1 / invigilatorAvailable
+                        1 / invigilatorAvailable +
+                        1 / startAndEndTimeDateViolated +
+                        1 / allExamsHaveRequiredEquipments +
+                        1 / noExamsWeekendAndHolidays +
+                        1 / examStartAndEndDateSame
         );
         return new double[]{allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
                 allExamsHaveClassrooms, classroomsHasCapacity, invigilatorOverlapped,
-                studentOverlapped, invigilatorAvailable,
+                studentOverlapped, invigilatorAvailable, startAndEndTimeDateViolated,
+                allExamsHaveRequiredEquipments, noExamsWeekendAndHolidays, examStartAndEndDateSame,
                 fitnessScore};
     }
 
@@ -185,10 +193,10 @@ public class Fitness {
                 requiredTimeslotPunishment += differenceInvigilator;
                 requiredTimeslotPunishment += differenceStudent;
                 if (differenceInvigilator != 0) {
-                    logger.info("This is not the required time for invigilator");
+                    //logger.info("This is not the required time for invigilator");
                 }
                 if (differenceStudent != 0) {
-                    logger.info("This is not the required time for student");
+                    //logger.info("This is not the required time for student");
                 }
             }
         }
@@ -211,10 +219,10 @@ public class Fitness {
                 int difference = Math.abs(requiredInvigilator - invigilatorCount);
                 invigilatorCountPunishment += difference;
                 if (difference != 0) {
-                    logger.info("The invigilator count is missing :(");
-                    logger.info("Course: " + course);
-                    logger.info("Required invigilator count: " + requiredInvigilator);
-                    logger.info("Current invigilator count: " + invigilatorCount);
+//                    logger.info("The invigilator count is missing :(");
+//                    logger.info("Course: " + course);
+//                    logger.info("Required invigilator count: " + requiredInvigilator);
+//                    logger.info("Current invigilator count: " + invigilatorCount);
                 }
             }
         }
@@ -238,12 +246,12 @@ public class Fitness {
                 for (int j = i + 1; j < length; j++) {
                     long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
                     if (minutes != 0) {
-                        logger.info("Timeslots overlap for classroom!!!!!!!!!!");
-                        logger.info("Classroom Code: " + classroom);
-                        logger.info("Exams: " + assignedExams);
-                        logger.info(timeslots.get(i));
-                        logger.info(timeslots.get(j));
-                        logger.info("Overlapped minutes: " + minutes);
+//                        logger.info("Timeslots overlap for classroom!!!!!!!!!!");
+//                        logger.info("Classroom Code: " + classroom);
+//                        logger.info("Exams: " + assignedExams);
+//                        logger.info(timeslots.get(i));
+//                        logger.info(timeslots.get(j));
+//                        logger.info("Overlapped minutes: " + minutes);
                         classroomPunishment += (double) minutes / 60;
                     }
                 }
@@ -276,7 +284,7 @@ public class Fitness {
                 for (int j = i + 1; j < length; j++) {
                     long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
                     if (minutes != 0) {
-                        logger.info("Timeslots overlap for student!!!!!!!!!!");
+//                        logger.info("Timeslots overlap for student!!!!!!!!!!");
 //                        logger.info("Student Id: " + studentId);
 //                        logger.info("Exams: " + assignedExams);
 //                        logger.info(timeslots.get(i));
@@ -307,7 +315,7 @@ public class Fitness {
                 for (int j = i + 1; j < length; j++) {
                     long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
                     if (minutes != 0) {
-                        logger.info("Timeslots overlap for invigilator!!!!!!!!!!");
+//                        logger.info("Timeslots overlap for invigilator!!!!!!!!!!");
 //                        logger.info("Invigilator Id: " + invigilatorId);
 //                        logger.info("Exams: " + assignedExams);
 //                        logger.info(timeslots.get(i));
@@ -334,7 +342,7 @@ public class Fitness {
                 ArrayList<EncodedExam> monitoredExams = invigilatorExams.get(invigilatorId);
                 int monitoredExamCount = monitoredExams.size();
                 if (maxMonitoredExamCount < monitoredExamCount) {
-                    logger.info("Invigilator is over her/his capacity!!!!!!!!!!");
+//                    logger.info("Invigilator is over her/his capacity!!!!!!!!!!");
 //                    logger.info("Invigilator Id: " + invigilatorId);
 //                    logger.info("Max Capacity:" + maxMonitoredExamCount);
 //                    logger.info("Monitored Exam count:" + monitoredExamCount);
@@ -353,7 +361,7 @@ public class Fitness {
         int allExamsHaveClassroomsPunishment = 0;
         for (EncodedExam exam : chromosome) {
             if (exam.getClassroomCode() == null) {
-                logger.info("Exam " + exam.getCourseCode() + " has no classroom assigned!!!!!!!");
+                //logger.info("Exam " + exam.getCourseCode() + " has no classroom assigned!!!!!!!");
                 allExamsHaveClassroomsPunishment++;
             }
         }
@@ -379,7 +387,7 @@ public class Fitness {
             }
 
             if (classroom.getCapacity() < course.getRegisteredStudents().size()) {
-                logger.info("Classroom " + classroom.getClassroomCode() + " does not have the required capacity!!!!!");
+                //logger.info("Classroom " + classroom.getClassroomCode() + " does not have the required capacity!!!!!");
                 classroomsHasCapacityPunishment++;
             }
         }
@@ -387,27 +395,81 @@ public class Fitness {
         return classroomsHasCapacityPunishment;
     }
 
-    public double startAndEndTimeViolated() {
+    public double startAndEndTimeDateViolated(ArrayList<EncodedExam> chromosome) {
         // No exam can be held before or after the defined time frame
-        int startAndEndTimePunishment = 0;
-
-        return startAndEndTimePunishment;
+        int startAndEndTimeDatePunishment = 0;
+        for (EncodedExam exam : chromosome) {
+            Timeslot timeslot = exam.getTimeSlot();
+            LocalDateTime start = timeslot.getStart();
+            LocalDateTime end = timeslot.getEnd();
+            LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
+            if (start.isBefore(startDateTime) || start.isAfter(endDateTime) ||
+                    end.isBefore(startDateTime) || end.isAfter(endDateTime)) {
+//                logger.info("Exam timeslot is not in the specified range!!");
+//                logger.info("Start: " + start);
+//                logger.info("End: " + end);
+                startAndEndTimeDatePunishment++;
+            }
+        }
+        return startAndEndTimeDatePunishment;
     }
 
 
-    // The classroom has the required equipments(computer) if necessary like
-    public double allExamsHaveRequiredEquipments() {
-        // No exam can be held before or after the defined time frame
+    public double allExamsHaveRequiredEquipments(ArrayList<EncodedExam> chromosome) {
+        // The classroom has the required equipments(computer) if necessary like
         int allExamsHaveRequiredEquipmentsPunishment = 0;
-
+        for (EncodedExam exam : chromosome) {
+            Classroom classroom = Classroom.findByClassroomCode(classrooms, exam.getClassroomCode());
+            Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+            if (course != null && classroom != null) {
+                boolean pcLab = classroom.isPcLab();
+                boolean pcRequired = course.isPcExam();
+                if (pcLab != pcRequired) {
+                    allExamsHaveRequiredEquipmentsPunishment++;
+                }
+            }
+        }
         return allExamsHaveRequiredEquipmentsPunishment;
     }
 
-    // No exam at the weekend or holidays
-    public double noExamsWeekendAndHolidays() {
+    public double noExamsWeekendAndHolidays(ArrayList<EncodedExam> chromosome) {
+        // No exam at the weekend or holidays
         int noExamsWeekendAndHolidaysPunishment = 0;
+        Set<LocalDate> holidays = FileHelper.loadHolidaysFromFile();
+
+        for (EncodedExam exam : chromosome) {
+            LocalDateTime startDateTime = exam.getTimeSlot().getStart();
+            LocalDate examDate = startDateTime.toLocalDate();
+            DayOfWeek dayOfWeek = examDate.getDayOfWeek();
+
+            // Check if the exam is on a weekend
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+//                logger.info("Exam Date: "+ examDate);
+//                logger.info("Exam can not be placed in the weekends");
+                noExamsWeekendAndHolidaysPunishment++;
+            }
+
+            // Check if the exam is on a holiday
+            if (holidays.contains(examDate)) {
+//                logger.info("Exam Date: "+ examDate);
+//                logger.info("Exam can not be placed in the holidays");
+                noExamsWeekendAndHolidaysPunishment++;
+            }
+        }
 
         return noExamsWeekendAndHolidaysPunishment;
+    }
+
+    public double examStartAndEndDateSame(ArrayList<EncodedExam> chromosome) {
+        // Exam should start and end at the same day
+        int examStartAndEndDateSamePunishment = 0;
+        for (EncodedExam exam : chromosome) {
+            if (!exam.getTimeSlot().getStart().toLocalDate().isEqual(exam.getTimeSlot().getEnd().toLocalDate())) {
+                examStartAndEndDateSamePunishment++;
+            }
+        }
+        return examStartAndEndDateSamePunishment;
     }
 
 
