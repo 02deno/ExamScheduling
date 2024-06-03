@@ -6,10 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.example.dataPreprocessing.RandomDataGenerator;
 import org.example.geneticAlgorithm.operators.*;
 import org.example.models.*;
-import org.example.utils.ConfigHelper;
-import org.example.utils.DataStructureHelper;
-import org.example.utils.HTMLHelper;
-import org.example.utils.VisualizationHelper;
+import org.example.utils.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -56,11 +53,16 @@ public class GeneticAlgorithm {
     public void generateData() {
         HashMap<String, HashMap<String, ArrayList<Object>>> randomData = RandomDataGenerator.combineAllData();
         this.courses = RandomDataGenerator.generateCourseInstances(randomData.get("courseData"));
+        this.courses = new ArrayList<>(courses.subList(0, Math.min(70, courses.size())));
+
         this.invigilators = RandomDataGenerator.generateInvigilatorInstances(randomData.get("invigilatorData"));
-        // to decide invigilator number
-        //this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(100, invigilators.size())));
+        this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(40, invigilators.size())));
+
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
+
         this.students = RandomDataGenerator.generateStudentInstances(randomData.get("studentData"));
+        this.students = new ArrayList<>(students.subList(0, Math.min(100, students.size())));
+
         this.startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
         this.endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE")); // this date is not included
         this.startTime = LocalTime.parse(ConfigHelper.getProperty("START_TIME"));
@@ -83,7 +85,7 @@ public class GeneticAlgorithm {
 
     }
 
-    public ArrayList<ArrayList<EncodedExam>> initializationAndEncode() {
+    public void initializationAndEncode() {
         int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
         for (int i = 0; i < populationSize; i++) {
 
@@ -100,16 +102,14 @@ public class GeneticAlgorithm {
 
             HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(exams, invigilators);
             this.exams = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
-            this.invigilators = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("invigilators"), Invigilator.class);
-            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithInvigilators finished.");
 
+            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(exams, classrooms);
             this.exams = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
-            this.classrooms = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("classrooms"), Classroom.class);
-            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             logger.info("heuristicMapExamsWithClassrooms finished.");
 
+            Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(exams, timeslots);
             this.exams = DataStructureHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
             logger.info("heuristicMapExamsWithTimeslots finished.");
@@ -129,7 +129,6 @@ public class GeneticAlgorithm {
             this.populationForVisualization.add(new HashMap<>(chromosomeForVisualization));
             reset();
         }
-        return population;
     }
 
     public void encode() {
@@ -198,21 +197,27 @@ public class GeneticAlgorithm {
     public void calculateFitness() {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
-        Fitness fitness = new Fitness(courses, students);
+        Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
+        ArrayList<double[]> scoresList = new ArrayList<>();
         for (ArrayList<EncodedExam> chromosome : population) {
-            double fitnessScore = fitness.fitnessScore(chromosome);
+            double[] scores = fitness.fitnessScore(chromosome);
+            scoresList.add(scores);
+            double fitnessScore = scores[scores.length - 1];
             fitnessScores.put(chromosome, fitnessScore);
         }
 
         // sort this hashmap based on fitness scores
         fitnessScores = sortByValueDescending(fitnessScores);
-        //logger.info(fitnessScores);
+        // visualize
+        for (ArrayList<EncodedExam> chromosome : fitnessScores.keySet()) {
+            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
+        }
+        FileHelper.writeFitnessScoresToFile(scoresList, "graphs/fitness_scores.csv");
     }
 
     public void selectParents() {
-        calculateFitness();
         Selection selection = new Selection();
-        parents = selection.rouletteWheelSelection(fitnessScores);
+        parents = selection.rouletteWheelSelection(this.fitnessScores);
     }
 
     public void crossover() {

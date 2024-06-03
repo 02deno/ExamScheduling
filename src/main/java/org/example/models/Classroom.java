@@ -29,7 +29,6 @@ public class Classroom {
     private String classroomName;
     private int capacity;
     private boolean isPcLab;
-    private ArrayList<String> courseCodes = new ArrayList<>();
     private ArrayList<Integer> placedExams = new ArrayList<>();
     private String classroomProperties;
 
@@ -51,5 +50,15 @@ public class Classroom {
             }
         }
         logger.error("Classroom not found for update.");
+    }
+
+    public static Classroom findByClassroomCode(ArrayList<Classroom> classrooms, String classroomCode) {
+        for (Classroom classroom : classrooms) {
+            if (classroom.getClassroomCode().equals(classroomCode)) {
+                return classroom;
+            }
+        }
+        //logger.error("Could not find a classroom with classroom code: " + classroomCode);
+        return null;
     }
 }

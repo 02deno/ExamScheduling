@@ -3,11 +3,9 @@ package org.example;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
-import org.example.geneticAlgorithm.operators.Selection;
-import org.example.models.EncodedExam;
+import org.example.utils.FileHelper;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import static org.example.utils.FileHelper.deleteFolderContents;
 
@@ -21,12 +19,16 @@ public class App
         String folderPath = "graphs/";
         deleteFolderContents(new File(folderPath));
 
+        File holidaysFile = new File(FileHelper.holidayFilePath);
+        if (!holidaysFile.exists()) {
+            FileHelper.saveHolidaysToFile();
+        }
 
         logger.info("Application started...");
 
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
         geneticAlgorithm.generateData();
-        ArrayList<ArrayList<EncodedExam>> population = geneticAlgorithm.initializationAndEncode();
+        geneticAlgorithm.initializationAndEncode();
         geneticAlgorithm.visualization(wantedExamScheduleCount);
         geneticAlgorithm.calculateFitness();
         geneticAlgorithm.selectParents();

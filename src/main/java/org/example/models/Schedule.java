@@ -57,7 +57,7 @@ public class Schedule {
 
     public int calculateMaxTimeSlots() {
         long days = Duration.between(startDate.atStartOfDay(), endDate.atStartOfDay()).toDays();
-        long timeSlotsPerDay = Duration.between(startTime, endTime).toHours();
+        long timeSlotsPerDay = Duration.between(startTime, endTime).toHours() * 60 / interval;
         //logger.info("# Available Days: " + days);
         //logger.info("# Timeslots per day: " + timeSlotsPerDay);
         return (int) (days * timeSlotsPerDay);
