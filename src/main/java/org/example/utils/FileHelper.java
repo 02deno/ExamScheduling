@@ -49,7 +49,7 @@ public class FileHelper {
             String[] header = {"Exam id", "allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
                     "allExamsHaveClassrooms", "classroomsHasCapacity", "invigilatorOverlapped",
                     "studentOverlapped", "invigilatorAvailable", "startAndEndTimeDateViolated",
-                    "allExamsHaveRequiredEquipments", "noExamsWeekendAndHolidays", "examStartAndEndDateSame",
+                    "allExamsHaveRequiredEquipments", "noExamsHolidays", "examStartAndEndDateSame",
                     "fitnessScore"};
             fitnessTableGenerator(scoresList, filePath, header, writer);
         } catch (IOException e) {
@@ -62,7 +62,7 @@ public class FileHelper {
 
         String[] header = {"Exam id", "studentMoreThanTwoExamSameDay",
                 "minimumGapBetweenExamsStudent", "invigilatorMoreThanThreeExamSameDay",
-                "minimumGapBetweenExamsInvigilator",
+                "minimumGapBetweenExamsInvigilator", "noExamsAtWeekends",
                 "fitnessScore"};
 
         try (FileWriter writer = new FileWriter(filePath, true)) {
@@ -135,5 +135,12 @@ public class FileHelper {
 
         return holidays;
     }
+
+    // * Students should not take more than a total of 3 exams on 2 consecutive days.
+    // * Most examinations should take place in the afternoon, when students' perceptions are normally most open.
+    // * The lessons that most students have chosen should take place at the beginning of the exam timetable.
+    // This gives the teacher enough time to assess the exams.
+    // * Invigilators' preferred time slots and classrooms should be allocated accordingly.
+
 
 }

@@ -8,6 +8,7 @@ import org.example.utils.FileHelper;
 
 import java.time.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -50,15 +51,16 @@ public class Fitness {
      * score = (1 / (1 + number_of_constraint_violations))
      * score can be at most 1 if everything is perfect
      *
-     * TODO(Deniz) : return also a checklist of constraints
      *
      * TODO(Deniz) : add graphs for fitness function, like their
-     *  progress in different generations, or their avarage in one
+     *  progress in different generations, or their average in one
      *  population, ..
      *
      * TODO(Deniz) : Return true/false array for constraints
      *  or if score is not one == violation
      *
+     * TODO(Deniz) : Add weights to constraints by calculating
+     *  fitness scores
      * */
 
     private static final Logger logger = LogManager.getLogger(Fitness.class);
@@ -104,7 +106,7 @@ public class Fitness {
         double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailable());
         double startAndEndTimeDateViolated = (double) 1 / (1 + startAndEndTimeDateViolated(encodedExams));
         double allExamsHaveRequiredEquipments = (double) 1 / (1 + allExamsHaveRequiredEquipments(encodedExams));
-        double noExamsWeekendAndHolidays = (double) 1 / (1 + noExamsWeekendAndHolidays(encodedExams));
+        double noExamsHolidays = (double) 1 / (1 + noExamsInHolidays(encodedExams));
         double examStartAndEndDateSame = (double) 1 / (1 + examStartAndEndDateSame(encodedExams));
 
         // use f1 score to calculate average, harmonic average
@@ -122,13 +124,13 @@ public class Fitness {
                         1 / invigilatorAvailable +
                         1 / startAndEndTimeDateViolated +
                         1 / allExamsHaveRequiredEquipments +
-                        1 / noExamsWeekendAndHolidays +
+                        1 / noExamsHolidays +
                         1 / examStartAndEndDateSame
         );
         return new double[]{allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
                 allExamsHaveClassrooms, classroomsHasCapacity, invigilatorOverlapped,
                 studentOverlapped, invigilatorAvailable, startAndEndTimeDateViolated,
-                allExamsHaveRequiredEquipments, noExamsWeekendAndHolidays, examStartAndEndDateSame,
+                allExamsHaveRequiredEquipments, noExamsHolidays, examStartAndEndDateSame,
                 fitnessScore};
     }
 
@@ -138,18 +140,20 @@ public class Fitness {
         double minimumGapBetweenExamsStudent = (double) 1 / (1 + minimumGapBetweenExamsStudent(encodedExams));
         double invigilatorMoreThanThreeExamSameDay = (double) 1 / (1 + invigilatorMoreThanThreeExamSameDay(encodedExams));
         double minimumGapBetweenExamsInvigilator = (double) 1 / (1 + minimumGapBetweenExamsInvigilator(encodedExams));
+        double noExamsAtWeekends = (double) 1 / (1 + noExamsAtWeekends(encodedExams));
 
         int n = 4;
         double fitnessScore = n / (
                 1 / studentMoreThanTwoExamSameDay +
                         1 / minimumGapBetweenExamsStudent +
                         1 / invigilatorMoreThanThreeExamSameDay +
-                        1 / minimumGapBetweenExamsInvigilator
+                        1 / minimumGapBetweenExamsInvigilator +
+                        1 / noExamsAtWeekends
 
         );
 
         return new double[]{studentMoreThanTwoExamSameDay, minimumGapBetweenExamsStudent, invigilatorMoreThanThreeExamSameDay,
-                minimumGapBetweenExamsInvigilator,
+                minimumGapBetweenExamsInvigilator, noExamsAtWeekends,
                 fitnessScore};
     }
 
@@ -268,21 +272,7 @@ public class Fitness {
                 timeslots.add(timeslot);
             }
 
-            int length = timeslots.size();
-            for (int i = 0; i < length; i++) {
-                for (int j = i + 1; j < length; j++) {
-                    long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
-                    if (minutes != 0) {
-//                        logger.info("Timeslots overlap for classroom!!!!!!!!!!");
-//                        logger.info("Classroom Code: " + classroom);
-//                        logger.info("Exams: " + assignedExams);
-//                        logger.info(timeslots.get(i));
-//                        logger.info(timeslots.get(j));
-//                        logger.info("Overlapped minutes: " + minutes);
-                        classroomPunishment += (double) minutes / 60;
-                    }
-                }
-            }
+            classroomPunishment = getOverlappedPunishment(classroomPunishment, timeslots);
         }
 
         return classroomPunishment;
@@ -306,23 +296,28 @@ public class Fitness {
                     timeslots.add(new Timeslot(timeslot.getStart().plusHours(beforeExamPrep), timeslot.getEnd().minusHours(afterExamPrep)));
                 }
             }
-            int length = timeslots.size();
-            for (int i = 0; i < length; i++) {
-                for (int j = i + 1; j < length; j++) {
-                    long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
-                    if (minutes != 0) {
+            studentOverlappedPunishment = getOverlappedPunishment(studentOverlappedPunishment, timeslots);
+        }
+        return studentOverlappedPunishment;
+    }
+
+    private double getOverlappedPunishment(double overlappedPunishment, ArrayList<Timeslot> timeslots) {
+        int length = timeslots.size();
+        for (int i = 0; i < length; i++) {
+            for (int j = i + 1; j < length; j++) {
+                long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
+                if (minutes != 0) {
 //                        logger.info("Timeslots overlap for student!!!!!!!!!!");
 //                        logger.info("Student Id: " + studentId);
 //                        logger.info("Exams: " + assignedExams);
 //                        logger.info(timeslots.get(i));
 //                        logger.info(timeslots.get(j));
 //                        logger.info("Overlapped minutes: " + minutes);
-                        studentOverlappedPunishment += (double) minutes / 60;
-                    }
+                    overlappedPunishment += (double) minutes / 60;
                 }
             }
         }
-        return studentOverlappedPunishment;
+        return overlappedPunishment;
     }
 
     public double invigilatorOverlapped() {
@@ -337,21 +332,7 @@ public class Fitness {
                 timeslots.add(timeslot);
             }
 
-            int length = timeslots.size();
-            for (int i = 0; i < length; i++) {
-                for (int j = i + 1; j < length; j++) {
-                    long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
-                    if (minutes != 0) {
-//                        logger.info("Timeslots overlap for invigilator!!!!!!!!!!");
-//                        logger.info("Invigilator Id: " + invigilatorId);
-//                        logger.info("Exams: " + assignedExams);
-//                        logger.info(timeslots.get(i));
-//                        logger.info(timeslots.get(j));
-//                        logger.info("Overlapped minutes: " + minutes);
-                        invigilatorOverlappedPunishment += (double) minutes / 60;
-                    }
-                }
-            }
+            invigilatorOverlappedPunishment = getOverlappedPunishment(invigilatorOverlappedPunishment, timeslots);
 
         }
 
@@ -460,9 +441,9 @@ public class Fitness {
         return allExamsHaveRequiredEquipmentsPunishment;
     }
 
-    public double noExamsWeekendAndHolidays(ArrayList<EncodedExam> chromosome) {
+    public double noExamsInHolidays(ArrayList<EncodedExam> chromosome) {
         // No exam at the weekend or holidays
-        int noExamsWeekendAndHolidaysPunishment = 0;
+        int noExamsHolidaysPunishment = 0;
         Set<LocalDate> holidays = FileHelper.loadHolidaysFromFile();
 
         for (EncodedExam exam : chromosome) {
@@ -470,22 +451,15 @@ public class Fitness {
             LocalDate examDate = startDateTime.toLocalDate();
             DayOfWeek dayOfWeek = examDate.getDayOfWeek();
 
-            // Check if the exam is on a weekend
-            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-//                logger.info("Exam Date: "+ examDate);
-//                logger.info("Exam can not be placed in the weekends");
-                noExamsWeekendAndHolidaysPunishment++;
-            }
-
             // Check if the exam is on a holiday
             if (holidays.contains(examDate)) {
 //                logger.info("Exam Date: "+ examDate);
 //                logger.info("Exam can not be placed in the holidays");
-                noExamsWeekendAndHolidaysPunishment++;
+                noExamsHolidaysPunishment++;
             }
         }
 
-        return noExamsWeekendAndHolidaysPunishment;
+        return noExamsHolidaysPunishment;
     }
 
     public double examStartAndEndDateSame(ArrayList<EncodedExam> chromosome) {
@@ -504,25 +478,169 @@ public class Fitness {
     public double studentMoreThanTwoExamSameDay(ArrayList<EncodedExam> chromosome) {
         // No student should enter more than two exam in one day
         int studentMoreThanTwoExamSameDayPunishment = 0;
+
+        for (String studentId : studentExams.keySet()) {
+            // new hashmap : date - exam count
+            HashMap<LocalDate, Integer> examCountPerDay = new HashMap<>();
+            ArrayList<EncodedExam> assignedExams = studentExams.get(studentId);
+
+            for (EncodedExam exam : assignedExams) {
+                Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+                if (course != null) {
+                    Timeslot timeslot = exam.getTimeSlot();
+                    LocalDate examDay = timeslot.getStart().toLocalDate();
+
+                    if (examCountPerDay.containsKey(examDay)) {
+                        examCountPerDay.put(examDay, examCountPerDay.get(examDay) + 1);
+                    } else {
+                        examCountPerDay.put(examDay, 1);
+                    }
+
+                }
+            }
+            for (int count : examCountPerDay.values()) {
+                if (count > 2) {
+                    studentMoreThanTwoExamSameDayPunishment += count - 2;
+                    //logger.info("Student:" + studentId + " Count:" + count);
+                }
+            }
+
+        }
         return studentMoreThanTwoExamSameDayPunishment;
     }
 
     public double minimumGapBetweenExamsStudent(ArrayList<EncodedExam> chromosome) {
         // If student has more than one exam in the same day , they should have at least 1 hour between
         int minimumGapBetweenExamsStudentPunishment = 0;
+        for (String studentId : studentExams.keySet()) {
+            ArrayList<EncodedExam> assignedExams = studentExams.get(studentId);
+            ArrayList<LocalDateTime> examEndTimes = new ArrayList<>();
+
+            for (EncodedExam exam : assignedExams) {
+                Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+                if (course != null) {
+                    int afterExamPrep = course.getAfterExamPrepTime();
+                    Timeslot timeslot = exam.getTimeSlot();
+                    examEndTimes.add(timeslot.getEnd().minusHours(afterExamPrep));
+                }
+            }
+
+            // Sort exam end times
+            Collections.sort(examEndTimes);
+
+            // Check the gaps between consecutive exams
+            for (int i = 1; i < examEndTimes.size(); i++) {
+                LocalDateTime previousExamEnd = examEndTimes.get(i - 1);
+                LocalDateTime currentExamStart = examEndTimes.get(i);
+
+                // Calculate the gap in hours
+                long gapInMinutes = Duration.between(previousExamEnd, currentExamStart).toMinutes();
+
+                // Add penalty if gap is less than 60 minutes
+                if (gapInMinutes < 60) {
+//                    logger.info(previousExamEnd);
+//                    logger.info(currentExamStart);
+//                    logger.info("The gap for student between consecutive exams is less than 60 minutes, it is: " + gapInMinutes);
+                    minimumGapBetweenExamsStudentPunishment++;
+                }
+            }
+        }
         return minimumGapBetweenExamsStudentPunishment;
     }
 
     public double invigilatorMoreThanThreeExamSameDay(ArrayList<EncodedExam> chromosome) {
         // No invigilator should monitor more than three exam in one day
         int invigilatorMoreThanThreeExamSameDayPunishment = 0;
+
+        for (String invigilatorId : invigilatorExams.keySet()) {
+            // new hashmap : date - exam count
+            HashMap<LocalDate, Integer> examCountPerDay = new HashMap<>();
+            ArrayList<EncodedExam> assignedExams = invigilatorExams.get(invigilatorId);
+
+            for (EncodedExam exam : assignedExams) {
+                Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+                if (course != null) {
+                    Timeslot timeslot = exam.getTimeSlot();
+                    LocalDate examDay = timeslot.getStart().toLocalDate();
+
+                    if (examCountPerDay.containsKey(examDay)) {
+                        examCountPerDay.put(examDay, examCountPerDay.get(examDay) + 1);
+                    } else {
+                        examCountPerDay.put(examDay, 1);
+                    }
+
+                }
+            }
+            //logger.info(examCountPerDay);
+            for (int count : examCountPerDay.values()) {
+                if (count > 3) {
+                    invigilatorMoreThanThreeExamSameDayPunishment += count - 3;
+                    //logger.info("Invigilator:" + invigilatorId + " Count:" + count);
+                }
+            }
+
+        }
+
         return invigilatorMoreThanThreeExamSameDayPunishment;
     }
 
     public double minimumGapBetweenExamsInvigilator(ArrayList<EncodedExam> chromosome) {
         // If student has more than one exam in the same day , they should have at least 1 hour between
         int minimumGapBetweenExamsInvigilatorPunishment = 0;
+
+        for (String invigilatorId : invigilatorExams.keySet()) {
+            ArrayList<EncodedExam> assignedExams = invigilatorExams.get(invigilatorId);
+            ArrayList<LocalDateTime> examEndTimes = new ArrayList<>();
+
+            for (EncodedExam exam : assignedExams) {
+                Timeslot timeslot = exam.getTimeSlot();
+                examEndTimes.add(timeslot.getEnd());
+
+            }
+
+            // Sort exam end times
+            Collections.sort(examEndTimes);
+
+            // Check the gaps between consecutive exams
+            for (int i = 1; i < examEndTimes.size(); i++) {
+                LocalDateTime previousExamEnd = examEndTimes.get(i - 1);
+                LocalDateTime currentExamStart = examEndTimes.get(i);
+
+                // Calculate the gap in hours
+                long gapInMinutes = Duration.between(previousExamEnd, currentExamStart).toMinutes();
+
+                // Add penalty if gap is less than 60 minutes
+                if (gapInMinutes < 30) {
+//                    logger.info(previousExamEnd);
+//                    logger.info(currentExamStart);
+//                    logger.info("The gap for invigilator between consecutive exams is less than 30 minutes, it is: " + gapInMinutes);
+                    minimumGapBetweenExamsInvigilatorPunishment++;
+                }
+            }
+        }
+
         return minimumGapBetweenExamsInvigilatorPunishment;
+    }
+
+    public double noExamsAtWeekends(ArrayList<EncodedExam> chromosome) {
+        // No exam at the weekend
+        int noExamsWeekendPunishment = 0;
+
+        for (EncodedExam exam : chromosome) {
+            LocalDateTime startDateTime = exam.getTimeSlot().getStart();
+            LocalDate examDate = startDateTime.toLocalDate();
+            DayOfWeek dayOfWeek = examDate.getDayOfWeek();
+
+            // Check if the exam is on a weekend
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+//                logger.info("Exam Date: "+ examDate);
+//                logger.info("Exam can not be placed in the weekends");
+                noExamsWeekendPunishment++;
+            }
+
+        }
+
+        return noExamsWeekendPunishment;
     }
 
 }
