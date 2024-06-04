@@ -136,24 +136,28 @@ public class Fitness {
 
     public double[] softConstraintScores(ArrayList<EncodedExam> encodedExams) {
 
-        double studentMoreThanTwoExamSameDay = (double) 1 / (1 + studentMoreThanTwoExamSameDay(encodedExams));
-        double minimumGapBetweenExamsStudent = (double) 1 / (1 + minimumGapBetweenExamsStudent(encodedExams));
-        double invigilatorMoreThanThreeExamSameDay = (double) 1 / (1 + invigilatorMoreThanThreeExamSameDay(encodedExams));
-        double minimumGapBetweenExamsInvigilator = (double) 1 / (1 + minimumGapBetweenExamsInvigilator(encodedExams));
+        double studentMoreThanTwoExamSameDay = (double) 1 / (1 + studentMoreThanTwoExamSameDay());
+        double minimumGapBetweenExamsStudent = (double) 1 / (1 + minimumGapBetweenExamsStudent());
+        double invigilatorMoreThanThreeExamSameDay = (double) 1 / (1 + invigilatorMoreThanThreeExamSameDay());
+        double minimumGapBetweenExamsInvigilator = (double) 1 / (1 + minimumGapBetweenExamsInvigilator());
         double noExamsAtWeekends = (double) 1 / (1 + noExamsAtWeekends(encodedExams));
+        double examsNotInAfternoon = (double) 1 / (1 + examsNotInAfternoon());
+        double popularExamsAtBeginning = (double) 1 / (1 + popularExamsAtBeginning(encodedExams));
 
-        int n = 4;
+        int n = 7;
         double fitnessScore = n / (
                 1 / studentMoreThanTwoExamSameDay +
                         1 / minimumGapBetweenExamsStudent +
                         1 / invigilatorMoreThanThreeExamSameDay +
                         1 / minimumGapBetweenExamsInvigilator +
-                        1 / noExamsAtWeekends
+                        1 / noExamsAtWeekends +
+                        1 / examsNotInAfternoon +
+                        1 / popularExamsAtBeginning
 
         );
 
         return new double[]{studentMoreThanTwoExamSameDay, minimumGapBetweenExamsStudent, invigilatorMoreThanThreeExamSameDay,
-                minimumGapBetweenExamsInvigilator, noExamsAtWeekends,
+                minimumGapBetweenExamsInvigilator, noExamsAtWeekends, examsNotInAfternoon, popularExamsAtBeginning,
                 fitnessScore};
     }
 
@@ -475,7 +479,7 @@ public class Fitness {
 
 
     // Soft Constraints
-    public double studentMoreThanTwoExamSameDay(ArrayList<EncodedExam> chromosome) {
+    public double studentMoreThanTwoExamSameDay() {
         // No student should enter more than two exam in one day
         int studentMoreThanTwoExamSameDayPunishment = 0;
 
@@ -509,7 +513,7 @@ public class Fitness {
         return studentMoreThanTwoExamSameDayPunishment;
     }
 
-    public double minimumGapBetweenExamsStudent(ArrayList<EncodedExam> chromosome) {
+    public double minimumGapBetweenExamsStudent() {
         // If student has more than one exam in the same day , they should have at least 1 hour between
         int minimumGapBetweenExamsStudentPunishment = 0;
         for (String studentId : studentExams.keySet()) {
@@ -548,7 +552,7 @@ public class Fitness {
         return minimumGapBetweenExamsStudentPunishment;
     }
 
-    public double invigilatorMoreThanThreeExamSameDay(ArrayList<EncodedExam> chromosome) {
+    public double invigilatorMoreThanThreeExamSameDay() {
         // No invigilator should monitor more than three exam in one day
         int invigilatorMoreThanThreeExamSameDayPunishment = 0;
 
@@ -584,7 +588,7 @@ public class Fitness {
         return invigilatorMoreThanThreeExamSameDayPunishment;
     }
 
-    public double minimumGapBetweenExamsInvigilator(ArrayList<EncodedExam> chromosome) {
+    public double minimumGapBetweenExamsInvigilator() {
         // If student has more than one exam in the same day , they should have at least 1 hour between
         int minimumGapBetweenExamsInvigilatorPunishment = 0;
 
@@ -643,4 +647,98 @@ public class Fitness {
         return noExamsWeekendPunishment;
     }
 
+    // Remaining Soft Constraints
+    // Advanced :
+    // * Invigilators' preferred time slots should be allocated accordingly.
+    // * If 2 exams are to be taken in the same day, these two exams should not be difficult courses
+    // with high credits. one of the exams on the same day should be easy and one difficult,
+    // or both should be easy.
+    // * High-scoring courses should not take place on consecutive days.
+    // * In cases where the course has a high number of credits, the exams for that course should be
+    // taken at the end of the exam schedule as much as possible. This gives students more time to
+    // study for difficult exams.
+
+    public double examsNotInAfternoon() {
+        // Most examinations should take place in the afternoon, when students' perceptions are normally most open.
+
+        double afternoonPunishment = 0;
+
+        LocalTime afternoonStart = LocalTime.of(12, 0);
+        LocalTime afternoonEnd = LocalTime.of(18, 0);
+
+        int totalExams = 0;
+        int afternoonExams = 0;
+
+        for (String studentId : studentExams.keySet()) {
+
+            ArrayList<EncodedExam> assignedExams = studentExams.get(studentId);
+
+            for (EncodedExam exam : assignedExams) {
+                Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+                if (course != null) {
+                    int beforeExamPrep = course.getBeforeExamPrepTime();
+                    Timeslot timeslot = exam.getTimeSlot();
+                    LocalTime examStartTime = timeslot.getStart().plusHours(beforeExamPrep).toLocalTime();
+                    totalExams++;
+
+                    if (!examStartTime.isBefore(afternoonStart) && !examStartTime.isAfter(afternoonEnd)) {
+                        afternoonExams++;
+                    }
+                }
+
+            }
+        }
+
+        double afternoonProportion = (double) afternoonExams / totalExams;
+        double desiredAfternoonProportion = 0.7;
+
+        if (afternoonProportion < desiredAfternoonProportion) {
+            //logger.info("Proportion is not enough: " + afternoonProportion);
+            double difference = Math.abs(desiredAfternoonProportion - afternoonProportion);
+            afternoonPunishment += difference * 10;
+        }
+        return afternoonPunishment;
+    }
+
+    public double popularExamsAtBeginning(ArrayList<EncodedExam> chromosome) {
+        // The lessons that most students have chosen should take place at the beginning of the
+        // exam timetable. This gives the teacher enough time to assess the exams.
+        // this function can be executed when there is more than 30 students for an exam?
+        LocalDate examPeriodStart = startDate;
+        LocalDate examPeriodThreshold = examPeriodStart.plusDays(4); // first 4 days
+
+        HashMap<String, Integer> examPopularity = new HashMap<>();
+        for (String studentId : studentExams.keySet()) {
+            ArrayList<EncodedExam> assignedExams = studentExams.get(studentId);
+            for (EncodedExam exam : assignedExams) {
+                String courseCode = exam.getCourseCode();
+                examPopularity.put(courseCode, examPopularity.getOrDefault(courseCode, 0) + 1);
+            }
+        }
+
+        ArrayList<HashMap.Entry<String, Integer>> sortedExams = new ArrayList<>(examPopularity.entrySet());
+        sortedExams.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())); // Descending order
+        //logger.info(sortedExams);
+        int numberOfPopularExams = 5; //  top 5 popular exams
+        ArrayList<String> popularExams = new ArrayList<>();
+        for (int i = 0; i < Math.min(numberOfPopularExams, sortedExams.size()); i++) {
+            popularExams.add(sortedExams.get(i).getKey());
+        }
+
+        // Calculate the penalty for popular exams not being at the beginning
+        int popularExamsNotAtBeginningPunishment = 0;
+        for (EncodedExam exam : chromosome) {
+            if (popularExams.contains(exam.getCourseCode())) {
+                Timeslot timeslot = exam.getTimeSlot();
+                if (timeslot.getStart().toLocalDate().isAfter(examPeriodThreshold)) {
+                    popularExamsNotAtBeginningPunishment++;
+                    //logger.info("Popular Exam that is not in the first 4 days: " + exam.getCourseCode());
+                    //logger.info("Timeslot : " + timeslot);
+
+                }
+            }
+        }
+
+        return popularExamsNotAtBeginningPunishment;
+    }
 }
