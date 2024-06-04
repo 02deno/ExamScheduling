@@ -227,12 +227,12 @@ public class Fitness {
                 int differenceStudent = Math.abs((examTimeslotCount - (course.getBeforeExamPrepTime() + course.getAfterExamPrepTime())) - timeslotCountForStudent);
                 requiredTimeslotPunishment += differenceInvigilator;
                 requiredTimeslotPunishment += differenceStudent;
-                if (differenceInvigilator != 0) {
-                    //logger.info("This is not the required time for invigilator");
-                }
-                if (differenceStudent != 0) {
-                    //logger.info("This is not the required time for student");
-                }
+//                if (differenceInvigilator != 0) {
+//                    logger.info("This is not the required time for invigilator");
+//                }
+//                if (differenceStudent != 0) {
+//                    //logger.info("This is not the required time for student");
+//                }
             }
         }
         return requiredTimeslotPunishment;
@@ -253,12 +253,12 @@ public class Fitness {
                 int requiredInvigilator = capacity < 20 ? 1 : capacity < 75 ? 2 : (capacity < 150 ? 3 : 4);
                 int difference = Math.abs(requiredInvigilator - invigilatorCount);
                 invigilatorCountPunishment += difference;
-                if (difference != 0) {
+//                if (difference != 0) {
 //                    logger.info("The invigilator count is missing :(");
 //                    logger.info("Course: " + course);
 //                    logger.info("Required invigilator count: " + requiredInvigilator);
 //                    logger.info("Current invigilator count: " + invigilatorCount);
-                }
+//                }
             }
         }
         return invigilatorCountPunishment;
@@ -453,7 +453,6 @@ public class Fitness {
         for (EncodedExam exam : chromosome) {
             LocalDateTime startDateTime = exam.getTimeSlot().getStart();
             LocalDate examDate = startDateTime.toLocalDate();
-            DayOfWeek dayOfWeek = examDate.getDayOfWeek();
 
             // Check if the exam is on a holiday
             if (holidays.contains(examDate)) {

@@ -160,9 +160,8 @@ public class RandomDataGenerator {
 
     public static Schedule generateSchedule(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, int interval) {
 
-        Schedule schedule = new Schedule(startDate, endDate, startTime, endTime, interval);
         //logger.info("Max Time Slots: " + schedule.calculateMaxTimeSlots());
-        return schedule;
+        return new Schedule(startDate, endDate, startTime, endTime, interval);
     }
 
 
