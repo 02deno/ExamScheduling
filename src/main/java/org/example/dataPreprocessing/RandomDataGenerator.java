@@ -35,6 +35,8 @@ public class RandomDataGenerator {
     *  classrooms that can contain more than 400 students.
     *
     * TODO(Deniz) : Add constraints like number of classroom that can be chosen.
+     *
+     * TODO(Deniz) : Add credit information to the courses randomly
     * */
 
     private static final Logger logger = LogManager.getLogger(RandomDataGenerator.class);
@@ -158,9 +160,8 @@ public class RandomDataGenerator {
 
     public static Schedule generateSchedule(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, int interval) {
 
-        Schedule schedule = new Schedule(startDate, endDate, startTime, endTime, interval);
         //logger.info("Max Time Slots: " + schedule.calculateMaxTimeSlots());
-        return schedule;
+        return new Schedule(startDate, endDate, startTime, endTime, interval);
     }
 
 

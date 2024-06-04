@@ -18,7 +18,6 @@ public class FileHelper {
 
     private static final Logger logger = LogManager.getLogger(FileHelper.class);
     public static final String holidayFilePath = "data/holidays.json";
-    private static int population_number = 1;
 
     public static void deleteFolderContents(File folder) {
         boolean result = false;
@@ -45,44 +44,61 @@ public class FileHelper {
         }
     }
 
-    public static void writeFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
+    public static void writeHardFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            String[] header = {"Exam id", "Population Number", "allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
+            String[] header = {"Exam id", "allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
                     "allExamsHaveClassrooms", "classroomsHasCapacity", "invigilatorOverlapped",
                     "studentOverlapped", "invigilatorAvailable", "startAndEndTimeDateViolated",
-                    "allExamsHaveRequiredEquipments", "noExamsWeekendAndHolidays", "examStartAndEndDateSame",
+                    "allExamsHaveRequiredEquipments", "noExamsHolidays", "examStartAndEndDateSame",
                     "fitnessScore"};
-            for (int i = 0; i < header.length; i++) {
-                writer.write(header[i]);
-                // Add comma if it's not the last header element
-                if (i < header.length - 1) {
-                    writer.write(",");
-                }
-            }
-            writer.write("\n");
-            int id = 1;
-            for (double[] row : scoresList) {
-                writer.write(Integer.toString(id++));
-                writer.write(",");
-                writer.write(Integer.toString(population_number));
-                writer.write(",");
-                // Write scores as a new row, separated by commas
-                for (int i = 0; i < row.length; i++) {
-                    writer.write(Double.toString(row[i]));
-                    // Add comma if it's not the last score
-                    if (i < row.length - 1) {
-                        writer.write(",");
-                    }
-                }
-                // Add new line after each row
-                writer.write("\n");
-            }
-            population_number++;
-            logger.info("Rows appended to CSV file: " + filePath);
+            fitnessTableGenerator(scoresList, filePath, header, writer);
         } catch (IOException e) {
             logger.error("Error appending rows to CSV file: " + e.getMessage());
         }
 
+    }
+
+    public static void writeSoftFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
+
+        String[] header = {"Exam id", "studentMoreThanTwoExamSameDay",
+                "minimumGapBetweenExamsStudent", "invigilatorMoreThanThreeExamSameDay",
+                "minimumGapBetweenExamsInvigilator", "noExamsAtWeekends", "examsNotInAfternoon",
+                "popularExamsAtBeginning",
+                "fitnessScore"};
+
+        try (FileWriter writer = new FileWriter(filePath, true)) {
+            fitnessTableGenerator(scoresList, filePath, header, writer);
+        } catch (IOException e) {
+            logger.error("Error appending rows to CSV file: " + e.getMessage());
+        }
+
+    }
+
+    private static void fitnessTableGenerator(ArrayList<double[]> scoresList, String filePath, String[] header, FileWriter writer) throws IOException {
+        for (int i = 0; i < header.length; i++) {
+            writer.write(header[i]);
+            // Add comma if it's not the last header element
+            if (i < header.length - 1) {
+                writer.write(",");
+            }
+        }
+        writer.write("\n");
+        int id = 1;
+        for (double[] row : scoresList) {
+            writer.write(Integer.toString(id++));
+            writer.write(",");
+            // Write scores as a new row, separated by commas
+            for (int i = 0; i < row.length; i++) {
+                writer.write(Double.toString(row[i]));
+                // Add comma if it's not the last score
+                if (i < row.length - 1) {
+                    writer.write(",");
+                }
+            }
+            // Add new line after each row
+            writer.write("\n");
+        }
+        logger.info("Rows appended to CSV file: " + filePath);
     }
 
     public static void saveHolidaysToFile() {

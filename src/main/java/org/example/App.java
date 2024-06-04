@@ -3,7 +3,6 @@ package org.example;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
-import org.example.utils.FileHelper;
 
 import java.io.File;
 
@@ -18,11 +17,6 @@ public class App
         int wantedExamScheduleCount = 3;
         String folderPath = "graphs/";
         deleteFolderContents(new File(folderPath));
-
-        File holidaysFile = new File(FileHelper.holidayFilePath);
-        if (!holidaysFile.exists()) {
-            FileHelper.saveHolidaysToFile();
-        }
 
         logger.info("Application started...");
 
