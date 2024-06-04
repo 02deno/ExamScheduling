@@ -8,6 +8,7 @@ import org.example.geneticAlgorithm.operators.*;
 import org.example.models.*;
 import org.example.utils.*;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -45,7 +46,8 @@ public class GeneticAlgorithm {
     private LocalTime startTime;
     private LocalTime endTime;
     private int interval;
-    private HashMap<ArrayList<EncodedExam>, Double> fitnessScores = new HashMap<>();
+    private HashMap<ArrayList<EncodedExam>, Double> hardConstraintFitnessScores = new HashMap<>();
+    private HashMap<ArrayList<EncodedExam>, Double> softConstraintFitnessScores = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
     private ArrayList<ArrayList<EncodedExam>> parents = new ArrayList<>();
 
@@ -82,11 +84,15 @@ public class GeneticAlgorithm {
         this.students = DataStructureHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
         logger.info("heuristicMapCoursesWithStudents finished.");
 
+        File holidaysFile = new File(FileHelper.holidayFilePath);
+        if (!holidaysFile.exists()) {
+            FileHelper.saveHolidaysToFile();
+        }
 
     }
 
     public void initializationAndEncode() {
-        int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
+        int populationSize = Integer.parseInt(ConfigHelper.getProperty("CHROMOSOME_COUNT"));
         for (int i = 0; i < populationSize; i++) {
 
             //logger.info("Population " + i);
@@ -198,26 +204,40 @@ public class GeneticAlgorithm {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
         Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
-        ArrayList<double[]> scoresList = new ArrayList<>();
+        ArrayList<double[]> hardConstraintScoresList = new ArrayList<>();
+        ArrayList<double[]> softConstraintScoresList = new ArrayList<>();
         for (ArrayList<EncodedExam> chromosome : population) {
-            double[] scores = fitness.fitnessScore(chromosome);
-            scoresList.add(scores);
-            double fitnessScore = scores[scores.length - 1];
-            fitnessScores.put(chromosome, fitnessScore);
+            double[][] scores = fitness.fitnessScore(chromosome);
+            double[] hardConstraintScores = scores[0];
+            double[] softConstraintScores = scores[1];
+
+            hardConstraintScoresList.add(hardConstraintScores);
+            softConstraintScoresList.add(softConstraintScores);
+
+            double hardFitnessScore = hardConstraintScores[hardConstraintScores.length - 1];
+            hardConstraintFitnessScores.put(chromosome, hardFitnessScore);
+            double softFitnessScore = softConstraintScores[softConstraintScores.length - 1];
+            softConstraintFitnessScores.put(chromosome, softFitnessScore);
+
         }
 
-        // sort this hashmap based on fitness scores
-        fitnessScores = sortByValueDescending(fitnessScores);
+        // sort hashmaps based on fitness scores, this tables only contain fitness scores
+        hardConstraintFitnessScores = sortByValueDescending(hardConstraintFitnessScores);
+        softConstraintFitnessScores = sortByValueDescending(softConstraintFitnessScores);
+
         // visualize
-        for (ArrayList<EncodedExam> chromosome : fitnessScores.keySet()) {
-            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
-        }
-        FileHelper.writeFitnessScoresToFile(scoresList, "graphs/fitness_scores.csv");
+//        for (ArrayList<EncodedExam> chromosome : hardConstraintFitnessScores.keySet()) {
+//            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + hardConstraintFitnessScores.get(chromosome));
+//        }
+
+        // this tables contain all the fitness function scores
+        FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, "graphs/fitness_scores_HARD.csv");
+        FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, "graphs/fitness_scores_SOFT.csv");
     }
 
     public void selectParents() {
         Selection selection = new Selection();
-        parents = selection.rouletteWheelSelection(this.fitnessScores);
+        parents = selection.rouletteWheelSelection(this.hardConstraintFitnessScores);
     }
 
     public void crossover() {

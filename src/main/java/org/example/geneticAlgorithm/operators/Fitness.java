@@ -85,10 +85,15 @@ public class Fitness {
         this.endTime = endTime;
     }
 
-    public double[] fitnessScore(ArrayList<EncodedExam> encodedExams) {
+    public double[][] fitnessScore(ArrayList<EncodedExam> encodedExams) {
 
         prepareDataForFitness(encodedExams);
+        double[] hardConstraintScores = hardConstraintScores(encodedExams);
+        double[] softConstraintScores = softConstraintScores(encodedExams);
+        return new double[][]{hardConstraintScores, softConstraintScores};
+    }
 
+    public double[] hardConstraintScores(ArrayList<EncodedExam> encodedExams) {
         double allExamsHaveRequiredTime = (double) 1 / (1 + allExamsHaveRequiredTime(encodedExams));
         double allExamHaveRequiredInvigilatorCount = (double) 1 / (1 + allExamHaveRequiredInvigilatorCount(encodedExams));
         double classroomOverlapped = (double) 1 / (1 + classroomOverlapped());
@@ -126,6 +131,28 @@ public class Fitness {
                 allExamsHaveRequiredEquipments, noExamsWeekendAndHolidays, examStartAndEndDateSame,
                 fitnessScore};
     }
+
+    public double[] softConstraintScores(ArrayList<EncodedExam> encodedExams) {
+
+        double studentMoreThanTwoExamSameDay = (double) 1 / (1 + studentMoreThanTwoExamSameDay(encodedExams));
+        double minimumGapBetweenExamsStudent = (double) 1 / (1 + minimumGapBetweenExamsStudent(encodedExams));
+        double invigilatorMoreThanThreeExamSameDay = (double) 1 / (1 + invigilatorMoreThanThreeExamSameDay(encodedExams));
+        double minimumGapBetweenExamsInvigilator = (double) 1 / (1 + minimumGapBetweenExamsInvigilator(encodedExams));
+
+        int n = 4;
+        double fitnessScore = n / (
+                1 / studentMoreThanTwoExamSameDay +
+                        1 / minimumGapBetweenExamsStudent +
+                        1 / invigilatorMoreThanThreeExamSameDay +
+                        1 / minimumGapBetweenExamsInvigilator
+
+        );
+
+        return new double[]{studentMoreThanTwoExamSameDay, minimumGapBetweenExamsStudent, invigilatorMoreThanThreeExamSameDay,
+                minimumGapBetweenExamsInvigilator,
+                fitnessScore};
+    }
+
 
     private void prepareDataForFitness(ArrayList<EncodedExam> chromosome) {
 
