@@ -40,10 +40,8 @@ public class Selection {
 
     public ArrayList<ArrayList<EncodedExam>> rouletteWheelSelection(HashMap<ArrayList<EncodedExam>, Double> fitnessScores) {
         int i = 0;
-        /*
-        * TODO: i <= pop.size/2
-         */
-        while (i <= 2){
+
+        while (i <= populationSize/2){
             double totalScore = 0;
             for (Double fitnessScore : fitnessScores.values()) {
                 totalScore += fitnessScore;

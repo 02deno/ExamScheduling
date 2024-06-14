@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Encode {
 
-    public static ArrayList<EncodedExam> encodeOperator(ArrayList<Exam> exams) {
+    public static ArrayList<EncodedExam> encode(ArrayList<Exam> exams) {
 
         ArrayList<EncodedExam> encodedExamList = new ArrayList<>();
         for (Exam exam: exams) {

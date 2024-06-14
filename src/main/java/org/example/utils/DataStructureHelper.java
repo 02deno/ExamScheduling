@@ -38,6 +38,21 @@ public class DataStructureHelper {
         return result;
     }
 
+    public static <K, V extends Comparable<? super V>> HashMap<K, V> sortByValueAscending(HashMap<K, V> map) {
+        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+
+        // Sort the list based on values in descending order
+        list.sort(Map.Entry.comparingByValue());
+
+        // Create a LinkedHashMap to maintain the order of sorted entries
+        HashMap<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+
+        return result;
+    }
+
     public static Comparator<EncodedExam> sortExamsByCourseCode() {
         return (exam1, exam2) -> exam1.getCourseCode().compareTo(exam2.getCourseCode());
     }
