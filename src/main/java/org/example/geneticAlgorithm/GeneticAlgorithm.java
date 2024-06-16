@@ -250,13 +250,13 @@ public class GeneticAlgorithm {
         FileHelper.writeFitnessScoresToFile(fitnessScoresList, "graphs/fitness_scores.csv");
     }
     public double findBestFitnessScore() {
-        return Collections.max(hardConstraintFitnessScores.values());
+        return Collections.max(fitnessScores.values());
     }
 
     public void selectParents() {
         calculateFitness();
         Selection selection = new Selection();
-        parents = selection.rouletteWheelSelection(this.hardConstraintFitnessScores);
+        parents = selection.rouletteWheelSelection(this.fitnessScores);
     }
 
     public ArrayList<ArrayList<EncodedExam>> crossover() {
@@ -266,14 +266,14 @@ public class GeneticAlgorithm {
 
     public void mutation() {
         Mutation mutation = new Mutation();
-        mutation.mutation(this.hardConstraintFitnessScores, population);
+        mutation.mutation(this.fitnessScores, population);
     }
 
     public void replacement(int currentGeneration, int childChromosomesSize) {
         Replacement replacement = new Replacement();
         logger.info(population);
         if (currentGeneration == 1) {
-            replacement.fitnessBasedReplacement(this.hardConstraintFitnessScores, childChromosomesSize, population);
+            replacement.fitnessBasedReplacement(this.fitnessScores, childChromosomesSize, population);
         } else {
             replacement.ageBasedReplacement(chromosomeAgesMap, childChromosomesSize, population);
         }
