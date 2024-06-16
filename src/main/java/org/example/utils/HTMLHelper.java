@@ -331,7 +331,7 @@ public class HTMLHelper {
         htmlContent.append("</tr>");
 
         StringBuilder courseCodesHTML = new StringBuilder();
-        Comparator<EncodedExam> comparator = DataStructureHelper.sortExamsByCourseCode();
+        Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
         exams.sort(comparator);
 
         Timeslot timeslot = null;

@@ -3,6 +3,7 @@ package org.example;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
+import org.example.models.Chromosome;
 import org.example.models.EncodedExam;
 import org.example.utils.ConfigHelper;
 
@@ -28,8 +29,8 @@ public class App
         logger.info("Application started...");
 
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-        ArrayList<ArrayList<EncodedExam>> population;
-        ArrayList<ArrayList<EncodedExam>> childChromosomes;
+        ArrayList<Chromosome> population;
+        ArrayList<Chromosome> childChromosomes;
 
         geneticAlgorithm.generateData();
         population = geneticAlgorithm.initializationAndEncode();
@@ -38,7 +39,7 @@ public class App
         while(currentGeneration < maxGenerations && generationsWithoutImprovement < 5){//değiştirilebilir
             currentGeneration += 1;
 
-            geneticAlgorithm.setAgeToChromosomes(population);
+            geneticAlgorithm.updateAgesOfChromosomes();
             geneticAlgorithm.visualization(wantedExamScheduleCount);
             double bestFitnessScore = geneticAlgorithm.findBestFitnessScore();
 
