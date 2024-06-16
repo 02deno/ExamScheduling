@@ -3,8 +3,12 @@ package org.example;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
+import org.example.models.EncodedExam;
+import org.example.utils.ConfigHelper;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import static org.example.utils.FileHelper.deleteFolderContents;
 
@@ -17,16 +21,45 @@ public class App
         int wantedExamScheduleCount = 3;
         String folderPath = "graphs/";
         deleteFolderContents(new File(folderPath));
+        int currentGeneration = 0;
+        int generationsWithoutImprovement = 0;
+        int maxGenerations = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
 
         logger.info("Application started...");
 
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
+        ArrayList<ArrayList<EncodedExam>> population;
+        ArrayList<ArrayList<EncodedExam>> childChromosomes;
+
         geneticAlgorithm.generateData();
-        geneticAlgorithm.initializationAndEncode();
-        geneticAlgorithm.visualization(wantedExamScheduleCount);
+        population = geneticAlgorithm.initializationAndEncode();
         geneticAlgorithm.calculateFitness();
-        geneticAlgorithm.selectParents();
-        geneticAlgorithm.crossover();
+
+        while(currentGeneration < maxGenerations && generationsWithoutImprovement < 5){//değiştirilebilir
+            currentGeneration += 1;
+
+            geneticAlgorithm.setAgeToChromosomes(population);
+            geneticAlgorithm.visualization(wantedExamScheduleCount);
+            double bestFitnessScore = geneticAlgorithm.findBestFitnessScore();
+
+            geneticAlgorithm.selectParents();
+            childChromosomes = geneticAlgorithm.crossover();
+            geneticAlgorithm.mutation();
+            geneticAlgorithm.replacement(currentGeneration, childChromosomes.size());
+            population.addAll(childChromosomes);
+
+            geneticAlgorithm.calculateFitness();
+            double lastBestFitnessScore = geneticAlgorithm.findBestFitnessScore();
+            logger.info("bestFitnessScore: " + bestFitnessScore);
+            logger.info("lastBestFitnessScore: " + lastBestFitnessScore);
+
+            if (lastBestFitnessScore <= bestFitnessScore) {
+                generationsWithoutImprovement += 1;
+            } else {
+                generationsWithoutImprovement = 0;
+            }
+        }
+
 
         long endTime = System.currentTimeMillis();
         long durationMs = endTime - startTime;

@@ -50,6 +50,9 @@ public class GeneticAlgorithm {
     private HashMap<ArrayList<EncodedExam>, Double> softConstraintFitnessScores = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
     private ArrayList<ArrayList<EncodedExam>> parents = new ArrayList<>();
+    double bestFitnessScore;
+    int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
+    private HashMap<ArrayList<EncodedExam>, Integer> chromosomeAgesMap = new HashMap<>();
 
 
     public void generateData() {
@@ -91,8 +94,8 @@ public class GeneticAlgorithm {
 
     }
 
-    public void initializationAndEncode() {
-        int populationSize = Integer.parseInt(ConfigHelper.getProperty("CHROMOSOME_COUNT"));
+    public ArrayList<ArrayList<EncodedExam>> initializationAndEncode() {
+        int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
         for (int i = 0; i < populationSize; i++) {
 
             //logger.info("Population " + i);
@@ -135,10 +138,11 @@ public class GeneticAlgorithm {
             this.populationForVisualization.add(new HashMap<>(chromosomeForVisualization));
             reset();
         }
+        return population;
     }
 
     public void encode() {
-        this.encodedExams = Encode.encodeOperator(this.exams);
+        this.encodedExams = Encode.encode(this.exams);
         this.chromosome = encodedExams;
         this.population.add(chromosome);
         logger.info("Encode is finished.");
@@ -155,7 +159,7 @@ public class GeneticAlgorithm {
             Random rand = new Random();
             int n = rand.nextInt(populationForVisualization.size());
             HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
-            ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encodeOperator(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class));
+            ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encode(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class));
             HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, "Exam Schedule-" + n + " for Invigilators");
 
             ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
@@ -166,7 +170,7 @@ public class GeneticAlgorithm {
                     int afterExam = course.getAfterExamPrepTime();
                     Timeslot combinedTimeslot = encodedExam.getTimeSlot();
                     Timeslot examTimeslot = new Timeslot(combinedTimeslot.getStart().plusHours(beforeExam), combinedTimeslot.getEnd().minusHours(afterExam));
-                    randomExamScheduleForStudents.add(new EncodedExam( encodedExam.getCourseCode(),
+                    randomExamScheduleForStudents.add(new EncodedExam(encodedExam.getCourseCode(),
                             encodedExam.getClassroomCode(),
                             examTimeslot,
                             encodedExam.getInvigilators()));
@@ -234,14 +238,42 @@ public class GeneticAlgorithm {
         FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, "graphs/fitness_scores_HARD.csv");
         FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, "graphs/fitness_scores_SOFT.csv");
     }
+    public double findBestFitnessScore() {
+        return Collections.max(hardConstraintFitnessScores.values());
+    }
 
     public void selectParents() {
+        calculateFitness();
         Selection selection = new Selection();
         parents = selection.rouletteWheelSelection(this.hardConstraintFitnessScores);
     }
 
-    public void crossover() {
+    public ArrayList<ArrayList<EncodedExam>> crossover() {
         Crossover crossover = new Crossover();
-        crossover.onePointCrossover(parents);
+        return crossover.onePointCrossover(parents);
+    }
+
+    public void mutation() {
+        Mutation mutation = new Mutation();
+        mutation.mutation(this.hardConstraintFitnessScores, population);
+    }
+
+    public void replacement(int currentGeneration, int childChromosomesSize) {
+        Replacement replacement = new Replacement();
+        logger.info(population);
+        if (currentGeneration == 1) {
+            replacement.fitnessBasedReplacement(this.hardConstraintFitnessScores, childChromosomesSize, population);
+        } else {
+            replacement.ageBasedReplacement(chromosomeAgesMap, childChromosomesSize, population);
+        }
+        logger.info(population);
+        logger.info("");
+
+    }
+
+    public void setAgeToChromosomes(ArrayList<ArrayList<EncodedExam>> chromosomeList) {
+        for (ArrayList<EncodedExam> chromosome: chromosomeList) {
+            chromosomeAgesMap.put(chromosome, chromosomeAgesMap.getOrDefault(chromosome, 0) + 1);
+        }
     }
 }
