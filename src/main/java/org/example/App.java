@@ -9,7 +9,6 @@ import org.example.utils.ConfigHelper;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static org.example.utils.FileHelper.deleteFolderContents;
 
@@ -25,6 +24,7 @@ public class App
         int currentGeneration = 0;
         int generationsWithoutImprovement = 0;
         int maxGenerations = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
+        int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
 
         logger.info("Application started...");
 
@@ -36,7 +36,7 @@ public class App
         population = geneticAlgorithm.initializationAndEncode();
         geneticAlgorithm.calculateFitness();
 
-        while(currentGeneration < maxGenerations && generationsWithoutImprovement < 5){//değiştirilebilir
+        while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
             currentGeneration += 1;
 
             geneticAlgorithm.updateAgesOfChromosomes();

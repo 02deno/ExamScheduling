@@ -2,6 +2,7 @@ package org.example.geneticAlgorithm.operators;
 
 import org.example.models.Chromosome;
 import org.example.models.EncodedExam;
+import org.example.utils.ConfigHelper;
 import org.example.utils.DataStructureHelper;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.Random;
 public class Crossover {
 
     private Random random = new Random();
-    private final double crossoverRate = 0.7;
+    private final double crossoverRate = Double.parseDouble(ConfigHelper.getProperty("CROSSOVER_RATE"));
     Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
 
 
