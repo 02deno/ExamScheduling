@@ -10,6 +10,9 @@ import junit.framework.TestSuite;
 public class AppTest 
     extends TestCase
 {
+
+    // TODO(Deniz) : What can we add here to enhance our algorithm?
+
     /**
      * Create the test case
      *

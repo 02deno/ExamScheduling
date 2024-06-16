@@ -29,6 +29,9 @@ public class GeneticAlgorithm {
     // TODO(Deniz) : Chromosome and Population classes can be avoid to
     //  reduce complexity
 
+    // TODO(Deniz) : Add a diversity calculator, it should calculate the
+    //  diversity of a chromosom
+
     private ArrayList<Course> courses = new ArrayList<>();
     private ArrayList<Invigilator> invigilators = new ArrayList<>();
     private ArrayList<Classroom> classrooms = new ArrayList<>();
@@ -48,6 +51,7 @@ public class GeneticAlgorithm {
     private int interval;
     private HashMap<ArrayList<EncodedExam>, Double> hardConstraintFitnessScores = new HashMap<>();
     private HashMap<ArrayList<EncodedExam>, Double> softConstraintFitnessScores = new HashMap<>();
+    private HashMap<ArrayList<EncodedExam>, Double> fitnessScores = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
     private ArrayList<ArrayList<EncodedExam>> parents = new ArrayList<>();
     double bestFitnessScore;
@@ -210,33 +214,40 @@ public class GeneticAlgorithm {
         Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
         ArrayList<double[]> hardConstraintScoresList = new ArrayList<>();
         ArrayList<double[]> softConstraintScoresList = new ArrayList<>();
+        ArrayList<Double> fitnessScoresList = new ArrayList<>();
+
         for (ArrayList<EncodedExam> chromosome : population) {
             double[][] scores = fitness.fitnessScore(chromosome);
             double[] hardConstraintScores = scores[0];
             double[] softConstraintScores = scores[1];
+            double fitnessScore = scores[2][0];
 
             hardConstraintScoresList.add(hardConstraintScores);
             softConstraintScoresList.add(softConstraintScores);
+            fitnessScoresList.add(fitnessScore);
 
             double hardFitnessScore = hardConstraintScores[hardConstraintScores.length - 1];
             hardConstraintFitnessScores.put(chromosome, hardFitnessScore);
             double softFitnessScore = softConstraintScores[softConstraintScores.length - 1];
             softConstraintFitnessScores.put(chromosome, softFitnessScore);
+            fitnessScores.put(chromosome, fitnessScore);
 
         }
 
         // sort hashmaps based on fitness scores, this tables only contain fitness scores
         hardConstraintFitnessScores = sortByValueDescending(hardConstraintFitnessScores);
         softConstraintFitnessScores = sortByValueDescending(softConstraintFitnessScores);
+        fitnessScores = sortByValueDescending(fitnessScores);
 
         // visualize
-//        for (ArrayList<EncodedExam> chromosome : hardConstraintFitnessScores.keySet()) {
-//            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + hardConstraintFitnessScores.get(chromosome));
-//        }
+        for (ArrayList<EncodedExam> chromosome : fitnessScores.keySet()) {
+            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
+        }
 
         // this tables contain all the fitness function scores
         FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, "graphs/fitness_scores_HARD.csv");
         FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, "graphs/fitness_scores_SOFT.csv");
+        FileHelper.writeFitnessScoresToFile(fitnessScoresList, "graphs/fitness_scores.csv");
     }
     public double findBestFitnessScore() {
         return Collections.max(hardConstraintFitnessScores.values());

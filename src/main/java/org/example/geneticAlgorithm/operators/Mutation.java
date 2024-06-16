@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.models.EncodedExam;
 import org.example.models.Timeslot;
+import org.example.utils.ConfigHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,11 +22,11 @@ public class Mutation {
      * if fitness value of a chromosome >=, set low mutation rate
      */
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
-    private Map<ArrayList<EncodedExam>, Double> mutationRates = new ConcurrentHashMap<>();
-    private Random random = new Random();
+    private final Map<ArrayList<EncodedExam>, Double> mutationRates = new ConcurrentHashMap<>();
+    private final Random random = new Random();
 
-    private final double lowMutationRate = 0.005;
-    private final double highMutationRate = 0.07;
+    private final double lowMutationRate = Double.parseDouble(ConfigHelper.getProperty("LOW_MUTATION_RATE"));
+    private final double highMutationRate = Double.parseDouble(ConfigHelper.getProperty("HIGH_MUTATION_RATE"));
     int randomExam1;
     int randomExam2;
 

@@ -4,6 +4,7 @@ import lombok.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.models.*;
+import org.example.utils.ConfigHelper;
 import org.example.utils.FileHelper;
 
 import java.time.*;
@@ -75,6 +76,8 @@ public class Fitness {
     private LocalDate endDate;
     private LocalTime startTime;
     private LocalTime endTime;
+    private final double hardWeight = Double.parseDouble(ConfigHelper.getProperty("HARD_CONSTRAINT_WEIGHT"));
+    private final double softWeight = Double.parseDouble(ConfigHelper.getProperty("SOFT_CONSTRAINT_WEIGHT"));
 
     public Fitness(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Classroom> classrooms, ArrayList<Invigilator> invigilators, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         this.courses = courses;
@@ -92,7 +95,10 @@ public class Fitness {
         prepareDataForFitness(encodedExams);
         double[] hardConstraintScores = hardConstraintScores(encodedExams);
         double[] softConstraintScores = softConstraintScores(encodedExams);
-        return new double[][]{hardConstraintScores, softConstraintScores};
+        double fitnessScore = hardWeight * hardConstraintScores[hardConstraintScores.length - 1] +
+                softWeight * softConstraintScores[softConstraintScores.length - 1];
+
+        return new double[][]{hardConstraintScores, softConstraintScores, new double[]{fitnessScore}};
     }
 
     public double[] hardConstraintScores(ArrayList<EncodedExam> encodedExams) {

@@ -101,6 +101,35 @@ public class FileHelper {
         logger.info("Rows appended to CSV file: " + filePath);
     }
 
+    public static void writeFitnessScoresToFile(ArrayList<Double> scoresList, String filePath) {
+        String[] header = {"Exam id", "fitnessScore"};
+
+        try (FileWriter writer = new FileWriter(filePath, true)) {
+
+            for (int i = 0; i < header.length; i++) {
+                writer.write(header[i]);
+                // Add comma if it's not the last header element
+                if (i < header.length - 1) {
+                    writer.write(",");
+                }
+            }
+            writer.write("\n");
+            int id = 1;
+            for (double row : scoresList) {
+                writer.write(Integer.toString(id++));
+                writer.write(",");
+                // Write scores as a new row, separated by commas
+                writer.write(Double.toString(row));
+                // Add new line after each row
+                writer.write("\n");
+            }
+            logger.info("Rows appended to CSV file: " + filePath);
+
+        } catch (IOException e) {
+            logger.error("Error appending rows to CSV file: " + e.getMessage());
+        }
+    }
+
     public static void saveHolidaysToFile() {
         Set<LocalDate> holidays = APIHelper.fetchHolidays();
         ObjectMapper mapper = new ObjectMapper();
