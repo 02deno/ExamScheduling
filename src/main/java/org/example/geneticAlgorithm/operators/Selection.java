@@ -3,6 +3,7 @@ package org.example.geneticAlgorithm.operators;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
+import org.example.models.Chromosome;
 import org.example.models.EncodedExam;
 import org.example.utils.ConfigHelper;
 
@@ -36,9 +37,9 @@ public class Selection {
     private HashMap<Integer, Double> fitnessScores = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
     private Random random = new Random();
-    private ArrayList<ArrayList<EncodedExam>> parents = new ArrayList<>();
+    private ArrayList<Chromosome> parents = new ArrayList<>();
 
-    public ArrayList<ArrayList<EncodedExam>> rouletteWheelSelection(HashMap<ArrayList<EncodedExam>, Double> fitnessScores) {
+    public ArrayList<Chromosome> rouletteWheelSelection(HashMap<Chromosome, Double> fitnessScores) {
         int i = 0;
 
         while (i <= populationSize/2){
@@ -46,13 +47,13 @@ public class Selection {
             for (Double fitnessScore : fitnessScores.values()) {
                 totalScore += fitnessScore;
             }
-            for (Map.Entry<ArrayList<EncodedExam>, Double> entry : fitnessScores.entrySet()) {//normalized scores
+            for (Map.Entry<Chromosome, Double> entry : fitnessScores.entrySet()) {//normalized scores
                 entry.setValue(entry.getValue() / totalScore);
             }
             double randomValue = random.nextDouble() * totalScore;
 
             double temp = 0;
-            for (Map.Entry<ArrayList<EncodedExam>, Double> entry : fitnessScores.entrySet()) {
+            for (Map.Entry<Chromosome, Double> entry : fitnessScores.entrySet()) {
                 temp += entry.getValue();
                 if (randomValue < temp) {
                     parents.add(entry.getKey());
