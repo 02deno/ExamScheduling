@@ -243,7 +243,7 @@ public class GeneticAlgorithm {
         fitnessScores = sortByValueDescending(fitnessScores);
 
         // visualize
-        for (ArrayList<EncodedExam> chromosome : fitnessScores.keySet()) {
+        for (Chromosome chromosome : fitnessScores.keySet()) {
             logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
         }
 
