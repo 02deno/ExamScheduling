@@ -3,6 +3,7 @@ package org.example.geneticAlgorithm.operators;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
+import org.example.models.Chromosome;
 import org.example.models.EncodedExam;
 import org.example.models.Timeslot;
 
@@ -21,7 +22,7 @@ public class Mutation {
      * if fitness value of a chromosome >=, set low mutation rate
      */
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
-    private Map<ArrayList<EncodedExam>, Double> mutationRates = new ConcurrentHashMap<>();
+    private Map<Chromosome, Double> mutationRates = new ConcurrentHashMap<>();
     private Random random = new Random();
 
     private final double lowMutationRate = 0.005;
@@ -29,7 +30,7 @@ public class Mutation {
     int randomExam1;
     int randomExam2;
 
-    public void mutation(HashMap<ArrayList<EncodedExam>, Double> fitnessScores, ArrayList<ArrayList<EncodedExam>> population) {
+    public void mutation(HashMap<Chromosome, Double> fitnessScores, ArrayList<Chromosome> population) {
 
         double threshHold = calculateAvgFitnessScore(fitnessScores);
         setMutationRates(fitnessScores, threshHold);
@@ -43,14 +44,14 @@ public class Mutation {
     }
 
 
-    public void swapMutation(ArrayList<EncodedExam> chromosome) {
-        randomExam1 = random.nextInt(chromosome.size());
+    public void swapMutation(Chromosome chromosome) {
+        randomExam1 = random.nextInt(chromosome.getEncodedExams().size());
         do {
-            randomExam2 = random.nextInt(chromosome.size());
+            randomExam2 = random.nextInt(chromosome.getEncodedExams().size());
         } while (randomExam1 == randomExam2);
 
-        EncodedExam firstExam = chromosome.get(randomExam1);
-        EncodedExam secondExam = chromosome.get(randomExam2);
+        EncodedExam firstExam = chromosome.getEncodedExams().get(randomExam1);
+        EncodedExam secondExam = chromosome.getEncodedExams().get(randomExam2);
 
         Timeslot tempTimeSlot = firstExam.getTimeSlot();
         firstExam.setTimeSlot(secondExam.getTimeSlot());
@@ -61,7 +62,7 @@ public class Mutation {
         secondExam.setClassroomCode(tempClassCode);
     }
 
-    private void setMutationRates(HashMap<ArrayList<EncodedExam>, Double> fitnessScores, double threshHold) {
+    private void setMutationRates(HashMap<Chromosome, Double> fitnessScores, double threshHold) {
         fitnessScores.entrySet().forEach(entry -> {
             if (entry.getValue() < threshHold) {
                 mutationRates.put(entry.getKey(), highMutationRate);
@@ -71,7 +72,7 @@ public class Mutation {
         });
     }
 
-    private double calculateAvgFitnessScore(HashMap<ArrayList<EncodedExam>, Double> fitnessScores) {
+    private double calculateAvgFitnessScore(HashMap<Chromosome, Double> fitnessScores) {
         double totalFitnessScore = 0;
 
         for (Double value : fitnessScores.values()) {

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 @Getter
 @Setter
@@ -17,4 +18,8 @@ public class EncodedExam {
     private String classroomCode;
     private Timeslot timeSlot;
     private ArrayList<String> invigilators;
+
+    public static Comparator<EncodedExam> sortExamsByCourseCode() {
+        return (exam1, exam2) -> exam1.getCourseCode().compareTo(exam2.getCourseCode());
+    }
 }

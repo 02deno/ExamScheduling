@@ -1,5 +1,6 @@
 package org.example.geneticAlgorithm.operators;
 
+import org.example.models.Chromosome;
 import org.example.models.EncodedExam;
 import org.example.utils.DataStructureHelper;
 
@@ -11,24 +12,24 @@ public class Crossover {
 
     private Random random = new Random();
     private final double crossoverRate = 0.7;
-    Comparator<EncodedExam> comparator = DataStructureHelper.sortExamsByCourseCode();
+    Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
 
 
-    public ArrayList<ArrayList<EncodedExam>> onePointCrossover(ArrayList<ArrayList<EncodedExam>> parents) {
-        ArrayList<EncodedExam> firstParent;
-        ArrayList<EncodedExam> secondParent;
-        ArrayList<ArrayList<EncodedExam>> childChromosomes = new ArrayList<>();
+    public ArrayList<Chromosome> onePointCrossover(ArrayList<Chromosome> parents) {
+        Chromosome firstParent;
+        Chromosome secondParent;
+        ArrayList<Chromosome> childChromosomes = new ArrayList<>();
 
 
-        for (ArrayList<EncodedExam> parent : parents) {
-            parent.sort(comparator);
+        for (Chromosome parent : parents) {
+            parent.getEncodedExams().sort(comparator);
         }
 
         int i = 0;
         while (i < parents.size() / 2) {//burdan emin değilim bakarız yine
             double randomProbability = random.nextDouble();
-            ArrayList<EncodedExam> firstChildChromosome = new ArrayList<>();
-            ArrayList<EncodedExam> secondChildChromosome = new ArrayList<>();
+            Chromosome firstChildChromosome = new Chromosome();
+            Chromosome secondChildChromosome = new Chromosome();
 
             if (randomProbability <= crossoverRate) {
                 int randomParent1 = random.nextInt(parents.size());
@@ -40,13 +41,23 @@ public class Crossover {
 
                 firstParent = parents.get(randomParent1);
                 secondParent = parents.get(randomParent2);
-                int crossoverPoint = random.nextInt(firstParent.size());
+                int crossoverPoint = random.nextInt(firstParent.getEncodedExams().size());
 
-                firstChildChromosome.addAll(firstParent.subList(0, crossoverPoint));
-                firstChildChromosome.addAll(secondParent.subList(crossoverPoint, firstParent.size()));
+                ArrayList<EncodedExam> firstChildList = new ArrayList<>();
+                firstChildList.addAll(firstParent.getEncodedExams().subList(0, crossoverPoint));
+                firstChildList.addAll(secondParent.getEncodedExams().subList(crossoverPoint,
+                        firstParent.getEncodedExams().size()));
 
-                secondChildChromosome.addAll(secondParent.subList(0, crossoverPoint));
-                secondChildChromosome.addAll(firstParent.subList(crossoverPoint, firstParent.size()));
+                firstChildChromosome.setEncodedExams(firstChildList);
+
+
+
+                ArrayList<EncodedExam> secondChildList = new ArrayList<>();
+                secondChildList.addAll(secondParent.getEncodedExams().subList(0, crossoverPoint));
+                secondChildList.addAll(firstParent.getEncodedExams().subList(crossoverPoint,
+                        firstParent.getEncodedExams().size()));
+
+                secondChildChromosome.setEncodedExams(secondChildList);
 
                 childChromosomes.add(firstChildChromosome);
                 childChromosomes.add(secondChildChromosome);
