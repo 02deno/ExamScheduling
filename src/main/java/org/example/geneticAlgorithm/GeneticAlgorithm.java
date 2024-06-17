@@ -152,13 +152,28 @@ public class GeneticAlgorithm {
     public void visualization(int wantedExamScheduleCount, int currentGeneration) {
 
         String baseFileName = "graphs/Population" + currentGeneration + "/";
+        String bestPath = baseFileName + "best/";
+        String randomPath = baseFileName + "random/";
         FileHelper.createDirectory(baseFileName);
+        FileHelper.createDirectory(bestPath);
+        FileHelper.createDirectory(randomPath);
 
+        // for best chromosomes
+        Set<Chromosome> bestChromosomes = new HashSet<>();
+        for (Map.Entry<Chromosome, Double> entry : fitnessScores.entrySet()) {
+            if (bestChromosomes.size() == 3) {
+                break;
+            }
+            bestChromosomes.add(entry.getKey());
+        }
+
+        // for random chromosomes
         Set<Integer> uniqueNumbers = new HashSet<>();
         Random rand = new Random();
         while (uniqueNumbers.size() < wantedExamScheduleCount) {
             uniqueNumbers.add(rand.nextInt(populationForVisualization.size()));
         }
+
 
         for (int k = 0; k < wantedExamScheduleCount; k++) {
 
@@ -166,10 +181,32 @@ public class GeneticAlgorithm {
             // this will visualize a random exam schedule from population
 
             // this exam schedule is for invigilators not for students
+            Chromosome bestChromosome = (Chromosome) bestChromosomes.toArray()[k];
+            ArrayList<EncodedExam> bestExamScheduleForInvigilators = bestChromosome.getEncodedExams();
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, bestExamScheduleForInvigilators, bestPath + "Best Exam Schedule-" + bestChromosome.getChromosomeId() + " for Invigilators.html");
+
+            ArrayList<EncodedExam> bestExamScheduleForStudents = new ArrayList<>();
+            for (EncodedExam encodedExam : bestExamScheduleForInvigilators) {
+                Course course = Course.findByCourseCode(courses, encodedExam.getCourseCode());
+                if (course != null) {
+                    int beforeExam = course.getBeforeExamPrepTime();
+                    int afterExam = course.getAfterExamPrepTime();
+                    Timeslot combinedTimeslot = encodedExam.getTimeSlot();
+                    Timeslot examTimeslot = new Timeslot(combinedTimeslot.getStart().plusHours(beforeExam), combinedTimeslot.getEnd().minusHours(afterExam));
+                    bestExamScheduleForStudents.add(new EncodedExam(encodedExam.getCourseCode(),
+                            encodedExam.getClassroomCode(),
+                            examTimeslot,
+                            encodedExam.getInvigilators()));
+                }
+            }
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, bestExamScheduleForStudents, bestPath + "Best Exam Schedule-" + bestChromosome.getChromosomeId() + " for Students.html");
+            HTMLHelper.generateExamTableDila(startDate, endDate, bestExamScheduleForStudents, bestPath + "Best Exam ScheduleDila-" + bestChromosome.getChromosomeId() + " for Students.html");
+
+
+            // Reports that are changing : invigilators, classrooms, exam schedules
             int n = (Integer) uniqueNumbers.toArray()[k];
             HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
             ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encode(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class));
-            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, baseFileName + "Exam Schedule-" + n + " for Invigilators.html");
 
             ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
             for (EncodedExam encodedExam : randomExamScheduleForInvigilators) {
@@ -185,13 +222,13 @@ public class GeneticAlgorithm {
                             encodedExam.getInvigilators()));
                 }
             }
-            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, baseFileName + "Exam Schedule-" + n + " for Students.html");
-            HTMLHelper.generateExamTableDila(startDate, endDate, randomExamScheduleForStudents, baseFileName + "Exam ScheduleDila-" + n + " for Students.html");
 
-            // Reports that are changing : invigilators, classrooms, exam schedules
-            HTMLHelper.generateInvigilatorReport(DataStructureHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), baseFileName + "invigilator_report_" + n + ".html", "Invigilator Report");
-            HTMLHelper.generateClassroomReport(DataStructureHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), baseFileName + "classroom_report_" + n + ".html", "Classroom Report");
-            HTMLHelper.generateExamReport(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class), baseFileName + "exams_" + n + ".html", "Exam Schedule");
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, randomPath + "Random Exam Schedule-" + n + " for Invigilators.html");
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, randomPath + "Random Exam Schedule-" + n + " for Students.html");
+            HTMLHelper.generateExamTableDila(startDate, endDate, randomExamScheduleForStudents, randomPath + "Random Exam ScheduleDila-" + n + " for Students.html");
+            HTMLHelper.generateInvigilatorReport(DataStructureHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), randomPath + "random_invigilator_report_" + n + ".html", "Invigilator Report");
+            HTMLHelper.generateClassroomReport(DataStructureHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), randomPath + "random_classroom_report_" + n + ".html", "Classroom Report");
+            HTMLHelper.generateExamReport(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class), randomPath + "random_exams_" + n + ".html", "Exam Schedule");
         }
 
     }

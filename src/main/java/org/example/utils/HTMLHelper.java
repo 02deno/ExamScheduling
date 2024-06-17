@@ -416,13 +416,13 @@ public class HTMLHelper {
         return (yiq >= 128) ? "#000000" : "#FFFFFF";
     }
 
-    public static void generateLinePlot(List<Double> averageFitnessScores) {
+    public static void generateLinePlot(List<Double> averageFitnessScores, String title, String path) {
 
         StringBuilder xValues = new StringBuilder("[");
         StringBuilder yValues = new StringBuilder("[");
 
         for (int i = 0; i < averageFitnessScores.size(); i++) {
-            xValues.append(i);
+            xValues.append(i + 1);
             yValues.append(averageFitnessScores.get(i));
             if (i < averageFitnessScores.size() - 1) {
                 xValues.append(", ");
@@ -435,7 +435,7 @@ public class HTMLHelper {
         StringBuilder htmlContent = new StringBuilder();
         htmlContent.append("<html>");
         htmlContent.append("<head>");
-        htmlContent.append("<title>Average Fitness Scores of Populations</title>");
+        htmlContent.append("<title>" + title + "</title>");
         htmlContent.append("<script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script>");
         htmlContent.append("<style>");
         htmlContent.append("body { font-family: Arial, sans-serif; margin: 40px; }");
@@ -455,9 +455,9 @@ public class HTMLHelper {
         htmlContent.append("};");
         htmlContent.append("var data = [trace];");
         htmlContent.append("var layout = {");
-        htmlContent.append("title: { text: 'Average Fitness Scores of Populations', font: { size: 24 } },");
+        htmlContent.append("title: { text: '" + title + "', font: { size: 24 } },");
         htmlContent.append("xaxis: { title: { text: 'Population', font: { size: 18 } }, showgrid: true, zeroline: true },");
-        htmlContent.append("yaxis: { title: { text: 'Average Fitness Score', font: { size: 18 } }, showgrid: true, zeroline: true },");
+        htmlContent.append("yaxis: { title: { text: 'Fitness Score', font: { size: 18 } }, showgrid: true, zeroline: true },");
         htmlContent.append("margin: { l: 50, r: 50, b: 50, t: 50 },");
         htmlContent.append("paper_bgcolor: 'white',");
         htmlContent.append("plot_bgcolor: '#f8f8f8'");
@@ -469,7 +469,7 @@ public class HTMLHelper {
 
         String baseFileName = "graphs/FitnessScores/plots/";
         FileHelper.createDirectory(baseFileName);
-        try (FileWriter fileWriter = new FileWriter(baseFileName + "average_fitness_scores.html")) {
+        try (FileWriter fileWriter = new FileWriter(baseFileName + path)) {
             fileWriter.write(htmlContent.toString());
         } catch (IOException e) {
             logger.error("Some error occurred while writing HTML file to desired path");
