@@ -290,7 +290,7 @@ public class HTMLHelper {
 
     }
 
-    public static void generateExamTableDila(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, int interval, ArrayList<EncodedExam> exams, String title) {
+    public static void generateExamTableDila(LocalDate startDate, LocalDate endDate, ArrayList<EncodedExam> exams, String title) {
 
         // Create HTML content
         StringBuilder htmlContent = new StringBuilder();
@@ -324,8 +324,8 @@ public class HTMLHelper {
         Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
         exams.sort(comparator);
 
-        Timeslot timeslot = null;
-        String classroomCode = "";
+        Timeslot timeslot;
+        String classroomCode;
         for (EncodedExam exam : exams) {
             String courseCode = exam.getCourseCode();
             String color = generateColor(courseCode);

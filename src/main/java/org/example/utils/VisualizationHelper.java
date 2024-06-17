@@ -7,7 +7,7 @@ import org.example.models.Student;
 import java.util.ArrayList;
 
 public class VisualizationHelper {
-    public static void generateReports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Classroom> classrooms, int interval) {
+    public static void generateReports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Classroom> classrooms) {
         // Reports that are always the same for exam schedules : students, courses, timeslots
         String baseFileName = "graphs/GeneralInformation/";
         FileHelper.createDirectory(baseFileName);

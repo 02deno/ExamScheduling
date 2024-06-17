@@ -138,7 +138,7 @@ public class GeneticAlgorithm {
             this.populationForVisualization.add(new HashMap<>(chromosomeForVisualization));
             reset();
         }
-        VisualizationHelper.generateReports(courses, students, classrooms, interval);
+        VisualizationHelper.generateReports(courses, students, classrooms);
         return population;
     }
 
@@ -182,7 +182,7 @@ public class GeneticAlgorithm {
                 }
             }
             HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, baseFileName + "Exam Schedule-" + n + " for Students.html");
-            HTMLHelper.generateExamTableDila(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, baseFileName + "Exam ScheduleDila-" + n + " for Students.html");
+            HTMLHelper.generateExamTableDila(startDate, endDate, randomExamScheduleForStudents, baseFileName + "Exam ScheduleDila-" + n + " for Students.html");
 
             // Reports that are changing : invigilators, classrooms, exam schedules
             HTMLHelper.generateInvigilatorReport(DataStructureHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), baseFileName + "invigilator_report_" + n + ".html", "Invigilator Report");
@@ -246,9 +246,9 @@ public class GeneticAlgorithm {
         fitnessScores = sortByValueDescending(fitnessScores);
 
         // visualize
-//        for (Chromosome chromosome: fitnessScores.keySet()) {
-//            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
-//        }
+        for (Chromosome chromosome : fitnessScores.keySet()) {
+            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
+        }
 
         // this tables contain all the fitness function scores
         String baseFileName = "graphs/FitnessScores/";
