@@ -183,7 +183,7 @@ public class GeneticAlgorithm {
             // this exam schedule is for invigilators not for students
             Chromosome bestChromosome = (Chromosome) bestChromosomes.toArray()[k];
             ArrayList<EncodedExam> bestExamScheduleForInvigilators = bestChromosome.getEncodedExams();
-            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, bestExamScheduleForInvigilators, bestPath + "Best Exam Schedule-" + bestChromosome.getChromosomeId() + " for Invigilators.html");
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, bestExamScheduleForInvigilators, bestPath + bestChromosome.getFitnessScore() + "_Best Exam Schedule-" + bestChromosome.getChromosomeId() + " for Invigilators.html");
 
             ArrayList<EncodedExam> bestExamScheduleForStudents = new ArrayList<>();
             for (EncodedExam encodedExam : bestExamScheduleForInvigilators) {
@@ -199,8 +199,8 @@ public class GeneticAlgorithm {
                             encodedExam.getInvigilators()));
                 }
             }
-            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, bestExamScheduleForStudents, bestPath + "Best Exam Schedule-" + bestChromosome.getChromosomeId() + " for Students.html");
-            HTMLHelper.generateExamTableDila(startDate, endDate, bestExamScheduleForStudents, bestPath + "Best Exam ScheduleDila-" + bestChromosome.getChromosomeId() + " for Students.html");
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, bestExamScheduleForStudents, bestPath + bestChromosome.getFitnessScore() + "_Best Exam Schedule-" + bestChromosome.getChromosomeId() + " for Students.html");
+            HTMLHelper.generateExamTableDila(startDate, endDate, bestExamScheduleForStudents, bestPath + bestChromosome.getFitnessScore() + "_Best Exam ScheduleDila-" + bestChromosome.getChromosomeId() + " for Students.html");
 
 
             // Reports that are changing : invigilators, classrooms, exam schedules

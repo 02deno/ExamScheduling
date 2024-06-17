@@ -5,12 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.models.Chromosome;
 import org.example.utils.ConfigHelper;
-import org.example.utils.ExcelDataParserHelper;
-import org.example.utils.HTMLHelper;
+import org.example.utils.VisualizationHelper;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.example.utils.FileHelper.deleteFolderContents;
 
@@ -41,22 +39,34 @@ public class App
             geneticAlgorithm.calculateFitness(true);
             currentGeneration += 1;
             geneticAlgorithm.updateAgesOfChromosomes();
-            geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
+            //geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
             double bestFitnessScore = geneticAlgorithm.findBestFitnessScore();
 
+            logger.info("-----");
             geneticAlgorithm.selectParents();
+            geneticAlgorithm.calculateFitness(false);
+            logger.info("bestFitnessScore after selection of parents: " + geneticAlgorithm.findBestFitnessScore());
             childChromosomes = geneticAlgorithm.crossover();
+            geneticAlgorithm.calculateFitness(false);
+            logger.info("bestFitnessScore after crossover: " + geneticAlgorithm.findBestFitnessScore());
             geneticAlgorithm.mutation();
+            geneticAlgorithm.calculateFitness(false);
+            logger.info("bestFitnessScore after mutation: " + geneticAlgorithm.findBestFitnessScore());
             geneticAlgorithm.replacement(currentGeneration, childChromosomes.size());
+            geneticAlgorithm.calculateFitness(false);
+            logger.info("bestFitnessScore after replacement: " + geneticAlgorithm.findBestFitnessScore());
             population.addAll(childChromosomes);
+            geneticAlgorithm.calculateFitness(false);
+            logger.info("bestFitnessScore after adding all: " + geneticAlgorithm.findBestFitnessScore());
 
             geneticAlgorithm.calculateFitness(false);
-            logger.info("population size: " + population.size());
+            logger.info("bestFitnessScore after calculating fitness: " + geneticAlgorithm.findBestFitnessScore());
+            logger.debug("population size: " + population.size());
             double lastBestFitnessScore = geneticAlgorithm.findBestFitnessScore();
             logger.info("Generation: " + currentGeneration);
             logger.info("bestFitnessScore: " + bestFitnessScore);
             logger.info("lastBestFitnessScore: " + lastBestFitnessScore);
-
+            logger.info("-----");
             if (lastBestFitnessScore <= bestFitnessScore) {
                 generationsWithoutImprovement += 1;
             } else {
@@ -65,11 +75,7 @@ public class App
         }
 
         // Create Graphs and Analyse Fitness Scores
-        String fitnessFilePath = "graphs/FitnessScores/fitness_scores.csv";
-        List<Double> averageFitnessScoresOfPopulations = ExcelDataParserHelper.averageFitnessScoresOfPopulations(fitnessFilePath);
-        List<Double> bestFitnessScoresOfPopulations = ExcelDataParserHelper.bestFitnessScoresOfPopulations(fitnessFilePath);
-        HTMLHelper.generateLinePlot(averageFitnessScoresOfPopulations, "Average Fitness Scores of Populations", "average_fitness_scores.html");
-        HTMLHelper.generateLinePlot(bestFitnessScoresOfPopulations, "Best Fitness Scores of Populations", "best_fitness_scores.html");
+        VisualizationHelper.generateFitnessPlots();
 
         long endTime = System.currentTimeMillis();
         long durationMs = endTime - startTime;
