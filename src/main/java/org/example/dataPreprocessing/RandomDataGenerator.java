@@ -53,20 +53,20 @@ public class RandomDataGenerator {
         ClassroomDataParser classroomDataParser = new ClassroomDataParser(classroomDataPath);
 
         HashMap<String, ArrayList<Object>> courseData = courseDataParser.parseCourseData();
-        //logger.info(courseData);
-        logger.info("Course infos extracted successfully:)");
+        //logger.debug(courseData);
+        logger.debug("Course debugs extracted successfully:)");
 
         HashMap<String, ArrayList<Object>> studentData = personDataParser.parseStudentData();
-        //logger.info(studentData);
-        logger.info("Student infos extracted successfully:)");
+        //logger.debug(studentData);
+        logger.debug("Student debugs extracted successfully:)");
 
         HashMap<String, ArrayList<Object>> invigilatorData = personDataParser.parseInvigilatorData();
-        //logger.info(invigilatorData);
-        logger.info("Invigilator infos extracted successfully:)");
+        //logger.debug(invigilatorData);
+        logger.debug("Invigilator debugs extracted successfully:)");
 
         HashMap<String, ArrayList<Object>> classroomData = classroomDataParser.parseClassroomData();
-        //logger.info(classroomData);
-        logger.info("Classroom infos extracted successfully:)");
+        //logger.debug(classroomData);
+        logger.debug("Classroom infos extracted successfully:)");
 
         HashMap<String, HashMap<String, ArrayList<Object>>> result = new HashMap<>();
 
@@ -96,8 +96,8 @@ public class RandomDataGenerator {
             Course course = new Course(courseCode, courseName, isPcExam, studentCapacity, beforeExamPrepTime, examDuration, afterExamPrepTime);
             courses.add(course);
         }
-        //logger.info(courses);
-        //logger.info("Course instances created successfully:)");
+        //logger.debug(courses);
+        logger.debug("Course instances created successfully:)");
         return courses;
     }
 
@@ -113,8 +113,8 @@ public class RandomDataGenerator {
             Invigilator invigilator = new Invigilator(id, name, surname, maxCoursesMonitoredCount);
             invigilators.add(invigilator);
         }
-        //logger.info(invigilators);
-        //logger.info("Invigilator instances created successfully:)");
+        //logger.debug(invigilators);
+        logger.debug("Invigilator instances created successfully:)");
         return invigilators;
     }
 
@@ -132,8 +132,8 @@ public class RandomDataGenerator {
             Classroom classroom = new Classroom(classroomCode, classroomName, classroomCapacity, isPcLab, classroomProperties);
             classrooms.add(classroom);
         }
-        //logger.info(classrooms);
-        //logger.info("Classroom instances created successfully:)");
+        //logger.debug(classrooms);
+        logger.debug("Classroom instances created successfully:)");
         return classrooms;
     }
 
@@ -153,14 +153,12 @@ public class RandomDataGenerator {
             Student student = new Student(id, name, surname, coursesTaken);
             students.add(student);
         }
-        //logger.info(invigilators);
-        //logger.info("Student instances created successfully:)");
+        //logger.debug(invigilators);
+        logger.debug("Student instances created successfully:)");
         return students;
     }
 
     public static Schedule generateSchedule(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, int interval) {
-
-        //logger.info("Max Time Slots: " + schedule.calculateMaxTimeSlots());
         return new Schedule(startDate, endDate, startTime, endTime, interval);
     }
 

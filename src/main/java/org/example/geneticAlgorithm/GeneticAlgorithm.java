@@ -11,10 +11,7 @@ import org.example.utils.*;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 import static org.example.utils.DataStructureHelper.sortByValueDescending;
 
@@ -64,15 +61,16 @@ public class GeneticAlgorithm {
     public void generateData() {
         HashMap<String, HashMap<String, ArrayList<Object>>> randomData = RandomDataGenerator.combineAllData();
         this.courses = RandomDataGenerator.generateCourseInstances(randomData.get("courseData"));
-        this.courses = new ArrayList<>(courses.subList(0, Math.min(70, courses.size())));
+        this.courses = new ArrayList<>(courses.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("COURSE_COUNT")), courses.size())));
 
         this.invigilators = RandomDataGenerator.generateInvigilatorInstances(randomData.get("invigilatorData"));
-        this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(40, invigilators.size())));
+        this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("INVIGILATOR_COUNT")), invigilators.size())));
 
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
+        this.classrooms = new ArrayList<>(classrooms.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("CLASSROOM_COUNT")), classrooms.size())));
 
         this.students = RandomDataGenerator.generateStudentInstances(randomData.get("studentData"));
-        this.students = new ArrayList<>(students.subList(0, Math.min(100, students.size())));
+        this.students = new ArrayList<>(students.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("STUDENT_COUNT")), students.size())));
 
         this.startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
         this.endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE")); // this date is not included
@@ -82,16 +80,16 @@ public class GeneticAlgorithm {
         this.schedule = RandomDataGenerator.generateSchedule(startDate, endDate, startTime, endTime, interval);
         this.timeslots = schedule.calculateTimeSlots();
 
-        logger.info("Number of Students: " + students.size());
-        logger.info("Number of Classroom: " + classrooms.size());
-        logger.info("Number of invigilators: " + invigilators.size());
-        logger.info("Number of courses: " + courses.size());
-        logger.info("Number of timeslots: " + schedule.calculateMaxTimeSlots());
+        logger.debug("Number of Students: " + students.size());
+        logger.debug("Number of Classroom: " + classrooms.size());
+        logger.debug("Number of invigilators: " + invigilators.size());
+        logger.debug("Number of courses: " + courses.size());
+        logger.debug("Number of timeslots: " + schedule.calculateMaxTimeSlots());
 
         HashMap<String, ArrayList<?>> resultCoursesStudents = Initialization.heuristicMapCoursesWithStudents(this.courses, this.students);
         this.courses = DataStructureHelper.castArrayList(resultCoursesStudents.get("courses"), Course.class);
         this.students = DataStructureHelper.castArrayList(resultCoursesStudents.get("students"), Student.class);
-        logger.info("heuristicMapCoursesWithStudents finished.");
+        logger.debug("heuristicMapCoursesWithStudents finished.");
 
         File holidaysFile = new File(FileHelper.holidayFilePath);
         if (!holidaysFile.exists()) {
@@ -104,11 +102,11 @@ public class GeneticAlgorithm {
         int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
         for (int i = 0; i < populationSize; i++) {
 
-            //logger.info("Population " + i);
+            logger.debug("Population " + i);
 
             HashMap<String, ArrayList<?>> resultExams = Initialization.createExamInstances(this.courses);
             this.exams = DataStructureHelper.castArrayList(resultExams.get("exams"), Exam.class);
-            logger.info("createExamInstances finished.");
+            logger.debug("createExamInstances finished.");
             Random rand = new Random();
 
             Collections.shuffle(this.exams, new Random(rand.nextInt(10000)));
@@ -117,17 +115,17 @@ public class GeneticAlgorithm {
 
             HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(exams, invigilators);
             this.exams = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
-            logger.info("heuristicMapExamsWithInvigilators finished.");
+            logger.debug("heuristicMapExamsWithInvigilators finished.");
 
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(exams, classrooms);
             this.exams = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
-            logger.info("heuristicMapExamsWithClassrooms finished.");
+            logger.debug("heuristicMapExamsWithClassrooms finished.");
 
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(exams, timeslots);
             this.exams = DataStructureHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
-            logger.info("heuristicMapExamsWithTimeslots finished.");
+            logger.debug("heuristicMapExamsWithTimeslots finished.");
 
             encode();
 
@@ -148,21 +146,27 @@ public class GeneticAlgorithm {
         chromosome = new Chromosome();
         chromosome.setEncodedExams(encodedExams);
         this.population.add(chromosome);
-        logger.info("Encode is finished.");
+        logger.debug("Encode is finished.");
     }
 
     public void visualization(int wantedExamScheduleCount, int currentGeneration) {
 
         String baseFileName = "graphs/Population" + currentGeneration + "/";
         FileHelper.createDirectory(baseFileName);
+
+        Set<Integer> uniqueNumbers = new HashSet<>();
+        Random rand = new Random();
+        while (uniqueNumbers.size() < wantedExamScheduleCount) {
+            uniqueNumbers.add(rand.nextInt(populationForVisualization.size()));
+        }
+
         for (int k = 0; k < wantedExamScheduleCount; k++) {
 
             // Exam Schedule :
             // this will visualize a random exam schedule from population
 
             // this exam schedule is for invigilators not for students
-            Random rand = new Random();
-            int n = rand.nextInt(populationForVisualization.size());
+            int n = (Integer) uniqueNumbers.toArray()[k];
             HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
             ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encode(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class));
             HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, baseFileName + "Exam Schedule-" + n + " for Invigilators.html");
@@ -247,7 +251,7 @@ public class GeneticAlgorithm {
 
         // visualize
         for (Chromosome chromosome : fitnessScores.keySet()) {
-            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
+            logger.debug("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
         }
 
         // this tables contain all the fitness function scores

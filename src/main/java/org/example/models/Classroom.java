@@ -58,7 +58,7 @@ public class Classroom {
                 return classroom;
             }
         }
-        //logger.error("Could not find a classroom with classroom code: " + classroomCode);
+        logger.error("Could not find a classroom with classroom code: " + classroomCode);
         return null;
     }
 }

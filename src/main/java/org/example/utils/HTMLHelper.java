@@ -67,7 +67,7 @@ public class HTMLHelper {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            //logger.info("Histogram saved as HTML file: " + outputFilePath);
+            logger.debug("Histogram saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
             logger.error("Error writing HTML file: " + e.getMessage());
         }
@@ -143,11 +143,11 @@ public class HTMLHelper {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            logger.info("Report saved as HTML file: " + outputFilePath);
+            logger.debug("Report saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
             logger.error("Error writing HTML file: " + e.getMessage());
         }
-        logger.info("Exam Table is generated.");
+        logger.debug("Exam Table is generated.");
     }
 
     public static void generateInvigilatorReport(ArrayList<Invigilator> invigilators, String output, String title) {
@@ -283,7 +283,7 @@ public class HTMLHelper {
 
         try (FileWriter fileWriter = new FileWriter(title)) {
             fileWriter.write(htmlContent.toString());
-            logger.info("HTML exam schedule generated successfully. File saved as " + title);
+            logger.debug("HTML exam schedule generated successfully. File saved as " + title);
         } catch (IOException e) {
             logger.error("An error occurred while writing the HTML file: " + e.getMessage());
         }
@@ -376,7 +376,7 @@ public class HTMLHelper {
 
         try (FileWriter fileWriter = new FileWriter(title)) {
             fileWriter.write(htmlContent.toString());
-            logger.info("HTML exam schedule generated successfully. File saved as " + title);
+            logger.debug("HTML exam schedule generated successfully. File saved as " + title);
         } catch (IOException e) {
             logger.error("An error occurred while writing the HTML file: " + e.getMessage());
         }

@@ -20,7 +20,7 @@ public class PersonDataParser {
     private String invigilatorDataPath;
     private static HashMap<String, String> studentColumnHeaderMap = new HashMap<>();
     private static HashMap<String, String> invigilatorColumnHeaderMap = new HashMap<>();
-    private static final Logger logger = LogManager.getLogger(CourseDataParser.class);
+    private static final Logger logger = LogManager.getLogger(PersonDataParser.class);
     private static String studentKeyHeader;
     private static String invigilatorKeyHeader;
     private static ExcelDataParserHelper excelDataParserHelper = new ExcelDataParserHelper();

@@ -2,9 +2,7 @@ package org.example.geneticAlgorithm.operators;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.models.Chromosome;
-import org.example.models.EncodedExam;
 import org.example.utils.ConfigHelper;
 
 import java.util.ArrayList;
@@ -33,11 +31,11 @@ public class Selection {
     * use one of these selection methods and additionally use rank selection when algo get closer to end
     */
 
-    private int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
-    private HashMap<Integer, Double> fitnessScores = new HashMap<>();
-    private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
-    private Random random = new Random();
-    private ArrayList<Chromosome> parents = new ArrayList<>();
+    private final int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
+    private final HashMap<Integer, Double> fitnessScores = new HashMap<>();
+    private static final Logger logger = LogManager.getLogger(Selection.class);
+    private final Random random = new Random();
+    private final ArrayList<Chromosome> parents = new ArrayList<>();
 
     public ArrayList<Chromosome> rouletteWheelSelection(HashMap<Chromosome, Double> fitnessScores) {
         int i = 0;
