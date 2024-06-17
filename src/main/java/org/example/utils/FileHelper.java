@@ -71,7 +71,7 @@ public class FileHelper {
 
     public static void writeHardFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            String[] header = {"Exam id", "allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
+            String[] header = {"Chromosome id", "allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",
                     "allExamsHaveClassrooms", "classroomsHasCapacity", "invigilatorOverlapped",
                     "studentOverlapped", "invigilatorAvailable", "startAndEndTimeDateViolated",
                     "allExamsHaveRequiredEquipments", "noExamsHolidays", "examStartAndEndDateSame",
@@ -85,7 +85,7 @@ public class FileHelper {
 
     public static void writeSoftFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
 
-        String[] header = {"Exam id", "studentMoreThanTwoExamSameDay",
+        String[] header = {"Chromosome id", "studentMoreThanTwoExamSameDay",
                 "minimumGapBetweenExamsStudent", "invigilatorMoreThanThreeExamSameDay",
                 "minimumGapBetweenExamsInvigilator", "noExamsAtWeekends", "examsNotInAfternoon",
                 "popularExamsAtBeginning",
@@ -101,11 +101,7 @@ public class FileHelper {
 
     private static void fitnessTableGenerator(ArrayList<double[]> scoresList, String filePath, String[] header, FileWriter writer) throws IOException {
         writeHeaderRow(header, writer);
-        int id = 1;
         for (double[] row : scoresList) {
-            writer.write(Integer.toString(id++));
-            writer.write(",");
-            // Write scores as a new row, separated by commas
             for (int i = 0; i < row.length; i++) {
                 writer.write(Double.toString(row[i]));
                 // Add comma if it's not the last score
@@ -131,22 +127,11 @@ public class FileHelper {
 
     }
 
-    public static void writeFitnessScoresToFile(ArrayList<Double> scoresList, String filePath) {
-        String[] header = {"Exam id", "fitnessScore"};
+    public static void writeFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
+        String[] header = {"Chromosome id", "fitnessScore"};
 
         try (FileWriter writer = new FileWriter(filePath, true)) {
-            writeHeaderRow(header, writer);
-            int id = 1;
-            for (double row : scoresList) {
-                writer.write(Integer.toString(id++));
-                writer.write(",");
-                // Write scores as a new row, separated by commas
-                writer.write(Double.toString(row));
-                // Add new line after each row
-                writer.write("\n");
-            }
-            logger.debug("Rows appended to CSV file: " + filePath);
-
+            fitnessTableGenerator(scoresList, filePath, header, writer);
         } catch (IOException e) {
             logger.error("Error appending rows to CSV file: " + e.getMessage());
         }

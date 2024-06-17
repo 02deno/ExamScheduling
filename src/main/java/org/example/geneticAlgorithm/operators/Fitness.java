@@ -90,18 +90,22 @@ public class Fitness {
         this.endTime = endTime;
     }
 
-    public double[][] fitnessScore(ArrayList<EncodedExam> encodedExams) {
+    public double[][] fitnessScore(Chromosome chromosome) {
 
+        ArrayList<EncodedExam> encodedExams = chromosome.getEncodedExams();
         prepareDataForFitness(encodedExams);
-        double[] hardConstraintScores = hardConstraintScores(encodedExams);
-        double[] softConstraintScores = softConstraintScores(encodedExams);
+
+        double[] hardConstraintScores = hardConstraintScores(chromosome);
+        double[] softConstraintScores = softConstraintScores(chromosome);
         double fitnessScore = hardWeight * hardConstraintScores[hardConstraintScores.length - 1] +
                 softWeight * softConstraintScores[softConstraintScores.length - 1];
 
-        return new double[][]{hardConstraintScores, softConstraintScores, new double[]{fitnessScore}};
+        return new double[][]{hardConstraintScores, softConstraintScores, new double[]{chromosome.getChromosomeId(), fitnessScore}};
     }
 
-    public double[] hardConstraintScores(ArrayList<EncodedExam> encodedExams) {
+    public double[] hardConstraintScores(Chromosome chromosome) {
+
+        ArrayList<EncodedExam> encodedExams = chromosome.getEncodedExams();
         double allExamsHaveRequiredTime = (double) 1 / (1 + allExamsHaveRequiredTime(encodedExams));
         double allExamHaveRequiredInvigilatorCount = (double) 1 / (1 + allExamHaveRequiredInvigilatorCount(encodedExams));
         double classroomOverlapped = (double) 1 / (1 + classroomOverlapped());
@@ -133,15 +137,16 @@ public class Fitness {
                         1 / noExamsHolidays +
                         1 / examStartAndEndDateSame
         );
-        return new double[]{allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
+        return new double[]{chromosome.getChromosomeId(), allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
                 allExamsHaveClassrooms, classroomsHasCapacity, invigilatorOverlapped,
                 studentOverlapped, invigilatorAvailable, startAndEndTimeDateViolated,
                 allExamsHaveRequiredEquipments, noExamsHolidays, examStartAndEndDateSame,
                 fitnessScore};
     }
 
-    public double[] softConstraintScores(ArrayList<EncodedExam> encodedExams) {
+    public double[] softConstraintScores(Chromosome chromosome) {
 
+        ArrayList<EncodedExam> encodedExams = chromosome.getEncodedExams();
         double studentMoreThanTwoExamSameDay = (double) 1 / (1 + studentMoreThanTwoExamSameDay());
         double minimumGapBetweenExamsStudent = (double) 1 / (1 + minimumGapBetweenExamsStudent());
         double invigilatorMoreThanThreeExamSameDay = (double) 1 / (1 + invigilatorMoreThanThreeExamSameDay());
@@ -162,7 +167,7 @@ public class Fitness {
 
         );
 
-        return new double[]{studentMoreThanTwoExamSameDay, minimumGapBetweenExamsStudent, invigilatorMoreThanThreeExamSameDay,
+        return new double[]{chromosome.getChromosomeId(), studentMoreThanTwoExamSameDay, minimumGapBetweenExamsStudent, invigilatorMoreThanThreeExamSameDay,
                 minimumGapBetweenExamsInvigilator, noExamsAtWeekends, examsNotInAfternoon, popularExamsAtBeginning,
                 fitnessScore};
     }

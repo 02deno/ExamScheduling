@@ -1,14 +1,19 @@
 package org.example.utils;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ExcelDataParserHelper {
 
@@ -92,6 +97,47 @@ public class ExcelDataParserHelper {
             logger.error("An error occurred while reading the Excel file.", e);
         }
         return map;
+    }
+
+    public static List<Double> averageFitnessScoresOfPopulations(String filePath) {
+
+        List<List<Double>> populations = new ArrayList<>();
+
+        try (Reader in = new FileReader(filePath)) {
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(in);
+            List<Double> currentPopulation = null;
+            for (CSVRecord record : records) {
+                if (record.get(0).equals("Chromosome id")) { // header
+                    logger.debug("Encountered header line, time for a new generation");
+                    if (currentPopulation != null) {
+                        populations.add(currentPopulation);
+                    }
+                    currentPopulation = new ArrayList<>();
+                } else if (currentPopulation != null) {
+                    currentPopulation.add(Double.parseDouble(record.get(1)));
+                }
+            }
+            if (currentPopulation != null) {
+                populations.add(currentPopulation);
+            }
+        } catch (IOException e) {
+            logger.error("File not found!");
+        }
+
+        List<Double> averageOfPopulations = new ArrayList<>();
+        logger.debug(populations.size());
+        for (List<Double> population : populations) {
+            int size = population.size();
+            double sum = 0;
+            for (Double aDouble : population) {
+                sum += aDouble;
+            }
+            double average = sum / size;
+            averageOfPopulations.add(average);
+        }
+        logger.debug(averageOfPopulations.size());
+        //logger.info(averageOfPopulations);
+        return averageOfPopulations;
     }
 }
 
