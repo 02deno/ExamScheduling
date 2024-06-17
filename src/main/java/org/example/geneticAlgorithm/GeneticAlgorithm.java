@@ -213,28 +213,28 @@ public class GeneticAlgorithm {
         this.classrooms = resetClassrooms;
     }
 
-    public void calculateFitness() {
+    public void calculateFitness(boolean saveToExcel) {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
         Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
         ArrayList<double[]> hardConstraintScoresList = new ArrayList<>();
         ArrayList<double[]> softConstraintScoresList = new ArrayList<>();
-        ArrayList<Double> fitnessScoresList = new ArrayList<>();
+        ArrayList<double[]> fitnessScoresList = new ArrayList<>();
 
         hardConstraintFitnessScores.clear();
         softConstraintFitnessScores.clear();
         fitnessScores.clear();
 
         for (Chromosome chromosome : population) {
-            double[][] scores = fitness.fitnessScore(chromosome.getEncodedExams());
+            double[][] calculatedScores = fitness.fitnessScore(chromosome);
 
-            double[] hardConstraintScores = scores[0];
-            double[] softConstraintScores = scores[1];
-            double fitnessScore = scores[2][0];
+            double[] hardConstraintScores = calculatedScores[0];
+            double[] softConstraintScores = calculatedScores[1];
+            double[] scores = calculatedScores[2];
 
             hardConstraintScoresList.add(hardConstraintScores);
             softConstraintScoresList.add(softConstraintScores);
-            fitnessScoresList.add(fitnessScore);
+            fitnessScoresList.add(scores);
 
             double hardFitnessScore = hardConstraintScores[hardConstraintScores.length - 1];
             hardConstraintFitnessScores.put(chromosome, hardFitnessScore);
@@ -242,6 +242,7 @@ public class GeneticAlgorithm {
             double softFitnessScore = softConstraintScores[softConstraintScores.length - 1];
             softConstraintFitnessScores.put(chromosome, softFitnessScore);
 
+            double fitnessScore = scores[scores.length - 1];
             fitnessScores.put(chromosome, fitnessScore);
             chromosome.setFitnessScore(fitnessScore);
 
@@ -254,22 +255,25 @@ public class GeneticAlgorithm {
 
         // visualize
         for (Chromosome chromosome : fitnessScores.keySet()) {
-            logger.debug("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
+            logger.debug("Id of Exam Schedule: " + chromosome.getChromosomeId() + ", Score: " + fitnessScores.get(chromosome));
         }
 
-        // this tables contain all the fitness function scores
-        String baseFileName = "graphs/FitnessScores/";
-        FileHelper.createDirectory(baseFileName);
-        FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, baseFileName + "fitness_scores_HARD.csv");
-        FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, baseFileName + "fitness_scores_SOFT.csv");
-        FileHelper.writeFitnessScoresToFile(fitnessScoresList, baseFileName + "fitness_scores.csv");
+        if (saveToExcel) {
+            // this tables contain all the fitness function scores
+            String baseFileName = "graphs/FitnessScores/";
+            FileHelper.createDirectory(baseFileName);
+            FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, baseFileName + "fitness_scores_HARD.csv");
+            FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, baseFileName + "fitness_scores_SOFT.csv");
+            FileHelper.writeFitnessScoresToFile(fitnessScoresList, baseFileName + "fitness_scores.csv");
+        }
+
     }
     public double findBestFitnessScore() {
         return Collections.max(fitnessScores.values());
     }
 
     public void selectParents() {
-        calculateFitness();
+        calculateFitness(true);
         Selection selection = new Selection();
         parents = selection.rouletteWheelSelection(this.fitnessScores);
     }

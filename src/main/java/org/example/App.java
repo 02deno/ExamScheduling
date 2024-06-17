@@ -5,9 +5,12 @@ import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.models.Chromosome;
 import org.example.utils.ConfigHelper;
+import org.example.utils.ExcelDataParserHelper;
+import org.example.utils.HTMLHelper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.example.utils.FileHelper.deleteFolderContents;
 
@@ -33,7 +36,7 @@ public class App
 
         geneticAlgorithm.generateData();
         population = geneticAlgorithm.initializationAndEncode();
-        geneticAlgorithm.calculateFitness();
+        geneticAlgorithm.calculateFitness(false);
 
         while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
             currentGeneration += 1;
@@ -47,7 +50,7 @@ public class App
             geneticAlgorithm.replacement(currentGeneration, childChromosomes.size());
             population.addAll(childChromosomes);
 
-            geneticAlgorithm.calculateFitness();
+            geneticAlgorithm.calculateFitness(false);
             logger.info("population size: " + population.size());
             double lastBestFitnessScore = geneticAlgorithm.findBestFitnessScore();
             logger.info("bestFitnessScore: " + bestFitnessScore);
@@ -60,6 +63,10 @@ public class App
             }
         }
 
+        // Create Graphs and Analyse Fitness Scores
+        String fitnessFilePath = "graphs/FitnessScores/fitness_scores.csv";
+        List<Double> averageFitnessScoresOfPopulations = ExcelDataParserHelper.averageFitnessScoresOfPopulations(fitnessFilePath);
+        HTMLHelper.generateLinePlot(averageFitnessScoresOfPopulations);
 
         long endTime = System.currentTimeMillis();
         long durationMs = endTime - startTime;
