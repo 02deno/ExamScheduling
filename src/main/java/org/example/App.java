@@ -36,9 +36,9 @@ public class App
 
         geneticAlgorithm.generateData();
         population = geneticAlgorithm.initializationAndEncode();
-        geneticAlgorithm.calculateFitness(false);
 
         while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
+            geneticAlgorithm.calculateFitness(true);
             currentGeneration += 1;
             geneticAlgorithm.updateAgesOfChromosomes();
             geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
