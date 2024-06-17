@@ -265,18 +265,18 @@ public class GeneticAlgorithm {
         FileHelper.writeFitnessScoresToFile(fitnessScoresList, baseFileName + "fitness_scores.csv");
     }
     public double findBestFitnessScore() {
-        return Collections.max(fitnessScores.values());
+        population.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);
+        return population.get(0).getFitnessScore();
     }
 
     public void selectParents() {
-        calculateFitness();
         Selection selection = new Selection();
-        parents = selection.rouletteWheelSelection(this.fitnessScores);
+        parents = selection.rouletteWheelSelection(population);
     }
 
     public ArrayList<Chromosome> crossover() {
         Crossover crossover = new Crossover();
-        ArrayList<Chromosome> childChromosomes = crossover.onePointCrossover(parents, chromosomeIdCounter);
+        ArrayList<Chromosome> childChromosomes = crossover.twoPointCrossover(parents, chromosomeIdCounter);
         chromosomeIdCounter = childChromosomes.get(childChromosomes.size() - 1).getChromosomeId();
         chromosomeIdCounter++;
 
@@ -285,7 +285,7 @@ public class GeneticAlgorithm {
 
     public void mutation() {
         Mutation mutation = new Mutation();
-        mutation.mutation(this.fitnessScores, population);
+        mutation.mutation(population);
     }
 
     public void replacement(int currentGeneration, int childChromosomesSize) {

@@ -8,7 +8,6 @@ import org.example.models.Timeslot;
 import org.example.utils.ConfigHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,25 +25,44 @@ public class Mutation {
     private final Random random = new Random();
     private final double lowMutationRate = Double.parseDouble(ConfigHelper.getProperty("LOW_MUTATION_RATE"));
     private final double highMutationRate = Double.parseDouble(ConfigHelper.getProperty("HIGH_MUTATION_RATE"));
-    int randomExam1;
-    int randomExam2;
+    private final int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
+    private final ArrayList<Chromosome> elitChromosomes = new ArrayList<>();
+    private final double elitismPercent = populationSize * 0.1;
 
-    public void mutation(HashMap<Chromosome, Double> fitnessScores, ArrayList<Chromosome> population) {
+    public void mutation(ArrayList<Chromosome> population) {
+
+        ArrayList<Double> fitnessScores = new ArrayList<>();
+        for (Chromosome chromosome : population) {
+            fitnessScores.add(chromosome.getFitnessScore());
+        }
 
         double threshHold = calculateAvgFitnessScore(fitnessScores);
-        setMutationRates(fitnessScores, threshHold);
+        setMutationRates(population, threshHold);
+        elitism(population);
+
         mutationRates.forEach((key, value) -> {
             double randomProbability = random.nextDouble() * 0.1;
 
-            if (randomProbability <= value) {
+            if (randomProbability <= value && !elitChromosomes.contains(key)) {
                 swapMutation(key);
             }
         });
     }
 
+    private void elitism(ArrayList<Chromosome> population) {
+        population.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);//azalan
+
+        for (Chromosome chromosome : population) {
+            elitChromosomes.add(chromosome);
+            if (elitChromosomes.size() == elitismPercent) {
+                break;
+            }
+        }
+    }
 
     public void swapMutation(Chromosome chromosome) {
-        randomExam1 = random.nextInt(chromosome.getEncodedExams().size());
+        int randomExam1 = random.nextInt(chromosome.getEncodedExams().size());
+        int randomExam2;
         do {
             randomExam2 = random.nextInt(chromosome.getEncodedExams().size());
         } while (randomExam1 == randomExam2);
@@ -61,21 +79,26 @@ public class Mutation {
         secondExam.setClassroomCode(tempClassCode);
     }
 
-    private void setMutationRates(HashMap<Chromosome, Double> fitnessScores, double threshHold) {
-        fitnessScores.entrySet().forEach(entry -> {
-            if (entry.getValue() < threshHold) {
-                mutationRates.put(entry.getKey(), highMutationRate);
-            } else {
-                mutationRates.put(entry.getKey(), lowMutationRate);
-            }
-        });
+    public void randomResetMutation(Chromosome chromosome) {
+
     }
 
-    private double calculateAvgFitnessScore(HashMap<Chromosome, Double> fitnessScores) {
+    private void setMutationRates(ArrayList<Chromosome> population, double threshHold) {
+
+        for (Chromosome chromosome : population) {
+            if (chromosome.getFitnessScore() < threshHold) {
+                mutationRates.put(chromosome, highMutationRate);
+            } else {
+                mutationRates.put(chromosome, lowMutationRate);
+            }
+        }
+    }
+
+    private double calculateAvgFitnessScore(ArrayList<Double> fitnessScores) {
         double totalFitnessScore = 0;
 
-        for (Double value : fitnessScores.values()) {
-            totalFitnessScore += value;
+        for (Double score : fitnessScores) {
+            totalFitnessScore += score;
         }
         return totalFitnessScore / fitnessScores.size();
     }

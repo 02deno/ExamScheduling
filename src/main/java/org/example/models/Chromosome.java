@@ -10,7 +10,6 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Data
 @ToString
 public class Chromosome {
