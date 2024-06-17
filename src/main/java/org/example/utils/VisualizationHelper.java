@@ -9,8 +9,11 @@ import java.util.ArrayList;
 public class VisualizationHelper {
     public static void generateReports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Classroom> classrooms, int interval) {
         // Reports that are always the same for exam schedules : students, courses, timeslots
-        HTMLHelper.generateStudentReport(students, "graphs/students_report.html", "Assigned Students Report");
-        HTMLHelper.generateCourseReport(courses, "graphs/courses_report.html", "Assigned Courses Report");
+        String baseFileName = "graphs/GeneralInformation/";
+        FileHelper.createDirectory(baseFileName);
+
+        HTMLHelper.generateStudentReport(students, baseFileName + "students_report.html", "Assigned Students Report");
+        HTMLHelper.generateCourseReport(courses, baseFileName + "courses_report.html", "Assigned Courses Report");
 
 
         // Histogram - course capacities and timeslot counts
@@ -19,13 +22,12 @@ public class VisualizationHelper {
         for (Course course : courses) {
             int capacity = course.getRegisteredStudents().size();
             courseCapacities.add(capacity);
-            int requiredTimeslotCount = (course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime()) * 60 / interval;
+            int requiredTimeslotCount = (course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime());
             timeslotCounts.add(requiredTimeslotCount);
         }
         // this histogram is made to see distribution and decide how many invigilators need to observe the exams
-        HTMLHelper.generateHistogram(courseCapacities, "graphs/courseCapacityHistogram.html", "The number of students in courses");
-        HTMLHelper.generateHistogram(timeslotCounts, "graphs/requiredTimeslotHistogram.html", "Timeslot histogram");
-
+        HTMLHelper.generateHistogram(courseCapacities, baseFileName + "courseCapacityHistogram.html", "The number of students in courses");
+        HTMLHelper.generateHistogram(timeslotCounts, baseFileName + "requiredTimeslotHistogram.html", "Timeslot histogram in Hour");
 
         // Histogram - classroom capacities
         ArrayList<Integer> classroomCapacities = new ArrayList<>();
@@ -33,7 +35,7 @@ public class VisualizationHelper {
             int capacity = classroom.getCapacity();
             classroomCapacities.add(capacity);
         }
-        HTMLHelper.generateHistogram(classroomCapacities, "graphs/classroomCapacityHistogram.html", "Classroom Capacity");
+        HTMLHelper.generateHistogram(classroomCapacities, baseFileName + "classroomCapacityHistogram.html", "Classroom Capacity");
 
     }
 

@@ -44,6 +44,22 @@ public class FileHelper {
         }
     }
 
+    public static void createDirectory(String baseFileName) {
+
+        File directory = new File(baseFileName);
+
+        if (!directory.exists()) {
+            boolean success = directory.mkdirs();
+            if (success) {
+                logger.info("Directory created: " + baseFileName);
+            } else {
+                logger.error("Failed to create directory: " + baseFileName);
+            }
+        } else {
+            logger.info("Directory already exists: " + baseFileName);
+        }
+    }
+
     public static void writeHardFitnessScoresToFile(ArrayList<double[]> scoresList, String filePath) {
         try (FileWriter writer = new FileWriter(filePath, true)) {
             String[] header = {"Exam id", "allExamsHaveRequiredTime", "allExamHaveRequiredInvigilatorCount", "classroomOverlapped",

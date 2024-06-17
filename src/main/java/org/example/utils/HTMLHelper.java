@@ -183,11 +183,6 @@ public class HTMLHelper {
 
     public static void generateExamTable(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, int interval, ArrayList<EncodedExam> exams, String title) {
 
-        String baseFileName = "graphs/" + title;
-        UUID randomUUID = UUID.randomUUID();
-        //String fileName = baseFileName + "_" + randomUUID + ".html";
-        String fileName = baseFileName + ".html";
-
         // Create HTML content
         StringBuilder htmlContent = new StringBuilder();
         htmlContent.append("<!DOCTYPE html>");
@@ -286,9 +281,9 @@ public class HTMLHelper {
 
         htmlContent.append("</table></body></html>");
 
-        try (FileWriter fileWriter = new FileWriter(fileName)) {
+        try (FileWriter fileWriter = new FileWriter(title)) {
             fileWriter.write(htmlContent.toString());
-            logger.info("HTML exam schedule generated successfully. File saved as " + fileName);
+            logger.info("HTML exam schedule generated successfully. File saved as " + title);
         } catch (IOException e) {
             logger.error("An error occurred while writing the HTML file: " + e.getMessage());
         }
@@ -296,11 +291,6 @@ public class HTMLHelper {
     }
 
     public static void generateExamTableDila(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, int interval, ArrayList<EncodedExam> exams, String title) {
-
-        String baseFileName = "graphs/" + title;
-        UUID randomUUID = UUID.randomUUID();
-        //String fileName = baseFileName + "_" + randomUUID + ".html";
-        String fileName = baseFileName + ".html";
 
         // Create HTML content
         StringBuilder htmlContent = new StringBuilder();
@@ -384,9 +374,9 @@ public class HTMLHelper {
 
         htmlContent.append("</table></body></html>");
 
-        try (FileWriter fileWriter = new FileWriter(fileName)) {
+        try (FileWriter fileWriter = new FileWriter(title)) {
             fileWriter.write(htmlContent.toString());
-            logger.info("HTML exam schedule generated successfully. File saved as " + fileName);
+            logger.info("HTML exam schedule generated successfully. File saved as " + title);
         } catch (IOException e) {
             logger.error("An error occurred while writing the HTML file: " + e.getMessage());
         }

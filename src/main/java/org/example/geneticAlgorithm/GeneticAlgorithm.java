@@ -138,6 +138,7 @@ public class GeneticAlgorithm {
             this.populationForVisualization.add(new HashMap<>(chromosomeForVisualization));
             reset();
         }
+        VisualizationHelper.generateReports(courses, students, classrooms, interval);
         return population;
     }
 
@@ -150,9 +151,11 @@ public class GeneticAlgorithm {
         logger.info("Encode is finished.");
     }
 
-    public void visualization(int wantedExamScheduleCount) {
+    public void visualization(int wantedExamScheduleCount, int currentGeneration) {
+
+        String baseFileName = "graphs/Population" + currentGeneration + "/";
+        FileHelper.createDirectory(baseFileName);
         for (int k = 0; k < wantedExamScheduleCount; k++) {
-            VisualizationHelper.generateReports(courses, students, classrooms, interval);
 
             // Exam Schedule :
             // this will visualize a random exam schedule from population
@@ -162,7 +165,7 @@ public class GeneticAlgorithm {
             int n = rand.nextInt(populationForVisualization.size());
             HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
             ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encode(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class));
-            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, "Exam Schedule-" + n + " for Invigilators");
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForInvigilators, baseFileName + "Exam Schedule-" + n + " for Invigilators.html");
 
             ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
             for (EncodedExam encodedExam : randomExamScheduleForInvigilators) {
@@ -178,13 +181,13 @@ public class GeneticAlgorithm {
                             encodedExam.getInvigilators()));
                 }
             }
-            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, "Exam Schedule-" + n + " for Students");
-            HTMLHelper.generateExamTableDila(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, "Exam ScheduleDila-" + n + " for Students");
+            HTMLHelper.generateExamTable(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, baseFileName + "Exam Schedule-" + n + " for Students.html");
+            HTMLHelper.generateExamTableDila(startTime, endTime, startDate, endDate, interval, randomExamScheduleForStudents, baseFileName + "Exam ScheduleDila-" + n + " for Students.html");
 
             // Reports that are changing : invigilators, classrooms, exam schedules
-            HTMLHelper.generateInvigilatorReport(DataStructureHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), "graphs/invigilator_report_" + n + ".html", "Invigilator Report");
-            HTMLHelper.generateClassroomReport(DataStructureHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), "graphs/classroom_report_" + n + ".html", "Classroom Report");
-            HTMLHelper.generateExamReport(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class), "graphs/exams_" + n + ".html", "Exam Schedule");
+            HTMLHelper.generateInvigilatorReport(DataStructureHelper.castArrayList(randomInfo.get("invigilators"), Invigilator.class), baseFileName + "invigilator_report_" + n + ".html", "Invigilator Report");
+            HTMLHelper.generateClassroomReport(DataStructureHelper.castArrayList(randomInfo.get("classrooms"), Classroom.class), baseFileName + "classroom_report_" + n + ".html", "Classroom Report");
+            HTMLHelper.generateExamReport(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class), baseFileName + "exams_" + n + ".html", "Exam Schedule");
         }
 
     }
@@ -243,14 +246,16 @@ public class GeneticAlgorithm {
         fitnessScores = sortByValueDescending(fitnessScores);
 
         // visualize
-        for (Chromosome chromosome : fitnessScores.keySet()) {
-            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
-        }
+//        for (Chromosome chromosome: fitnessScores.keySet()) {
+//            logger.info("Hashcode of Exam Schedule: " + chromosome.hashCode() + ", Score: " + fitnessScores.get(chromosome));
+//        }
 
         // this tables contain all the fitness function scores
-        FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, "graphs/fitness_scores_HARD.csv");
-        FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, "graphs/fitness_scores_SOFT.csv");
-        FileHelper.writeFitnessScoresToFile(fitnessScoresList, "graphs/fitness_scores.csv");
+        String baseFileName = "graphs/FitnessScores/";
+        FileHelper.createDirectory(baseFileName);
+        FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, baseFileName + "fitness_scores_HARD.csv");
+        FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, baseFileName + "fitness_scores_SOFT.csv");
+        FileHelper.writeFitnessScoresToFile(fitnessScoresList, baseFileName + "fitness_scores.csv");
     }
     public double findBestFitnessScore() {
         return Collections.max(fitnessScores.values());

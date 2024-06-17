@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.models.Chromosome;
-import org.example.models.EncodedExam;
 import org.example.utils.ConfigHelper;
 
 import java.io.File;
@@ -40,7 +39,7 @@ public class App
             currentGeneration += 1;
 
             geneticAlgorithm.updateAgesOfChromosomes();
-            geneticAlgorithm.visualization(wantedExamScheduleCount);
+            geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
             double bestFitnessScore = geneticAlgorithm.findBestFitnessScore();
 
             geneticAlgorithm.selectParents();
