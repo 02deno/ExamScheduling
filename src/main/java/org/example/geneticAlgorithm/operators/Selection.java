@@ -32,29 +32,27 @@ public class Selection {
     */
 
     private final int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
-    private final HashMap<Integer, Double> fitnessScores = new HashMap<>();
+    private final HashMap<Chromosome, Double> normalizedFitnessScores = new HashMap<Chromosome, Double>();
     private static final Logger logger = LogManager.getLogger(Selection.class);
     private final Random random = new Random();
     private final ArrayList<Chromosome> parents = new ArrayList<>();
 
-    public ArrayList<Chromosome> rouletteWheelSelection(HashMap<Chromosome, Double> fitnessScores) {
+    public ArrayList<Chromosome> rouletteWheelSelection(ArrayList<Chromosome> population) {
         int i = 0;
 
-        while (i <= populationSize/2){
+        while (i < populationSize/2){
             double totalScore = 0;
-            for (Double fitnessScore : fitnessScores.values()) {
-                totalScore += fitnessScore;
+            for (Chromosome chromosome : population) {
+                totalScore += chromosome.getFitnessScore();
             }
-            for (Map.Entry<Chromosome, Double> entry : fitnessScores.entrySet()) {//normalized scores
-                entry.setValue(entry.getValue() / totalScore);
-            }
+
             double randomValue = random.nextDouble() * totalScore;
 
             double temp = 0;
-            for (Map.Entry<Chromosome, Double> entry : fitnessScores.entrySet()) {
-                temp += entry.getValue();
+            for (Chromosome chromosome : population) {
+                temp += chromosome.getFitnessScore();
                 if (randomValue < temp) {
-                    parents.add(entry.getKey());
+                    parents.add(chromosome);
                     break;
                 }
             }

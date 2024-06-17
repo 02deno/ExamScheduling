@@ -37,6 +37,7 @@ public class Replacement {
 
     public void ageBasedReplacement(ArrayList<Chromosome> population, int childChromosomesSize) {
         elitism(population);
+        Collections.shuffle(population);
         population.sort(Chromosome.sortChromosomesByAge);
 
 
