@@ -53,6 +53,7 @@ public class App
             geneticAlgorithm.calculateFitness(false);
             logger.info("population size: " + population.size());
             double lastBestFitnessScore = geneticAlgorithm.findBestFitnessScore();
+            logger.info("Generation: " + currentGeneration);
             logger.info("bestFitnessScore: " + bestFitnessScore);
             logger.info("lastBestFitnessScore: " + lastBestFitnessScore);
 
@@ -66,7 +67,9 @@ public class App
         // Create Graphs and Analyse Fitness Scores
         String fitnessFilePath = "graphs/FitnessScores/fitness_scores.csv";
         List<Double> averageFitnessScoresOfPopulations = ExcelDataParserHelper.averageFitnessScoresOfPopulations(fitnessFilePath);
-        HTMLHelper.generateLinePlot(averageFitnessScoresOfPopulations);
+        List<Double> bestFitnessScoresOfPopulations = ExcelDataParserHelper.bestFitnessScoresOfPopulations(fitnessFilePath);
+        HTMLHelper.generateLinePlot(averageFitnessScoresOfPopulations, "Average Fitness Scores of Populations", "average_fitness_scores.html");
+        HTMLHelper.generateLinePlot(bestFitnessScoresOfPopulations, "Best Fitness Scores of Populations", "best_fitness_scores.html");
 
         long endTime = System.currentTimeMillis();
         long durationMs = endTime - startTime;

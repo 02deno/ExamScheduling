@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -136,8 +137,44 @@ public class ExcelDataParserHelper {
             averageOfPopulations.add(average);
         }
         logger.debug(averageOfPopulations.size());
-        //logger.info(averageOfPopulations);
+        logger.debug(averageOfPopulations);
         return averageOfPopulations;
+    }
+
+    public static List<Double> bestFitnessScoresOfPopulations(String filePath) {
+
+        List<List<Double>> populations = new ArrayList<>();
+
+        try (Reader in = new FileReader(filePath)) {
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(in);
+            List<Double> currentPopulation = null;
+            for (CSVRecord record : records) {
+                if (record.get(0).equals("Chromosome id")) { // header
+                    logger.debug("Encountered header line, time for a new generation");
+                    if (currentPopulation != null) {
+                        populations.add(currentPopulation);
+                    }
+                    currentPopulation = new ArrayList<>();
+                } else if (currentPopulation != null) {
+                    currentPopulation.add(Double.parseDouble(record.get(1)));
+                }
+            }
+            if (currentPopulation != null) {
+                populations.add(currentPopulation);
+            }
+        } catch (IOException e) {
+            logger.error("File not found!");
+        }
+
+        List<Double> bestOfPopulations = new ArrayList<>();
+        logger.debug(populations.size());
+        for (List<Double> population : populations) {
+            double best = Collections.max(population);
+            bestOfPopulations.add(best);
+        }
+        logger.debug(bestOfPopulations.size());
+        logger.debug(bestOfPopulations);
+        return bestOfPopulations;
     }
 }
 
