@@ -67,7 +67,7 @@ public class HTMLHelper {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            //logger.info("Histogram saved as HTML file: " + outputFilePath);
+            logger.debug("Histogram saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
             logger.error("Error writing HTML file: " + e.getMessage());
         }
@@ -143,11 +143,11 @@ public class HTMLHelper {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
             writer.close();
-            logger.info("Report saved as HTML file: " + outputFilePath);
+            logger.debug("Report saved as HTML file: " + outputFilePath);
         } catch (IOException e) {
             logger.error("Error writing HTML file: " + e.getMessage());
         }
-        logger.info("Exam Table is generated.");
+        logger.debug("Exam Table is generated.");
     }
 
     public static void generateInvigilatorReport(ArrayList<Invigilator> invigilators, String output, String title) {
@@ -182,11 +182,6 @@ public class HTMLHelper {
     }
 
     public static void generateExamTable(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, int interval, ArrayList<EncodedExam> exams, String title) {
-
-        String baseFileName = "graphs/" + title;
-        UUID randomUUID = UUID.randomUUID();
-        //String fileName = baseFileName + "_" + randomUUID + ".html";
-        String fileName = baseFileName + ".html";
 
         // Create HTML content
         StringBuilder htmlContent = new StringBuilder();
@@ -286,21 +281,16 @@ public class HTMLHelper {
 
         htmlContent.append("</table></body></html>");
 
-        try (FileWriter fileWriter = new FileWriter(fileName)) {
+        try (FileWriter fileWriter = new FileWriter(title)) {
             fileWriter.write(htmlContent.toString());
-            logger.info("HTML exam schedule generated successfully. File saved as " + fileName);
+            logger.debug("HTML exam schedule generated successfully. File saved as " + title);
         } catch (IOException e) {
             logger.error("An error occurred while writing the HTML file: " + e.getMessage());
         }
 
     }
 
-    public static void generateExamTableDila(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, int interval, ArrayList<EncodedExam> exams, String title) {
-
-        String baseFileName = "graphs/" + title;
-        UUID randomUUID = UUID.randomUUID();
-        //String fileName = baseFileName + "_" + randomUUID + ".html";
-        String fileName = baseFileName + ".html";
+    public static void generateExamTableDila(LocalDate startDate, LocalDate endDate, ArrayList<EncodedExam> exams, String title) {
 
         // Create HTML content
         StringBuilder htmlContent = new StringBuilder();
@@ -334,8 +324,8 @@ public class HTMLHelper {
         Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
         exams.sort(comparator);
 
-        Timeslot timeslot = null;
-        String classroomCode = "";
+        Timeslot timeslot;
+        String classroomCode;
         for (EncodedExam exam : exams) {
             String courseCode = exam.getCourseCode();
             String color = generateColor(courseCode);
@@ -384,9 +374,9 @@ public class HTMLHelper {
 
         htmlContent.append("</table></body></html>");
 
-        try (FileWriter fileWriter = new FileWriter(fileName)) {
+        try (FileWriter fileWriter = new FileWriter(title)) {
             fileWriter.write(htmlContent.toString());
-            logger.info("HTML exam schedule generated successfully. File saved as " + fileName);
+            logger.debug("HTML exam schedule generated successfully. File saved as " + title);
         } catch (IOException e) {
             logger.error("An error occurred while writing the HTML file: " + e.getMessage());
         }

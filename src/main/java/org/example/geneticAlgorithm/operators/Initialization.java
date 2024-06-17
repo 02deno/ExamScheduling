@@ -63,7 +63,7 @@ public class Initialization {
             }
         }
 
-        logger.info("Student instances mapped with courses successfully :)");
+        logger.debug("Student instances mapped with courses successfully :)");
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("courses", courses);
         result.put("students", students);
@@ -82,7 +82,7 @@ public class Initialization {
             }
         }
 
-        logger.info("Exam instances are created!!");
+        logger.debug("Exam instances are created!!");
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("exams", exams);
         return result;
@@ -111,7 +111,7 @@ public class Initialization {
                 ArrayList<Invigilator> filteredInvigilators = invigilators.stream()
                         .filter(Invigilator::isAvailable)
                         .collect(Collectors.toCollection(ArrayList::new));
-                //logger.info("Invigilators available: " + course.getCourseName() + ": "+filteredInvigilators.size());
+                logger.debug("Invigilators available: " + course.getCourseName() + ": " + filteredInvigilators.size());
                 if (!filteredInvigilators.isEmpty()) {
                     int invigilatorIndex = DataStructureHelper.getRandomElement(filteredInvigilators);
                     Invigilator invigilator = filteredInvigilators.get(invigilatorIndex);
@@ -125,14 +125,14 @@ public class Initialization {
                         invigilator.setAvailable(false);
                     }
                 } else {
-                    logger.info("No more invigilator could be found :(");
+                    logger.debug("No more invigilator could be found :(");
                     break;
                 }
                 exam.setExamInvigilators(availableInvigilators);
             }
 
         }
-        logger.info("Exam instances mapped with courses and invigilators successfully :)");
+        logger.debug("Exam instances mapped with courses and invigilators successfully :)");
 
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("exams", exams);
@@ -171,12 +171,12 @@ public class Initialization {
                 assignedCourses++;
 
             } else {
-                logger.info("Could not find a classroom for course " + exam.getCourse().getCourseCode() + " with exam capacity " + capacity);
+                logger.debug("Could not find a classroom for course " + exam.getCourse().getCourseCode() + " with exam capacity " + capacity);
             }
         }
 
-        logger.info("Assigned Courses: " + assignedCourses);
-        logger.info("Course instances mapped with classrooms successfully :)");
+        logger.debug("Assigned Exam Count to a classroom: " + assignedCourses);
+        logger.debug("Course instances mapped with classrooms successfully :)");
 
         HashMap<String, ArrayList<?>> result = new HashMap<>();
         result.put("exams", exams);
@@ -203,7 +203,7 @@ public class Initialization {
                 if (sameDay) {
                     found = true;
                 } else {
-                    //logger.info("Timeslots are not on the same day. Trying to find another random value...");
+                    logger.debug("Timeslots are not on the same day. Trying to find another random value...");
                 }
             }
             assignedTimeslots.add(timeslots.get(timeslotStartIndex));

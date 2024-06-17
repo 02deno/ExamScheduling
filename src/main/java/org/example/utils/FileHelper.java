@@ -20,27 +20,52 @@ public class FileHelper {
     public static final String holidayFilePath = "data/holidays.json";
 
     public static void deleteFolderContents(File folder) {
-        boolean result = false;
-        if (folder.exists()) {
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        deleteFolderContents(file);
-                    } else if (!file.getName().equals(".gitkeep")) {
-                        result = file.delete();
-                    }
+        if (!folder.exists()) {
+            logger.debug("Folder does not exist!!");
+            return;
+        }
+
+        File[] files = folder.listFiles();
+        if (files == null) {
+            logger.debug("Graphs folder is already empty");
+            return;
+        }
+
+        boolean allFilesDeleted = true;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                deleteFolderContents(file);
+                if (!file.delete()) {
+                    allFilesDeleted = false;
                 }
-            } else {
-                logger.info("Graphs folder is already empty");
-                return;
+            } else if (!file.getName().equals(".gitkeep")) {
+                if (!file.delete()) {
+                    allFilesDeleted = false;
+                }
             }
         }
 
-        if (result) {
-            logger.info("Folder contents is deleted successfully :)");
+        if (allFilesDeleted) {
+            logger.debug("Folder contents are deleted successfully :)");
         } else {
             logger.error("Some error occurred during folder deletion");
+        }
+    }
+
+    public static void createDirectory(String baseFileName) {
+
+        File directory = new File(baseFileName);
+
+        if (!directory.exists()) {
+            boolean success = directory.mkdirs();
+            if (success) {
+                logger.debug("Directory created: " + baseFileName);
+            } else {
+                logger.error("Failed to create directory: " + baseFileName);
+            }
+        } else {
+            logger.debug("Directory already exists: " + baseFileName);
         }
     }
 
@@ -75,14 +100,7 @@ public class FileHelper {
     }
 
     private static void fitnessTableGenerator(ArrayList<double[]> scoresList, String filePath, String[] header, FileWriter writer) throws IOException {
-        for (int i = 0; i < header.length; i++) {
-            writer.write(header[i]);
-            // Add comma if it's not the last header element
-            if (i < header.length - 1) {
-                writer.write(",");
-            }
-        }
-        writer.write("\n");
+        writeHeaderRow(header, writer);
         int id = 1;
         for (double[] row : scoresList) {
             writer.write(Integer.toString(id++));
@@ -98,22 +116,26 @@ public class FileHelper {
             // Add new line after each row
             writer.write("\n");
         }
-        logger.info("Rows appended to CSV file: " + filePath);
+        logger.debug("Rows appended to CSV file: " + filePath);
+    }
+
+    private static void writeHeaderRow(String[] header, FileWriter writer) throws IOException {
+        for (int i = 0; i < header.length; i++) {
+            writer.write(header[i]);
+            // Add comma if it's not the last header element
+            if (i < header.length - 1) {
+                writer.write(",");
+            }
+        }
+        writer.write("\n");
+
     }
 
     public static void writeFitnessScoresToFile(ArrayList<Double> scoresList, String filePath) {
         String[] header = {"Exam id", "fitnessScore"};
 
         try (FileWriter writer = new FileWriter(filePath, true)) {
-
-            for (int i = 0; i < header.length; i++) {
-                writer.write(header[i]);
-                // Add comma if it's not the last header element
-                if (i < header.length - 1) {
-                    writer.write(",");
-                }
-            }
-            writer.write("\n");
+            writeHeaderRow(header, writer);
             int id = 1;
             for (double row : scoresList) {
                 writer.write(Integer.toString(id++));
@@ -123,7 +145,7 @@ public class FileHelper {
                 // Add new line after each row
                 writer.write("\n");
             }
-            logger.info("Rows appended to CSV file: " + filePath);
+            logger.debug("Rows appended to CSV file: " + filePath);
 
         } catch (IOException e) {
             logger.error("Error appending rows to CSV file: " + e.getMessage());

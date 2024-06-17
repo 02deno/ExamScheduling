@@ -233,12 +233,12 @@ public class Fitness {
                 int differenceStudent = Math.abs((examTimeslotCount - (course.getBeforeExamPrepTime() + course.getAfterExamPrepTime())) - timeslotCountForStudent);
                 requiredTimeslotPunishment += differenceInvigilator;
                 requiredTimeslotPunishment += differenceStudent;
-//                if (differenceInvigilator != 0) {
-//                    logger.info("This is not the required time for invigilator");
-//                }
-//                if (differenceStudent != 0) {
-//                    //logger.info("This is not the required time for student");
-//                }
+                if (differenceInvigilator != 0) {
+                    logger.debug("This is not the required time for invigilator");
+                }
+                if (differenceStudent != 0) {
+                    logger.debug("This is not the required time for student");
+                }
             }
         }
         return requiredTimeslotPunishment;
@@ -259,12 +259,12 @@ public class Fitness {
                 int requiredInvigilator = capacity < 20 ? 1 : capacity < 75 ? 2 : (capacity < 150 ? 3 : 4);
                 int difference = Math.abs(requiredInvigilator - invigilatorCount);
                 invigilatorCountPunishment += difference;
-//                if (difference != 0) {
-//                    logger.info("The invigilator count is missing :(");
-//                    logger.info("Course: " + course);
-//                    logger.info("Required invigilator count: " + requiredInvigilator);
-//                    logger.info("Current invigilator count: " + invigilatorCount);
-//                }
+                if (difference != 0) {
+                    logger.debug("The invigilator count is missing :(");
+                    logger.debug("Course: " + course);
+                    logger.debug("Required invigilator count: " + requiredInvigilator);
+                    logger.debug("Current invigilator count: " + invigilatorCount);
+                }
             }
         }
         return invigilatorCountPunishment;
@@ -317,12 +317,10 @@ public class Fitness {
             for (int j = i + 1; j < length; j++) {
                 long minutes = timeslots.get(i).getOverlapMinutes(timeslots.get(j));
                 if (minutes != 0) {
-//                        logger.info("Timeslots overlap for student!!!!!!!!!!");
-//                        logger.info("Student Id: " + studentId);
-//                        logger.info("Exams: " + assignedExams);
-//                        logger.info(timeslots.get(i));
-//                        logger.info(timeslots.get(j));
-//                        logger.info("Overlapped minutes: " + minutes);
+                    logger.debug("Timeslots overlap !!!!!!!!!!");
+                    logger.debug(timeslots.get(i));
+                    logger.debug(timeslots.get(j));
+                    logger.debug("Overlapped minutes: " + minutes);
                     overlappedPunishment += (double) minutes / 60;
                 }
             }
@@ -360,11 +358,11 @@ public class Fitness {
                 ArrayList<EncodedExam> monitoredExams = invigilatorExams.get(invigilatorId);
                 int monitoredExamCount = monitoredExams.size();
                 if (maxMonitoredExamCount < monitoredExamCount) {
-//                    logger.info("Invigilator is over her/his capacity!!!!!!!!!!");
-//                    logger.info("Invigilator Id: " + invigilatorId);
-//                    logger.info("Max Capacity:" + maxMonitoredExamCount);
-//                    logger.info("Monitored Exam count:" + monitoredExamCount);
-//                    logger.info("Exams: " + monitoredExams);
+                    logger.debug("Invigilator is over her/his capacity!!!!!!!!!!");
+                    logger.debug("Invigilator Id: " + invigilatorId);
+                    logger.debug("Max Capacity:" + maxMonitoredExamCount);
+                    logger.debug("Monitored Exam count:" + monitoredExamCount);
+                    logger.debug("Exams: " + monitoredExams);
                     invigilatorAvailablePunishment++;
                 }
             }
@@ -379,7 +377,7 @@ public class Fitness {
         int allExamsHaveClassroomsPunishment = 0;
         for (EncodedExam exam : chromosome) {
             if (exam.getClassroomCode() == null) {
-                //logger.info("Exam " + exam.getCourseCode() + " has no classroom assigned!!!!!!!");
+                logger.debug("Exam " + exam.getCourseCode() + " has no classroom assigned!!!!!!!");
                 allExamsHaveClassroomsPunishment++;
             }
         }
@@ -395,17 +393,17 @@ public class Fitness {
             Course course = Course.findByCourseCode(courses, exam.getCourseCode());
 
             if (classroom == null) {
-                //logger.error("Classroom with code " + exam.getClassroomCode() + " not found.");
+                logger.error("Classroom with code " + exam.getClassroomCode() + " not found.");
                 continue;
             }
 
             if (course == null) {
-                //logger.error("Course with code " + exam.getCourseCode() + " not found.");
+                logger.error("Course with code " + exam.getCourseCode() + " not found.");
                 continue;
             }
 
             if (classroom.getCapacity() < course.getRegisteredStudents().size()) {
-                //logger.info("Classroom " + classroom.getClassroomCode() + " does not have the required capacity!!!!!");
+                logger.debug("Classroom " + classroom.getClassroomCode() + " does not have the required capacity!!!!!");
                 classroomsHasCapacityPunishment++;
             }
         }
@@ -424,9 +422,9 @@ public class Fitness {
             LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
             if (start.isBefore(startDateTime) || start.isAfter(endDateTime) ||
                     end.isBefore(startDateTime) || end.isAfter(endDateTime)) {
-//                logger.info("Exam timeslot is not in the specified range!!");
-//                logger.info("Start: " + start);
-//                logger.info("End: " + end);
+                logger.debug("Exam timeslot is not in the specified range!!");
+                logger.debug("Start: " + start);
+                logger.debug("End: " + end);
                 startAndEndTimeDatePunishment++;
             }
         }
@@ -462,8 +460,8 @@ public class Fitness {
 
             // Check if the exam is on a holiday
             if (holidays.contains(examDate)) {
-//                logger.info("Exam Date: "+ examDate);
-//                logger.info("Exam can not be placed in the holidays");
+                logger.debug("Exam Date: " + examDate);
+                logger.debug("Exam can not be placed in the holidays");
                 noExamsHolidaysPunishment++;
             }
         }
@@ -510,7 +508,7 @@ public class Fitness {
             for (int count : examCountPerDay.values()) {
                 if (count > 2) {
                     studentMoreThanTwoExamSameDayPunishment += count - 2;
-                    //logger.info("Student:" + studentId + " Count:" + count);
+                    logger.debug("Student:" + studentId + " Count:" + count);
                 }
             }
 
@@ -547,9 +545,9 @@ public class Fitness {
 
                 // Add penalty if gap is less than 60 minutes
                 if (gapInMinutes < 60) {
-//                    logger.info(previousExamEnd);
-//                    logger.info(currentExamStart);
-//                    logger.info("The gap for student between consecutive exams is less than 60 minutes, it is: " + gapInMinutes);
+                    logger.debug(previousExamEnd);
+                    logger.debug(currentExamStart);
+                    logger.debug("The gap for student between consecutive exams is less than 60 minutes, it is: " + gapInMinutes);
                     minimumGapBetweenExamsStudentPunishment++;
                 }
             }
@@ -580,11 +578,11 @@ public class Fitness {
 
                 }
             }
-            //logger.info(examCountPerDay);
+            logger.debug(examCountPerDay);
             for (int count : examCountPerDay.values()) {
                 if (count > 3) {
                     invigilatorMoreThanThreeExamSameDayPunishment += count - 3;
-                    //logger.info("Invigilator:" + invigilatorId + " Count:" + count);
+                    logger.debug("Invigilator:" + invigilatorId + " Count:" + count);
                 }
             }
 
@@ -620,9 +618,9 @@ public class Fitness {
 
                 // Add penalty if gap is less than 60 minutes
                 if (gapInMinutes < 30) {
-//                    logger.info(previousExamEnd);
-//                    logger.info(currentExamStart);
-//                    logger.info("The gap for invigilator between consecutive exams is less than 30 minutes, it is: " + gapInMinutes);
+                    logger.debug(previousExamEnd);
+                    logger.debug(currentExamStart);
+                    logger.debug("The gap for invigilator between consecutive exams is less than 30 minutes, it is: " + gapInMinutes);
                     minimumGapBetweenExamsInvigilatorPunishment++;
                 }
             }
@@ -642,8 +640,8 @@ public class Fitness {
 
             // Check if the exam is on a weekend
             if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-//                logger.info("Exam Date: "+ examDate);
-//                logger.info("Exam can not be placed in the weekends");
+                logger.debug("Exam Date: " + examDate);
+                logger.debug("Exam can not be placed in the weekends");
                 noExamsWeekendPunishment++;
             }
 
@@ -698,7 +696,7 @@ public class Fitness {
         double desiredAfternoonProportion = 0.7;
 
         if (afternoonProportion < desiredAfternoonProportion) {
-            //logger.info("Proportion is not enough: " + afternoonProportion);
+            logger.debug("Proportion is not enough: " + afternoonProportion);
             double difference = Math.abs(desiredAfternoonProportion - afternoonProportion);
             afternoonPunishment += difference * 10;
         }
@@ -723,7 +721,7 @@ public class Fitness {
 
         ArrayList<HashMap.Entry<String, Integer>> sortedExams = new ArrayList<>(examPopularity.entrySet());
         sortedExams.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())); // Descending order
-        //logger.info(sortedExams);
+        logger.debug(sortedExams);
         int numberOfPopularExams = 5; //  top 5 popular exams
         ArrayList<String> popularExams = new ArrayList<>();
         for (int i = 0; i < Math.min(numberOfPopularExams, sortedExams.size()); i++) {
@@ -737,8 +735,8 @@ public class Fitness {
                 Timeslot timeslot = exam.getTimeSlot();
                 if (timeslot.getStart().toLocalDate().isAfter(examPeriodThreshold)) {
                     popularExamsNotAtBeginningPunishment++;
-                    //logger.info("Popular Exam that is not in the first 4 days: " + exam.getCourseCode());
-                    //logger.info("Timeslot : " + timeslot);
+                    logger.debug("Popular Exam that is not in the first 4 days: " + exam.getCourseCode());
+                    logger.debug("Timeslot : " + timeslot);
 
                 }
             }

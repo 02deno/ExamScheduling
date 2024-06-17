@@ -24,7 +24,7 @@ public class ExcelDataParserHelper {
         if (headerRow != null) {
             for (Cell cell : headerRow) {
                 String columnHeader = cell.getStringCellValue();
-                //logger.info("Column Name:" + columnHeader);
+                logger.debug("Column Name:" + columnHeader);
 
                 if (columnIndexMap.containsKey(columnHeader)) {
                     columnIndexMap.put(columnHeader, cell.getColumnIndex());
@@ -74,7 +74,7 @@ public class ExcelDataParserHelper {
                     map.put(keyValue, info);
                 }
             }
-            logger.info("Data extracted successfully and hashmap created.");
+            logger.debug("Data extracted successfully and hashmap created.");
         } else {
             logger.error("Column headers not found.");
         }
