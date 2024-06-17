@@ -176,5 +176,82 @@ public class ExcelDataParserHelper {
         logger.debug(bestOfPopulations);
         return bestOfPopulations;
     }
+
+    public static List<Double> averageConstraintScoresOfPopulations(String filePath) {
+
+        List<List<Double>> populations = new ArrayList<>();
+
+        try (Reader in = new FileReader(filePath)) {
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(in);
+            List<Double> currentPopulation = null;
+            for (CSVRecord record : records) {
+                if (record.get(0).equals("Chromosome id")) { // header
+                    logger.debug("Encountered header line, time for a new generation");
+                    if (currentPopulation != null) {
+                        populations.add(currentPopulation);
+                    }
+                    currentPopulation = new ArrayList<>();
+                } else if (currentPopulation != null) {
+                    currentPopulation.add(Double.parseDouble(record.get(record.size() - 1)));
+                }
+            }
+            if (currentPopulation != null) {
+                populations.add(currentPopulation);
+            }
+        } catch (IOException e) {
+            logger.error("File not found!");
+        }
+
+        List<Double> averageOfPopulations = new ArrayList<>();
+        logger.debug(populations.size());
+        for (List<Double> population : populations) {
+            int size = population.size();
+            double sum = 0;
+            for (Double aDouble : population) {
+                sum += aDouble;
+            }
+            double average = sum / size;
+            averageOfPopulations.add(average);
+        }
+        logger.debug(averageOfPopulations.size());
+        logger.debug(averageOfPopulations);
+        return averageOfPopulations;
+    }
+
+    public static List<Double> bestConstraintScoresOfPopulations(String filePath) {
+
+        List<List<Double>> populations = new ArrayList<>();
+
+        try (Reader in = new FileReader(filePath)) {
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(in);
+            List<Double> currentPopulation = null;
+            for (CSVRecord record : records) {
+                if (record.get(0).equals("Chromosome id")) { // header
+                    logger.debug("Encountered header line, time for a new generation");
+                    if (currentPopulation != null) {
+                        populations.add(currentPopulation);
+                    }
+                    currentPopulation = new ArrayList<>();
+                } else if (currentPopulation != null) {
+                    currentPopulation.add(Double.parseDouble(record.get(record.size() - 1)));
+                }
+            }
+            if (currentPopulation != null) {
+                populations.add(currentPopulation);
+            }
+        } catch (IOException e) {
+            logger.error("File not found!");
+        }
+
+        List<Double> bestOfPopulations = new ArrayList<>();
+        logger.debug(populations.size());
+        for (List<Double> population : populations) {
+            double best = Collections.max(population);
+            bestOfPopulations.add(best);
+        }
+        logger.debug(bestOfPopulations.size());
+        logger.debug(bestOfPopulations);
+        return bestOfPopulations;
+    }
 }
 

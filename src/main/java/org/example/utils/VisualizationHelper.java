@@ -5,6 +5,7 @@ import org.example.models.Course;
 import org.example.models.Student;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class VisualizationHelper {
     public static void generateReports(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Classroom> classrooms) {
@@ -37,6 +38,29 @@ public class VisualizationHelper {
         }
         HTMLHelper.generateHistogram(classroomCapacities, baseFileName + "classroomCapacityHistogram.html", "Classroom Capacity");
 
+    }
+
+    public static void generateFitnessPlots() {
+        // For Fitness Scores
+        String fitnessFilePath = "graphs/FitnessScores/fitness_scores.csv";
+        List<Double> averageFitnessScoresOfPopulations = ExcelDataParserHelper.averageFitnessScoresOfPopulations(fitnessFilePath);
+        List<Double> bestFitnessScoresOfPopulations = ExcelDataParserHelper.bestFitnessScoresOfPopulations(fitnessFilePath);
+        HTMLHelper.generateLinePlot(averageFitnessScoresOfPopulations, "Average Fitness Scores of Populations", "average_fitness_scores.html");
+        HTMLHelper.generateLinePlot(bestFitnessScoresOfPopulations, "Best Fitness Scores of Populations", "best_fitness_scores.html");
+
+        // For Hard Constraints Scores
+        String fitnessHardFilePath = "graphs/FitnessScores/fitness_scores_HARD.csv";
+        List<Double> averageHardFitnessScoresOfPopulations = ExcelDataParserHelper.averageConstraintScoresOfPopulations(fitnessHardFilePath);
+        List<Double> bestHardFitnessScoresOfPopulations = ExcelDataParserHelper.bestConstraintScoresOfPopulations(fitnessHardFilePath);
+        HTMLHelper.generateLinePlot(averageHardFitnessScoresOfPopulations, "Average Hard Constraint Scores of Populations", "average_fitness_scores_HARD.html");
+        HTMLHelper.generateLinePlot(bestHardFitnessScoresOfPopulations, "Best Hard Constraint Scores of Populations", "best_fitness_scores_HARD.html");
+
+        // For Soft Constraints Scores
+        String fitnessSoftFilePath = "graphs/FitnessScores/fitness_scores_SOFT.csv";
+        List<Double> averageSoftFitnessScoresOfPopulations = ExcelDataParserHelper.averageConstraintScoresOfPopulations(fitnessSoftFilePath);
+        List<Double> bestSoftFitnessScoresOfPopulations = ExcelDataParserHelper.bestConstraintScoresOfPopulations(fitnessSoftFilePath);
+        HTMLHelper.generateLinePlot(averageSoftFitnessScoresOfPopulations, "Average Soft Constraint Scores of Populations", "average_fitness_scores_SOFT.html");
+        HTMLHelper.generateLinePlot(bestSoftFitnessScoresOfPopulations, "Best Soft Constraint Scores of Populations", "best_fitness_scores_SOFT.html");
     }
 
 
