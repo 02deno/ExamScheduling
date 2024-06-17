@@ -54,8 +54,8 @@ public class GeneticAlgorithm {
     private ArrayList<Chromosome> parents = new ArrayList<>();
     private double bestFitnessScore;
     private int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
-    private HashMap<Chromosome, Integer> chromosomeAgesMap = new HashMap<>();
     private ArrayList<EncodedExam> encodedExamArrayList = new ArrayList<>();
+    private long chromosomeIdCounter = 0;
 
 
     public void generateData() {
@@ -143,8 +143,8 @@ public class GeneticAlgorithm {
     public void encode() {
         this.encodedExams = Encode.encode(this.exams);
 
-        chromosome = new Chromosome();
-        chromosome.setEncodedExams(encodedExams);
+        chromosome = new Chromosome(chromosomeIdCounter, encodedExams, 0);
+        chromosomeIdCounter++;
         this.population.add(chromosome);
         logger.debug("Encode is finished.");
     }
@@ -224,7 +224,7 @@ public class GeneticAlgorithm {
         hardConstraintFitnessScores.clear();
         softConstraintFitnessScores.clear();
         fitnessScores.clear();
-      
+
         for (Chromosome chromosome : population) {
             double[][] scores = fitness.fitnessScore(chromosome.getEncodedExams());
 
@@ -238,9 +238,12 @@ public class GeneticAlgorithm {
 
             double hardFitnessScore = hardConstraintScores[hardConstraintScores.length - 1];
             hardConstraintFitnessScores.put(chromosome, hardFitnessScore);
+
             double softFitnessScore = softConstraintScores[softConstraintScores.length - 1];
             softConstraintFitnessScores.put(chromosome, softFitnessScore);
+
             fitnessScores.put(chromosome, fitnessScore);
+            chromosome.setFitnessScore(fitnessScore);
 
         }
 
@@ -273,7 +276,11 @@ public class GeneticAlgorithm {
 
     public ArrayList<Chromosome> crossover() {
         Crossover crossover = new Crossover();
-        return crossover.onePointCrossover(parents);
+        ArrayList<Chromosome> childChromosomes = crossover.onePointCrossover(parents, chromosomeIdCounter);
+        chromosomeIdCounter = childChromosomes.get(childChromosomes.size() - 1).getChromosomeId();
+        chromosomeIdCounter++;
+
+        return childChromosomes;
     }
 
     public void mutation() {
@@ -285,9 +292,9 @@ public class GeneticAlgorithm {
         Replacement replacement = new Replacement();
 
         if (currentGeneration == 1) {
-            replacement.fitnessBasedReplacement(this.fitnessScores, childChromosomesSize, population);
+            replacement.randomReplacement(population, childChromosomesSize);
         } else {
-            replacement.ageBasedReplacement(chromosomeAgesMap, childChromosomesSize, population);
+            replacement.ageBasedReplacement(population, childChromosomesSize);
         }
     }
 

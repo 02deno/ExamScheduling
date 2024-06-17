@@ -37,7 +37,6 @@ public class App
 
         while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
             currentGeneration += 1;
-
             geneticAlgorithm.updateAgesOfChromosomes();
             geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
             double bestFitnessScore = geneticAlgorithm.findBestFitnessScore();
@@ -49,6 +48,7 @@ public class App
             population.addAll(childChromosomes);
 
             geneticAlgorithm.calculateFitness();
+            logger.info("population size: " + population.size());
             double lastBestFitnessScore = geneticAlgorithm.findBestFitnessScore();
             logger.info("bestFitnessScore: " + bestFitnessScore);
             logger.info("lastBestFitnessScore: " + lastBestFitnessScore);
