@@ -67,8 +67,14 @@ public class Mutation {
             randomExam2 = random.nextInt(chromosome.getEncodedExams().size());
         } while (randomExam1 == randomExam2);
 
-        EncodedExam firstExam = chromosome.getEncodedExams().get(randomExam1);
-        EncodedExam secondExam = chromosome.getEncodedExams().get(randomExam2);
+        EncodedExam firstExamOriginal = chromosome.getEncodedExams().get(randomExam1);
+        EncodedExam secondExamOriginal = chromosome.getEncodedExams().get(randomExam2);
+
+        EncodedExam firstExam = new EncodedExam(firstExamOriginal.getCourseCode(), firstExamOriginal.getClassroomCode(),
+                firstExamOriginal.getTimeSlot(), firstExamOriginal.getInvigilators());
+
+        EncodedExam secondExam = new EncodedExam(secondExamOriginal.getCourseCode(), secondExamOriginal.getClassroomCode(),
+                secondExamOriginal.getTimeSlot(), secondExamOriginal.getInvigilators());
 
         Timeslot tempTimeSlot = firstExam.getTimeSlot();
         firstExam.setTimeSlot(secondExam.getTimeSlot());
@@ -77,6 +83,10 @@ public class Mutation {
         String tempClassCode = firstExam.getClassroomCode();
         firstExam.setClassroomCode(secondExam.getClassroomCode());
         secondExam.setClassroomCode(tempClassCode);
+
+        // update Encoded exams
+        EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), firstExam);
+        EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), secondExam);
     }
 
     public void randomResetMutation(Chromosome chromosome) {
