@@ -23,11 +23,11 @@ import static org.example.utils.DataStructureHelper.sortByValueDescending;
 @Data
 public class GeneticAlgorithm {
 
-    // TODO(Deniz) : Chromosome and Population classes can be avoid to
+    // TODO(Deniz) : Chromosome and Population classes can be added to
     //  reduce complexity
 
     // TODO(Deniz) : Add a diversity calculator, it should calculate the
-    //  diversity of a chromosom
+    //  diversity of a population
 
     private ArrayList<Course> courses = new ArrayList<>();
     private ArrayList<Invigilator> invigilators = new ArrayList<>();
@@ -343,5 +343,53 @@ public class GeneticAlgorithm {
         for (Chromosome chromosome: population) {
             chromosome.setAge(chromosome.getAge() + 1);
         }
+    }
+
+    public void algorithm() {
+
+        int wantedExamScheduleCount = 3;
+        int currentGeneration = 0;
+        int generationsWithoutImprovement = 0;
+        int maxGenerations = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
+        int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
+
+
+        ArrayList<Chromosome> population;
+        ArrayList<Chromosome> childChromosomes;
+
+        generateData();
+        population = initializationAndEncode();
+
+        while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
+            calculateFitness(true);
+            currentGeneration += 1;
+            updateAgesOfChromosomes();
+            //geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
+            double bestFitnessScore = findBestFitnessScore();
+
+            selectParents();
+            childChromosomes = crossover();
+            mutation();
+            replacement(currentGeneration, childChromosomes.size());
+            population.addAll(childChromosomes);
+
+
+            calculateFitness(false);
+            logger.debug("population size: " + population.size());
+            double lastBestFitnessScore = findBestFitnessScore();
+            logger.info("Generation: " + currentGeneration);
+            logger.info("bestFitnessScore: " + bestFitnessScore);
+            logger.info("lastBestFitnessScore: " + lastBestFitnessScore);
+
+            if (lastBestFitnessScore <= bestFitnessScore) {
+                generationsWithoutImprovement += 1;
+            } else {
+                generationsWithoutImprovement = 0;
+            }
+        }
+
+        // Create Graphs and Analyse Fitness Scores
+        VisualizationHelper.generateFitnessPlots();
+
     }
 }
