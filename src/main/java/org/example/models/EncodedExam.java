@@ -36,6 +36,5 @@ public class EncodedExam {
                 return;
             }
         }
-        logger.error("Student not found for update.");
     }
 }
