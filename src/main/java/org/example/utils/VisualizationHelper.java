@@ -61,7 +61,18 @@ public class VisualizationHelper {
         List<Double> bestSoftFitnessScoresOfPopulations = ExcelDataParserHelper.bestConstraintScoresOfPopulations(fitnessSoftFilePath);
         HTMLHelper.generateLinePlot(averageSoftFitnessScoresOfPopulations, "Average Soft Constraint Scores of Populations", "average_fitness_scores_SOFT.html");
         HTMLHelper.generateLinePlot(bestSoftFitnessScoresOfPopulations, "Best Soft Constraint Scores of Populations", "best_fitness_scores_SOFT.html");
+
+
     }
 
+    // TODO(Deniz) : % of criteria met graph
+    // TODO(Deniz) : combine mean, best and worst of scores in one graph
+    // TODO(Deniz) : with Elitsim / without Elitism graphs
+    // TODO(Deniz) : with adaptive parameters, with mutation rate of 0.1 and 0.001 in same graph
+    // TODO(Deniz) : with termination time
+    // TODO(Deniz) : needed time to reach gloabal optimum (average fitness score > 0.9)
+    // TODO(Deniz) : implement restart when initial best fitness is too low or
+    //  there is no progress in 50 generations
+    //  TODO(Deniz) : implement random/grid search for parameter control
 
 }
