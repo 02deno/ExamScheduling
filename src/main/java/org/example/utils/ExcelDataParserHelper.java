@@ -121,7 +121,7 @@ public class ExcelDataParserHelper {
                 populations.add(currentPopulation);
             }
         } catch (IOException e) {
-            logger.error("File not found!");
+            logger.error("File " + filePath + " not found!");
         }
         return populations;
     }

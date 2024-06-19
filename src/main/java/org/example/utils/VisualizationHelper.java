@@ -80,7 +80,7 @@ public class VisualizationHelper {
     }
 
     public static void generateFitnessPlotsExperiment(double experimentId) {
-        String fitnessFilePath = "graphs/FitnessScores/fitness_scores.csv";
+        String fitnessFilePath = "experiments/experiment_" + (int) experimentId + "/FitnessScores/fitness_scores.csv";
         String basePath = "experiments/experiment_" + (int) experimentId + "/";
         FileHelper.createDirectory(basePath);
         String outputPath = basePath + "fitness_score.html";
