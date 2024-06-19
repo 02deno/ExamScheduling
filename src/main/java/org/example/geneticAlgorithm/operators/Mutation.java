@@ -1,5 +1,6 @@
 package org.example.geneticAlgorithm.operators;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.models.Chromosome;
@@ -9,9 +10,7 @@ import org.example.models.Timeslot;
 import org.example.utils.ConfigHelper;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -26,17 +25,15 @@ public class Mutation {
     private static final Logger logger = LogManager.getLogger(Mutation.class);
     private final Map<Chromosome, Double> mutationRates = new ConcurrentHashMap<>();
     private final Random random = new Random();
-    private final double lowMutationRate = Double.parseDouble(ConfigHelper.getProperty("LOW_MUTATION_RATE"));
-    private final double highMutationRate = Double.parseDouble(ConfigHelper.getProperty("HIGH_MUTATION_RATE"));
     private final int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
     private final LocalDate startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
     private final LocalDate endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE"));
     private final LocalTime startTime = LocalTime.parse(ConfigHelper.getProperty("START_TIME"));
     private final LocalTime endTime = LocalTime.parse(ConfigHelper.getProperty("END_TIME"));
-    private final ArrayList<Chromosome> elitChromosomes = new ArrayList<>();
-    private final double elitismPercent = populationSize * 0.1;
+    private final ArrayList<Chromosome> eliteChromosomes = new ArrayList<>();
+    private final double elitismPercent = Double.parseDouble(ConfigHelper.getProperty("ELITISM_PERCENT"));
 
-    public void mutation(ArrayList<Chromosome> population, ArrayList<Timeslot> timeslots, ArrayList<Classroom> classrooms) {
+    public void mutation(ArrayList<Chromosome> population, ArrayList<Classroom> classrooms, double lowMutationRate, double highMutationRate, boolean isStable) {
 
         ArrayList<Double> fitnessScores = new ArrayList<>();
         for (Chromosome chromosome : population) {
@@ -44,15 +41,20 @@ public class Mutation {
         }
 
         double threshHold = calculateAvgFitnessScore(population);
-        setMutationRates(population, threshHold);
+        setMutationRates(population, threshHold, lowMutationRate, highMutationRate);
         elitism(population);
 
         mutationRates.forEach((key, value) -> {
             double randomProbability = random.nextDouble() * 0.1;
 
-            if (randomProbability <= value && !elitChromosomes.contains(key)) {
-                randomResetMutation(key, classrooms);
-                //swapMutation(key);
+            if (randomProbability <= value && !eliteChromosomes.contains(key)) {
+                int resetExamThreshold = key.getFitnessScore() < threshHold ? 5 : 2;
+
+                if (isStable) {
+                    swapMutation(key, resetExamThreshold);
+                } else {
+                    randomResetMutation(key, classrooms, resetExamThreshold);
+                }
             }
         });
     }
@@ -61,68 +63,66 @@ public class Mutation {
         population.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);//azalan
 
         for (Chromosome chromosome : population) {
-            elitChromosomes.add(chromosome);
-            if (elitChromosomes.size() == elitismPercent) {
+            eliteChromosomes.add(chromosome);
+            if (eliteChromosomes.size() == populationSize * elitismPercent) {
                 break;
             }
         }
     }
 
-    public void swapMutation(Chromosome chromosome) {
-        int randomExam1 = random.nextInt(chromosome.getEncodedExams().size());
-        int randomExam2;
-        do {
-            randomExam2 = random.nextInt(chromosome.getEncodedExams().size());
-        } while (randomExam1 == randomExam2);
+    public void swapMutation(Chromosome chromosome, double resetExamThreshold) {
+        Set<ImmutablePair<Integer, Integer>> uniqueRandomExamIndexPairs = new HashSet<>();
+        while (uniqueRandomExamIndexPairs.size() < resetExamThreshold) {
+            int randomExamIndex = random.nextInt(chromosome.getEncodedExams().size());
+            int randomExamIndex2;
+            do {
+                randomExamIndex2 = random.nextInt(chromosome.getEncodedExams().size());
+            } while (randomExamIndex == randomExamIndex2);
 
-        EncodedExam firstExamOriginal = chromosome.getEncodedExams().get(randomExam1);
-        EncodedExam secondExamOriginal = chromosome.getEncodedExams().get(randomExam2);
+            uniqueRandomExamIndexPairs.add(new ImmutablePair<>(randomExamIndex, randomExamIndex2));
+        }
 
-        EncodedExam firstExam = new EncodedExam(firstExamOriginal.getCourseCode(), firstExamOriginal.getClassroomCode(),
-                firstExamOriginal.getTimeSlot(), firstExamOriginal.getInvigilators());
+        for (ImmutablePair<Integer, Integer> indexPair : uniqueRandomExamIndexPairs) {
+            EncodedExam firstOriginalExam = chromosome.getEncodedExams().get(indexPair.left);
+            EncodedExam secondOriginalExam = chromosome.getEncodedExams().get(indexPair.right);
 
-        EncodedExam secondExam = new EncodedExam(secondExamOriginal.getCourseCode(), secondExamOriginal.getClassroomCode(),
-                secondExamOriginal.getTimeSlot(), secondExamOriginal.getInvigilators());
+            EncodedExam firstCopyExam = new EncodedExam(firstOriginalExam.getCourseCode(), firstOriginalExam.getClassroomCode(),
+                    firstOriginalExam.getTimeSlot(), firstOriginalExam.getInvigilators());
+            EncodedExam secondCopyExam = new EncodedExam(secondOriginalExam.getCourseCode(), secondOriginalExam.getClassroomCode(),
+                    secondOriginalExam.getTimeSlot(), secondOriginalExam.getInvigilators());
 
-        Timeslot tempTimeSlot = firstExam.getTimeSlot();
-        firstExam.setTimeSlot(secondExam.getTimeSlot());
-        secondExam.setTimeSlot(tempTimeSlot);
+            Timeslot tempTimeslot = firstCopyExam.getTimeSlot();
+            firstCopyExam.setTimeSlot(secondCopyExam.getTimeSlot());
+            secondCopyExam.setTimeSlot(tempTimeslot);
 
-        String tempClassCode = firstExam.getClassroomCode();
-        firstExam.setClassroomCode(secondExam.getClassroomCode());
-        secondExam.setClassroomCode(tempClassCode);
+            String tempClassCode = firstCopyExam.getClassroomCode();
+            firstCopyExam.setClassroomCode(secondCopyExam.getClassroomCode());
+            secondCopyExam.setClassroomCode(tempClassCode);
 
-        // update Encoded exams
-        EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), firstExam);
-        EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), secondExam);
+            EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), firstCopyExam);
+            EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), secondCopyExam);
+        }
     }
 
-    public void randomResetMutation(Chromosome chromosome, ArrayList<Classroom> classrooms) {
-        int randomExam1 = random.nextInt(chromosome.getEncodedExams().size());
-        int randomExam2;
-        do {
-            randomExam2 = random.nextInt(chromosome.getEncodedExams().size());
-        } while (randomExam1 == randomExam2);
+    public void randomResetMutation(Chromosome chromosome, ArrayList<Classroom> classrooms, double resetExamThreshold) {
+        Set<Integer> uniqueRandomExamIndexes = new HashSet<>();
+        while (uniqueRandomExamIndexes.size() < resetExamThreshold) {
+            int randomExamIndex = random.nextInt(chromosome.getEncodedExams().size());
+            uniqueRandomExamIndexes.add(randomExamIndex);
+        }
 
-        EncodedExam firstExamOriginal = chromosome.getEncodedExams().get(randomExam1);
-        EncodedExam secondExamOriginal = chromosome.getEncodedExams().get(randomExam2);
+        for (int index : uniqueRandomExamIndexes) {
+            EncodedExam originalExam = chromosome.getEncodedExams().get(index);
+            EncodedExam copyExam = new EncodedExam(originalExam.getCourseCode(), originalExam.getClassroomCode(),
+                    originalExam.getTimeSlot(), originalExam.getInvigilators());
 
-        EncodedExam firstExam = new EncodedExam(firstExamOriginal.getCourseCode(), firstExamOriginal.getClassroomCode(),
-                firstExamOriginal.getTimeSlot(), firstExamOriginal.getInvigilators());
-        EncodedExam secondExam = new EncodedExam(secondExamOriginal.getCourseCode(), secondExamOriginal.getClassroomCode(),
-                secondExamOriginal.getTimeSlot(), secondExamOriginal.getInvigilators());
+            copyExam.setTimeSlot(getRandomTimeslot(copyExam, getRandomDay()));
+            int randomClassroomIndex = random.nextInt(classrooms.size());
+            copyExam.setClassroomCode(classrooms.get(randomClassroomIndex).getClassroomCode());
 
+            EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), copyExam);
+        }
 
-        firstExam.setTimeSlot(getRandomTimeslot(firstExam, getRandomDay()));
-        int randomClassroom1 = random.nextInt(classrooms.size());
-        firstExam.setClassroomCode(classrooms.get(randomClassroom1).getClassroomCode());
-
-        secondExam.setTimeSlot(getRandomTimeslot(secondExam, getRandomDay()));
-        int randomClassroom2 = random.nextInt(classrooms.size());
-        secondExam.setClassroomCode(classrooms.get(randomClassroom2).getClassroomCode());
-
-        EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), firstExam);
-        EncodedExam.updateEncodedExam(chromosome.getEncodedExams(), secondExam);
     }
 
     private LocalDate getRandomDay() {
@@ -144,7 +144,7 @@ public class Mutation {
         return new Timeslot(randomTimeSlotStart, randomTimeSlotEnd);
     }
 
-    private void setMutationRates(ArrayList<Chromosome> population, double threshHold) {
+    private void setMutationRates(ArrayList<Chromosome> population, double threshHold, double lowMutationRate, double highMutationRate) {
 
         for (Chromosome chromosome : population) {
             if (chromosome.getFitnessScore() < threshHold) {

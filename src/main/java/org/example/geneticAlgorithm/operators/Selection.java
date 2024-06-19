@@ -44,7 +44,7 @@ public class Selection {
             totalScore += chromosome.getFitnessScore();
         }
 
-        while (i < populationSize/2) {
+        while (i < populationSize * 0.7) {
             double randomValue = random.nextDouble() * totalScore;
 
             double temp = 0;
@@ -65,7 +65,7 @@ public class Selection {
         int i = 0;
         ArrayList<Chromosome> tournamentChromosomes = new ArrayList<>();
 
-        while (i < populationSize/2) {
+        while (i < populationSize * 0.7) {
             for (int j = 0; j < numberOfChromosomesToBeSelected; j++) {
                 int randomChromosomeIndex = random.nextInt(populationSize);
                 tournamentChromosomes.add(population.get(randomChromosomeIndex));
@@ -96,7 +96,7 @@ public class Selection {
             totalProbability += probability;
         }
 
-        while (i < populationSize/2) {
+        while (i < populationSize * 0.7) {
             double randomValue = random.nextDouble() * totalProbability;
 
             double temp = 0;

@@ -53,10 +53,15 @@ public class GeneticAlgorithm {
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
     private ArrayList<Chromosome> parents = new ArrayList<>();
     private double bestFitnessScore;
+    private double lastBestFitnessScore;
     private int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
     private ArrayList<EncodedExam> encodedExamArrayList = new ArrayList<>();
     private long chromosomeIdCounter = 0;
     private int maxGeneration = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
+    private double lowMutationRate = Double.parseDouble(ConfigHelper.getProperty("LOW_MUTATION_RATE"));
+    private double highMutationRate = Double.parseDouble(ConfigHelper.getProperty("HIGH_MUTATION_RATE"));
+    private double crossoverRate = Double.parseDouble(ConfigHelper.getProperty("CROSSOVER_RATE"));
+    private boolean isStable = false;
 
 
     public void generateData() {
@@ -314,6 +319,8 @@ public class GeneticAlgorithm {
         Selection selection = new Selection();
         if (currentGeneration >= maxGeneration * 0.7) {
             parents = selection.rankSelection(population);
+        } else if (isStable) {
+            parents = selection.rouletteWheelSelection(population);
         } else {
             parents = selection.tournamentSelection(population);
         }
@@ -322,7 +329,14 @@ public class GeneticAlgorithm {
 
     public ArrayList<Chromosome> crossover() {
         Crossover crossover = new Crossover();
-        ArrayList<Chromosome> childChromosomes = crossover.twoPointCrossover(parents, chromosomeIdCounter);
+        ArrayList<Chromosome> childChromosomes;
+
+        if (isStable) {
+            childChromosomes = crossover.onePointCrossover(parents, chromosomeIdCounter, crossoverRate);
+        } else {
+            childChromosomes = crossover.twoPointCrossover(parents, chromosomeIdCounter, crossoverRate);
+        }
+
         chromosomeIdCounter = childChromosomes.get(childChromosomes.size() - 1).getChromosomeId();
         chromosomeIdCounter++;
 
@@ -331,7 +345,7 @@ public class GeneticAlgorithm {
 
     public void mutation() {
         Mutation mutation = new Mutation();
-        mutation.mutation(population, this.timeslots, this.classrooms);
+        mutation.mutation(population, this.classrooms, lowMutationRate, highMutationRate, isStable);
     }
 
     public void replacement(int currentGeneration, int childChromosomesSize) {
@@ -354,6 +368,7 @@ public class GeneticAlgorithm {
         int wantedExamScheduleCount = 3;
         int currentGeneration = 0;
         int generationsWithoutImprovement = 0;
+        int generationsWithUnderImprovementThreshold = 0;
         int maxGenerations = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
         int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
 
@@ -373,7 +388,7 @@ public class GeneticAlgorithm {
             currentGeneration += 1;
             updateAgesOfChromosomes();
             //geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
-            double bestFitnessScore = findBestFitnessScore();
+            bestFitnessScore = findBestFitnessScore();
 
             selectParents(currentGeneration);
             childChromosomes = crossover();
@@ -384,16 +399,34 @@ public class GeneticAlgorithm {
 
             calculateFitness(false);
             logger.debug("population size: " + population.size());
-            double lastBestFitnessScore = findBestFitnessScore();
+            lastBestFitnessScore = findBestFitnessScore();
             logger.info("Generation: " + currentGeneration);
             logger.info("bestFitnessScore: " + bestFitnessScore);
             logger.info("lastBestFitnessScore: " + lastBestFitnessScore);
+
 
             if (lastBestFitnessScore <= bestFitnessScore) {
                 generationsWithoutImprovement += 1;
             } else {
                 generationsWithoutImprovement = 0;
+                isStable = false;
             }
+
+            double improvement = lastBestFitnessScore - bestFitnessScore;
+            if (improvement < 0.01) {
+                generationsWithUnderImprovementThreshold++;
+            } else {
+                generationsWithUnderImprovementThreshold = 0;
+            }
+
+            if (generationsWithoutImprovement == 10) {
+                logger.info("parameters are changing..");
+                lowMutationRate += 0.001;
+                highMutationRate += 0.01;
+                crossoverRate += 0.05;
+                isStable = true;
+            }
+
         }
         double convergenceRate = (findBestFitnessScore() - initalBestFitness) / currentGeneration;
 
