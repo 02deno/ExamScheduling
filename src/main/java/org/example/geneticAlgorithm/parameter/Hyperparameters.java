@@ -20,6 +20,7 @@ public class Hyperparameters {
     private List<Double> lowMutationRates;
     private List<Double> highMutationRates;
     private List<Double> crossoverRates;
+    private List<Integer> tournamentSelectionNumbers;
 
     private int populationSizeMin;
     private int populationSizeMax;
@@ -33,6 +34,8 @@ public class Hyperparameters {
     private double highMutationRateMin;
     private double crossoverRateMin;
     private double crossoverRateMax;
+    private int tournamentSelectionNumberMin;
+    private int tournamentSelectionNumberMax;
 
 
     public Hyperparameters() {
@@ -44,6 +47,7 @@ public class Hyperparameters {
         lowMutationRates = parseDoubleList(ConfigHelper.getProperty("LOW_MUTATION_RATE_VALUES"));
         highMutationRates = parseDoubleList(ConfigHelper.getProperty("HIGH_MUTATION_RATE_VALUES"));
         crossoverRates = parseDoubleList(ConfigHelper.getProperty("CROSSOVER_RATE_VALUES"));
+        tournamentSelectionNumbers = parseIntegerList(ConfigHelper.getProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES_VALUES"));
 
         // Random Search Parameters
         populationSizeMin = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE_MIN"));
@@ -58,6 +62,8 @@ public class Hyperparameters {
         highMutationRateMax = Double.parseDouble(ConfigHelper.getProperty("HIGH_MUTATION_RATE_MAX"));
         crossoverRateMin = Double.parseDouble(ConfigHelper.getProperty("CROSSOVER_RATE_MAX"));
         crossoverRateMax = Double.parseDouble(ConfigHelper.getProperty("CROSSOVER_RATE_MIN"));
+        tournamentSelectionNumberMin = Integer.parseInt(ConfigHelper.getProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES_MIN"));
+        tournamentSelectionNumberMax = Integer.parseInt(ConfigHelper.getProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES_MAX"));
 
     }
 
