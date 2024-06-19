@@ -1,0 +1,37 @@
+name: Run Java Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '21'
+
+    - name: Build with Maven
+      run: mvn clean install
+
+    - name: Run Application
+      run: java -cp src/main/java/org/example/App.java org.example.App
+
+    - name: Save Directory Graphs
+      uses: actions/upload-artifact@v2
+      with:
+        name: graphs/
+        path: graphs/
+
+    - name: Save Directory Experiments
+      uses: actions/upload-artifact@v2
+      with:
+        name: experiments/
+        path: experiments/
