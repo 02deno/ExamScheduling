@@ -33,7 +33,8 @@ public class Mutation {
     private final ArrayList<Chromosome> eliteChromosomes = new ArrayList<>();
     private final double elitismPercent = Double.parseDouble(ConfigHelper.getProperty("ELITISM_PERCENT"));
 
-    public void mutation(ArrayList<Chromosome> population, ArrayList<Classroom> classrooms, double lowMutationRate, double highMutationRate, boolean isStable) {
+    public void mutation(ArrayList<Chromosome> population, ArrayList<Classroom> classrooms, double lowMutationRate, double highMutationRate, boolean isStable,
+                         int currentGeneration) {
 
         ArrayList<Double> fitnessScores = new ArrayList<>();
         for (Chromosome chromosome : population) {
@@ -46,16 +47,39 @@ public class Mutation {
 
         mutationRates.forEach((key, value) -> {
             double randomProbability = random.nextDouble() * 0.1;
+            if (currentGeneration > 200 && currentGeneration < 500) {
+                // elitismus off and more mutation
+                if (randomProbability <= value) {
+                    int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 4 : 4;
 
-            if (randomProbability <= value && !eliteChromosomes.contains(key)) {
-                int resetExamThreshold = key.getFitnessScore() < threshHold ? 5 : 2;
+                    if (isStable) {
+                        swapMutation(key, resetExamThreshold);
+                    } else {
+                        randomResetMutation(key, classrooms, resetExamThreshold);
+                    }
+                }
+            } else if (currentGeneration > 500 && currentGeneration < 1000) {
+                if (randomProbability <= value) {
+                    int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 3 : 8;
 
-                if (isStable) {
-                    swapMutation(key, resetExamThreshold);
-                } else {
-                    randomResetMutation(key, classrooms, resetExamThreshold);
+                    if (isStable) {
+                        swapMutation(key, resetExamThreshold);
+                    } else {
+                        randomResetMutation(key, classrooms, resetExamThreshold);
+                    }
+                }
+            } else {
+                if (randomProbability <= value && !eliteChromosomes.contains(key)) {
+                    int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 5 : 2;
+
+                    if (isStable) {
+                        swapMutation(key, resetExamThreshold);
+                    } else {
+                        randomResetMutation(key, classrooms, resetExamThreshold);
+                    }
                 }
             }
+
         });
     }
 

@@ -446,8 +446,10 @@ public class Fitness {
             if (course != null && classroom != null) {
                 boolean pcLab = classroom.isPcLab();
                 boolean pcRequired = course.isPcExam();
-                if (pcLab != pcRequired) {
-                    allExamsHaveRequiredEquipmentsPunishment++;
+                if (pcRequired) {
+                    if (!pcLab) {
+                        allExamsHaveRequiredEquipmentsPunishment++;
+                    }
                 }
             }
         }
