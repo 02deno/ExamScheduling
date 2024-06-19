@@ -58,7 +58,7 @@ public class HyperparameterSearch {
                         for (double highMutationRate : parameters.getHighMutationRates()) {
                             for (double crossoverRate : parameters.getCrossoverRates()) {
 
-                                generationCount = 10; // to check grid search functionality, later this line will be deleted
+                                //generationCount = 10; // to check grid search functionality, later this line will be deleted
 
                                 logger.debug("Population Size: " + populationSize);
                                 logger.debug("Generation Count: " + generationCount);
@@ -175,7 +175,7 @@ public class HyperparameterSearch {
             Random random = new Random();
             int populationSize = random.nextInt(parameters.getPopulationSizeMax() - parameters.getPopulationSizeMin() + 1) + parameters.getPopulationSizeMin();
             int generationCount = random.nextInt(parameters.getGenerationNumberMax() - parameters.getGenerationNumberMin() + 1) + parameters.getGenerationNumberMin();
-            generationCount = 10; // to check random search functionality, later this line will be deleted
+            //generationCount = 10; // to check random search functionality, later this line will be deleted
             int generationWithoutImprovement = random.nextInt(parameters.getGenerationWithoutImprovementMax() - parameters.getGenerationWithoutImprovementMin() + 1) + parameters.getGenerationWithoutImprovementMin();
             double lowMutationRate = parameters.getLowMutationRateMin() + (parameters.getLowMutationRateMax() - parameters.getLowMutationRateMin()) * random.nextDouble();
             double highMutationRate = parameters.getHighMutationRateMin() + (parameters.getHighMutationRateMax() - parameters.getHighMutationRateMin()) * random.nextDouble();
