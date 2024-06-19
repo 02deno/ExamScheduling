@@ -19,8 +19,8 @@ import java.util.*;
 public class Replacement {
     private static final Logger logger = LogManager.getLogger(GeneticAlgorithm.class);
     private int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
-    private ArrayList<Chromosome> elitChromosomes = new ArrayList<>();
-    private double elitismPercent = populationSize * 0.1;
+    private ArrayList<Chromosome> eliteChromosomes = new ArrayList<>();
+    private double elitismPercent = Double.parseDouble(ConfigHelper.getProperty("ELITISM_PERCENT"));
     private ArrayList<Chromosome> chromosomesToBeRemoved = new ArrayList<>();
     private Random random = new Random();
 
@@ -28,8 +28,8 @@ public class Replacement {
         population.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);//azalan
 
         for (Chromosome chromosome : population) {
-            elitChromosomes.add(chromosome);
-            if (elitChromosomes.size() == elitismPercent) {
+            eliteChromosomes.add(chromosome);
+            if (eliteChromosomes.size() == populationSize * elitismPercent) {
                 break;
             }
         }
@@ -42,7 +42,7 @@ public class Replacement {
 
 
         for (Chromosome chromosome : population) {
-            if (!elitChromosomes.contains(chromosome)) {
+            if (!eliteChromosomes.contains(chromosome)) {
                 if (chromosomesToBeRemoved.size() == childChromosomesSize) {
                     break;
                 }
@@ -59,7 +59,7 @@ public class Replacement {
         Collections.shuffle(population);
 
         for (Chromosome chromosome : population) {
-            if (!elitChromosomes.contains(chromosome)) {
+            if (!eliteChromosomes.contains(chromosome)) {
                 if (chromosomesToBeRemoved.size() == childChromosomesSize) {
                     break;
                 }

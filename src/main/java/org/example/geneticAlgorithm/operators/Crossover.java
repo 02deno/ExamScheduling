@@ -3,7 +3,6 @@ package org.example.geneticAlgorithm.operators;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.example.models.Chromosome;
 import org.example.models.EncodedExam;
-import org.example.utils.ConfigHelper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -12,7 +11,6 @@ import java.util.Random;
 public class Crossover {
 
     private final Random random = new Random();
-    private final double crossoverRate = Double.parseDouble(ConfigHelper.getProperty("CROSSOVER_RATE"));
     private Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
     private ArrayList<Chromosome> childChromosomes = new ArrayList<>();;
     private Chromosome firstChildChromosome;
@@ -23,8 +21,7 @@ public class Crossover {
     private int firstCrossoverPoint;
     private  int secondCrossoverPoint;
 
-    public ArrayList<Chromosome> onePointCrossover(ArrayList<Chromosome> parents, long chromosomeIdCounter) {
-
+    public ArrayList<Chromosome> onePointCrossover(ArrayList<Chromosome> parents, long chromosomeIdCounter, double crossoverRate) {
         for (Chromosome parent : parents) {
             parent.getEncodedExams().sort(comparator);
         }
@@ -38,8 +35,8 @@ public class Crossover {
             secondChildList = new ArrayList<>();
 
             if (randomProbability <= crossoverRate) {
-                Chromosome firstParent = getRandomParents(parents).right;
-                Chromosome secondParent = getRandomParents(parents).left;
+                Chromosome firstParent = getRandomParents(parents).left;
+                Chromosome secondParent = getRandomParents(parents).right;
 
                 crossoverPoint = random.nextInt(firstParent.getEncodedExams().size());
 
@@ -58,7 +55,7 @@ public class Crossover {
         return childChromosomes;
     }
 
-    public ArrayList<Chromosome> twoPointCrossover(ArrayList<Chromosome> parents, long chromosomeIdCounter) {
+    public ArrayList<Chromosome> twoPointCrossover(ArrayList<Chromosome> parents, long chromosomeIdCounter, double crossoverRate) {
         for (Chromosome parent : parents) {
             parent.getEncodedExams().sort(comparator);
         }
@@ -72,8 +69,8 @@ public class Crossover {
             secondChildList = new ArrayList<>();
 
             if (randomProbability <= crossoverRate) {
-                Chromosome firstParent = getRandomParents(parents).right;
-                Chromosome secondParent = getRandomParents(parents).left;
+                Chromosome firstParent = getRandomParents(parents).left;
+                Chromosome secondParent = getRandomParents(parents).right;
 
                 firstCrossoverPoint = random.nextInt(firstParent.getEncodedExams().size() - 2);
                 secondCrossoverPoint = random.nextInt(

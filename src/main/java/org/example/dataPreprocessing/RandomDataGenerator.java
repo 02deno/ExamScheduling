@@ -47,7 +47,7 @@ public class RandomDataGenerator {
         String courseDataPath = "data/tum_dersler.xlsx";
         String studentDataPath = "data/students.xlsx";
         String invigilatorDataPath = "data/invigilators.xlsx";
-        String classroomDataPath = "data/Classrooms_20211103.xlsx";
+        String classroomDataPath = "data/Classrooms_v3.xlsx";
         CourseDataParser courseDataParser = new CourseDataParser(courseDataPath);
         PersonDataParser personDataParser = new PersonDataParser(studentDataPath, invigilatorDataPath);
         ClassroomDataParser classroomDataParser = new ClassroomDataParser(classroomDataPath);
@@ -65,7 +65,7 @@ public class RandomDataGenerator {
         logger.debug("Invigilator debugs extracted successfully:)");
 
         HashMap<String, ArrayList<Object>> classroomData = classroomDataParser.parseClassroomData();
-        //logger.debug(classroomData);
+        //logger.info(classroomData);
         logger.debug("Classroom infos extracted successfully:)");
 
         HashMap<String, HashMap<String, ArrayList<Object>>> result = new HashMap<>();
