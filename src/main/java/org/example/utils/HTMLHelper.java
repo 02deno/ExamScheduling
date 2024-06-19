@@ -476,4 +476,93 @@ public class HTMLHelper {
         }
     }
 
+    public static void generateLinePlotAll(List<Double> averageFitnessScores,
+                                           List<Double> bestFitnessScoresOfPopulations,
+                                           List<Double> worstFitnessScoresOfPopulations,
+                                           String title,
+                                           String path) {
+
+        StringBuilder xValues = new StringBuilder("[");
+        StringBuilder yValues1 = new StringBuilder("[");
+        StringBuilder yValues2 = new StringBuilder("[");
+        StringBuilder yValues3 = new StringBuilder("[");
+
+        for (int i = 0; i < averageFitnessScores.size(); i++) {
+            xValues.append(i + 1);
+            yValues1.append(averageFitnessScores.get(i));
+            yValues2.append(bestFitnessScoresOfPopulations.get(i));
+            yValues3.append(worstFitnessScoresOfPopulations.get(i));
+            if (i < averageFitnessScores.size() - 1) {
+                xValues.append(", ");
+                yValues1.append(", ");
+                yValues2.append(", ");
+                yValues3.append(", ");
+            }
+        }
+        xValues.append("]");
+        yValues1.append("]");
+        yValues2.append("]");
+        yValues3.append("]");
+
+        StringBuilder htmlContent = new StringBuilder();
+        htmlContent.append("<html>");
+        htmlContent.append("<head>");
+        htmlContent.append("<title>").append(title).append("</title>");
+        htmlContent.append("<script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script>");
+        htmlContent.append("<style>");
+        htmlContent.append("body { font-family: Arial, sans-serif; margin: 40px; }");
+        htmlContent.append("#plot { width: 100%; height: 100%; }");
+        htmlContent.append("</style>");
+        htmlContent.append("</head>");
+        htmlContent.append("<body>");
+        htmlContent.append("<div id=\"plot\"></div>");
+        htmlContent.append("<script>");
+        htmlContent.append("var trace1 = {");
+        htmlContent.append("x: ").append(xValues).append(",");
+        htmlContent.append("y: ").append(yValues1).append(",");
+        htmlContent.append("mode: 'lines+markers',");
+        htmlContent.append("type: 'scatter',");
+        htmlContent.append("name: 'Average Fitness Scores',");
+        htmlContent.append("line: { color: 'blue', width: 2 },");
+        htmlContent.append("marker: { size: 8, color: 'red' }");
+        htmlContent.append("};");
+        htmlContent.append("var trace2 = {");
+        htmlContent.append("x: ").append(xValues).append(",");
+        htmlContent.append("y: ").append(yValues2).append(",");
+        htmlContent.append("mode: 'lines+markers',");
+        htmlContent.append("type: 'scatter',");
+        htmlContent.append("name: 'Best Fitness Scores',");
+        htmlContent.append("line: { color: 'green', width: 2 },");
+        htmlContent.append("marker: { size: 8, color: 'orange' }");
+        htmlContent.append("};");
+        htmlContent.append("var trace3 = {");
+        htmlContent.append("x: ").append(xValues).append(",");
+        htmlContent.append("y: ").append(yValues3).append(",");
+        htmlContent.append("mode: 'lines+markers',");
+        htmlContent.append("type: 'scatter',");
+        htmlContent.append("name: 'Worst Fitness Scores',");
+        htmlContent.append("line: { color: 'purple', width: 2 },");
+        htmlContent.append("marker: { size: 8, color: 'yellow' }");
+        htmlContent.append("};");
+        htmlContent.append("var data = [trace1, trace2, trace3];");
+        htmlContent.append("var layout = {");
+        htmlContent.append("title: { text: '").append(title).append("', font: { size: 24 } },");
+        htmlContent.append("xaxis: { title: { text: 'Population', font: { size: 18 } }, showgrid: true, zeroline: true },");
+        htmlContent.append("yaxis: { title: { text: 'Fitness Score', font: { size: 18 } }, showgrid: true, zeroline: true },");
+        htmlContent.append("margin: { l: 50, r: 50, b: 50, t: 50 },");
+        htmlContent.append("paper_bgcolor: 'white',");
+        htmlContent.append("plot_bgcolor: '#f8f8f8'");
+        htmlContent.append("};");
+        htmlContent.append("Plotly.newPlot('plot', data, layout);");
+        htmlContent.append("</script>");
+        htmlContent.append("</body>");
+        htmlContent.append("</html>");
+
+        try (FileWriter fileWriter = new FileWriter(path)) {
+            fileWriter.write(htmlContent.toString());
+        } catch (IOException e) {
+            logger.error("Some error occurred while writing HTML file to desired path", e);
+        }
+    }
+
 }

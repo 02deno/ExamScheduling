@@ -9,6 +9,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -66,6 +69,17 @@ public class FileHelper {
             }
         } else {
             logger.debug("Directory already exists: " + baseFileName);
+        }
+    }
+
+    public static void copyFile(String source, String destination) {
+        Path sourcePath = Paths.get(source);
+        Path destinationPath = Paths.get(destination, sourcePath.getFileName().toString());
+
+        try {
+            Files.copy(sourcePath, destinationPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Some error occured while copying:" + e);
         }
     }
 

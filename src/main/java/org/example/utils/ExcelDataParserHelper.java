@@ -100,8 +100,7 @@ public class ExcelDataParserHelper {
         return map;
     }
 
-    public static List<Double> averageFitnessScoresOfPopulations(String filePath) {
-
+    public static List<List<Double>> readFitnessScores(String filePath) {
         List<List<Double>> populations = new ArrayList<>();
 
         try (Reader in = new FileReader(filePath)) {
@@ -124,27 +123,59 @@ public class ExcelDataParserHelper {
         } catch (IOException e) {
             logger.error("File not found!");
         }
+        return populations;
+    }
 
+    public static List<Double> getAverage(List<List<Double>> populations) {
         List<Double> averageOfPopulations = new ArrayList<>();
-        logger.debug(populations.size());
         for (List<Double> population : populations) {
             int size = population.size();
             double sum = 0;
-            for (Double aDouble : population) {
-                sum += aDouble;
+            for (Double fitnessScoreChromosom : population) {
+                sum += fitnessScoreChromosom;
             }
             double average = sum / size;
             averageOfPopulations.add(average);
         }
-        logger.debug(averageOfPopulations.size());
-        logger.debug(averageOfPopulations);
         return averageOfPopulations;
     }
 
+    public static List<Double> getBest(List<List<Double>> populations) {
+        List<Double> bestOfPopulations = new ArrayList<>();
+        for (List<Double> population : populations) {
+            double best = Collections.max(population);
+            bestOfPopulations.add(best);
+        }
+        return bestOfPopulations;
+    }
+
+    public static List<Double> getWorst(List<List<Double>> populations) {
+        List<Double> worstOfPopulations = new ArrayList<>();
+        for (List<Double> population : populations) {
+            double worst = Collections.min(population);
+            worstOfPopulations.add(worst);
+        }
+        return worstOfPopulations;
+    }
+
+    public static List<Double> averageFitnessScoresOfPopulations(String filePath) {
+        List<List<Double>> populations = readFitnessScores(filePath);
+        return getAverage(populations);
+    }
+
+
     public static List<Double> bestFitnessScoresOfPopulations(String filePath) {
+        List<List<Double>> populations = readFitnessScores(filePath);
+        return getBest(populations);
+    }
 
+    public static List<Double> worstFitnessScoresOfPopulations(String filePath) {
+        List<List<Double>> populations = readFitnessScores(filePath);
+        return getWorst(populations);
+    }
+
+    public static List<List<Double>> readConstraintScores(String filePath) {
         List<List<Double>> populations = new ArrayList<>();
-
         try (Reader in = new FileReader(filePath)) {
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(in);
             List<Double> currentPopulation = null;
@@ -156,7 +187,7 @@ public class ExcelDataParserHelper {
                     }
                     currentPopulation = new ArrayList<>();
                 } else if (currentPopulation != null) {
-                    currentPopulation.add(Double.parseDouble(record.get(1)));
+                    currentPopulation.add(Double.parseDouble(record.get(record.size() - 1)));
                 }
             }
             if (currentPopulation != null) {
@@ -165,93 +196,26 @@ public class ExcelDataParserHelper {
         } catch (IOException e) {
             logger.error("File not found!");
         }
+        return populations;
 
-        List<Double> bestOfPopulations = new ArrayList<>();
-        logger.debug(populations.size());
-        for (List<Double> population : populations) {
-            double best = Collections.max(population);
-            bestOfPopulations.add(best);
-        }
-        logger.debug(bestOfPopulations.size());
-        logger.debug(bestOfPopulations);
-        return bestOfPopulations;
     }
 
     public static List<Double> averageConstraintScoresOfPopulations(String filePath) {
-
-        List<List<Double>> populations = new ArrayList<>();
-
-        try (Reader in = new FileReader(filePath)) {
-            Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(in);
-            List<Double> currentPopulation = null;
-            for (CSVRecord record : records) {
-                if (record.get(0).equals("Chromosome id")) { // header
-                    logger.debug("Encountered header line, time for a new generation");
-                    if (currentPopulation != null) {
-                        populations.add(currentPopulation);
-                    }
-                    currentPopulation = new ArrayList<>();
-                } else if (currentPopulation != null) {
-                    currentPopulation.add(Double.parseDouble(record.get(record.size() - 1)));
-                }
-            }
-            if (currentPopulation != null) {
-                populations.add(currentPopulation);
-            }
-        } catch (IOException e) {
-            logger.error("File not found!");
-        }
-
-        List<Double> averageOfPopulations = new ArrayList<>();
-        logger.debug(populations.size());
-        for (List<Double> population : populations) {
-            int size = population.size();
-            double sum = 0;
-            for (Double aDouble : population) {
-                sum += aDouble;
-            }
-            double average = sum / size;
-            averageOfPopulations.add(average);
-        }
-        logger.debug(averageOfPopulations.size());
-        logger.debug(averageOfPopulations);
-        return averageOfPopulations;
+        List<List<Double>> populations = readConstraintScores(filePath);
+        return getAverage(populations);
     }
+
 
     public static List<Double> bestConstraintScoresOfPopulations(String filePath) {
-
-        List<List<Double>> populations = new ArrayList<>();
-
-        try (Reader in = new FileReader(filePath)) {
-            Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(in);
-            List<Double> currentPopulation = null;
-            for (CSVRecord record : records) {
-                if (record.get(0).equals("Chromosome id")) { // header
-                    logger.debug("Encountered header line, time for a new generation");
-                    if (currentPopulation != null) {
-                        populations.add(currentPopulation);
-                    }
-                    currentPopulation = new ArrayList<>();
-                } else if (currentPopulation != null) {
-                    currentPopulation.add(Double.parseDouble(record.get(record.size() - 1)));
-                }
-            }
-            if (currentPopulation != null) {
-                populations.add(currentPopulation);
-            }
-        } catch (IOException e) {
-            logger.error("File not found!");
-        }
-
-        List<Double> bestOfPopulations = new ArrayList<>();
-        logger.debug(populations.size());
-        for (List<Double> population : populations) {
-            double best = Collections.max(population);
-            bestOfPopulations.add(best);
-        }
-        logger.debug(bestOfPopulations.size());
-        logger.debug(bestOfPopulations);
-        return bestOfPopulations;
+        List<List<Double>> populations = readConstraintScores(filePath);
+        return getBest(populations);
     }
+
+    public static List<Double> worstConstraintScoresOfPopulations(String filePath) {
+        List<List<Double>> populations = readConstraintScores(filePath);
+        return getWorst(populations);
+    }
+
 }
+
 

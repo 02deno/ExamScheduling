@@ -41,38 +41,67 @@ public class VisualizationHelper {
     }
 
     public static void generateFitnessPlots() {
+        String baseFileName = "graphs/FitnessScores/plots/";
+        FileHelper.createDirectory(baseFileName);
+
         // For Fitness Scores
         String fitnessFilePath = "graphs/FitnessScores/fitness_scores.csv";
         List<Double> averageFitnessScoresOfPopulations = ExcelDataParserHelper.averageFitnessScoresOfPopulations(fitnessFilePath);
         List<Double> bestFitnessScoresOfPopulations = ExcelDataParserHelper.bestFitnessScoresOfPopulations(fitnessFilePath);
-        HTMLHelper.generateLinePlot(averageFitnessScoresOfPopulations, "Average Fitness Scores of Populations", "average_fitness_scores.html");
-        HTMLHelper.generateLinePlot(bestFitnessScoresOfPopulations, "Best Fitness Scores of Populations", "best_fitness_scores.html");
+        List<Double> worstFitnessScoresOfPopulations = ExcelDataParserHelper.worstFitnessScoresOfPopulations(fitnessFilePath);
+        HTMLHelper.generateLinePlotAll(averageFitnessScoresOfPopulations,
+                bestFitnessScoresOfPopulations,
+                worstFitnessScoresOfPopulations,
+                "Fitness Scores of Populations",
+                baseFileName + "fitness_scores.html");
 
         // For Hard Constraints Scores
         String fitnessHardFilePath = "graphs/FitnessScores/fitness_scores_HARD.csv";
         List<Double> averageHardFitnessScoresOfPopulations = ExcelDataParserHelper.averageConstraintScoresOfPopulations(fitnessHardFilePath);
         List<Double> bestHardFitnessScoresOfPopulations = ExcelDataParserHelper.bestConstraintScoresOfPopulations(fitnessHardFilePath);
-        HTMLHelper.generateLinePlot(averageHardFitnessScoresOfPopulations, "Average Hard Constraint Scores of Populations", "average_fitness_scores_HARD.html");
-        HTMLHelper.generateLinePlot(bestHardFitnessScoresOfPopulations, "Best Hard Constraint Scores of Populations", "best_fitness_scores_HARD.html");
+        List<Double> worstHardFitnessScoresOfPopulations = ExcelDataParserHelper.worstConstraintScoresOfPopulations(fitnessHardFilePath);
+        HTMLHelper.generateLinePlotAll(averageHardFitnessScoresOfPopulations,
+                bestHardFitnessScoresOfPopulations,
+                worstHardFitnessScoresOfPopulations,
+                "HARD Constraint of Populations",
+                baseFileName + "fitness_scores_HARD.html");
 
         // For Soft Constraints Scores
         String fitnessSoftFilePath = "graphs/FitnessScores/fitness_scores_SOFT.csv";
         List<Double> averageSoftFitnessScoresOfPopulations = ExcelDataParserHelper.averageConstraintScoresOfPopulations(fitnessSoftFilePath);
         List<Double> bestSoftFitnessScoresOfPopulations = ExcelDataParserHelper.bestConstraintScoresOfPopulations(fitnessSoftFilePath);
-        HTMLHelper.generateLinePlot(averageSoftFitnessScoresOfPopulations, "Average Soft Constraint Scores of Populations", "average_fitness_scores_SOFT.html");
-        HTMLHelper.generateLinePlot(bestSoftFitnessScoresOfPopulations, "Best Soft Constraint Scores of Populations", "best_fitness_scores_SOFT.html");
+        List<Double> worstSoftFitnessScoresOfPopulations = ExcelDataParserHelper.worstConstraintScoresOfPopulations(fitnessSoftFilePath);
+        HTMLHelper.generateLinePlotAll(averageSoftFitnessScoresOfPopulations,
+                bestSoftFitnessScoresOfPopulations,
+                worstSoftFitnessScoresOfPopulations,
+                "SOFT Constraint of Populations",
+                baseFileName + "fitness_scores_SOFT.html");
 
+    }
+
+    public static void generateFitnessPlotsExperiment(double experimentId) {
+        String fitnessFilePath = "graphs/FitnessScores/fitness_scores.csv";
+        String basePath = "experiments/experiment_" + (int) experimentId + "/";
+        FileHelper.createDirectory(basePath);
+        String outputPath = basePath + "fitness_score.html";
+
+        List<Double> averageFitnessScoresOfPopulations = ExcelDataParserHelper.averageFitnessScoresOfPopulations(fitnessFilePath);
+        List<Double> bestFitnessScoresOfPopulations = ExcelDataParserHelper.bestFitnessScoresOfPopulations(fitnessFilePath);
+        List<Double> worstFitnessScoresOfPopulations = ExcelDataParserHelper.worstFitnessScoresOfPopulations(fitnessFilePath);
+        HTMLHelper.generateLinePlotAll(averageFitnessScoresOfPopulations,
+                bestFitnessScoresOfPopulations,
+                worstFitnessScoresOfPopulations,
+                "Fitness Scores of Populations",
+                outputPath);
 
     }
 
     // TODO(Deniz) : % of criteria met graph
-    // TODO(Deniz) : combine mean, best and worst of scores in one graph
     // TODO(Deniz) : with Elitsim / without Elitism graphs
     // TODO(Deniz) : with adaptive parameters, with mutation rate of 0.1 and 0.001 in same graph
     // TODO(Deniz) : with termination time
     // TODO(Deniz) : needed time to reach gloabal optimum (average fitness score > 0.9)
     // TODO(Deniz) : implement restart when initial best fitness is too low or
     //  there is no progress in 50 generations
-    //  TODO(Deniz) : implement random/grid search for parameter control
 
 }
