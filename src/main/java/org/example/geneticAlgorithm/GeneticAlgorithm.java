@@ -297,7 +297,7 @@ public class GeneticAlgorithm {
 
         if (saveToExcel) {
             // this tables contain all the fitness function scores
-            String baseFileName = "";
+            String baseFileName;
             if (experiment) {
                 baseFileName = "experiments/experiment_" + experimentId + "/FitnessScores/";
             } else {
@@ -363,7 +363,7 @@ public class GeneticAlgorithm {
         int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
 
 
-        ArrayList<Chromosome> populationTemp = new ArrayList<>();
+        ArrayList<Chromosome> populationTemp;
         ArrayList<Chromosome> childChromosomes;
 
         generateData();
