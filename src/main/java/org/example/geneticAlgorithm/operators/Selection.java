@@ -7,7 +7,6 @@ import org.example.utils.ConfigHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 public class Selection {
@@ -32,7 +31,7 @@ public class Selection {
     */
 
     private final int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
-    private final HashMap<Chromosome, Double> normalizedFitnessScores = new HashMap<Chromosome, Double>();
+    private final int numberOfChromosomesToBeSelected = Integer.parseInt(ConfigHelper.getProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES"));
     private static final Logger logger = LogManager.getLogger(Selection.class);
     private final Random random = new Random();
     private final ArrayList<Chromosome> parents = new ArrayList<>();
@@ -40,12 +39,12 @@ public class Selection {
     public ArrayList<Chromosome> rouletteWheelSelection(ArrayList<Chromosome> population) {
         int i = 0;
 
-        while (i < populationSize/2){
-            double totalScore = 0;
-            for (Chromosome chromosome : population) {
-                totalScore += chromosome.getFitnessScore();
-            }
+        double totalScore = 0;
+        for (Chromosome chromosome : population) {
+            totalScore += chromosome.getFitnessScore();
+        }
 
+        while (i < populationSize/2) {
             double randomValue = random.nextDouble() * totalScore;
 
             double temp = 0;
@@ -60,6 +59,59 @@ public class Selection {
         }
         return parents;
 
+    }
+
+    public ArrayList<Chromosome> tournamentSelection(ArrayList<Chromosome> population) {
+        int i = 0;
+        ArrayList<Chromosome> tournamentChromosomes = new ArrayList<>();
+
+        while (i < populationSize/2) {
+            for (int j = 0; j < numberOfChromosomesToBeSelected; j++) {
+                int randomChromosomeIndex = random.nextInt(populationSize);
+                tournamentChromosomes.add(population.get(randomChromosomeIndex));
+            }
+
+            tournamentChromosomes.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);
+            parents.add(tournamentChromosomes.get(0));
+            i++;
+        }
+
+        return parents;
+    }
+
+    public ArrayList<Chromosome> rankSelection(ArrayList<Chromosome> population) {
+        population.sort(Chromosome.sortChromosomesByFitnessScoreAscendingOrder);
+        HashMap<Chromosome, Double> probabilityMap = new HashMap<>();
+
+        double rank = 1;
+        for (Chromosome chromosome : population) {
+            probabilityMap.put(chromosome, rank / population.size());
+            rank++;
+        }
+
+
+        int i = 0;
+        double totalProbability = 0;
+        for (Double probability : probabilityMap.values()) {
+            totalProbability += probability;
+        }
+
+        while (i < populationSize/2) {
+            double randomValue = random.nextDouble() * totalProbability;
+
+            double temp = 0;
+
+            for (HashMap.Entry<Chromosome, Double> entry : probabilityMap.entrySet()) {
+                temp += entry.getValue();
+                if (randomValue < temp) {
+                    parents.add(entry.getKey());
+                    break;
+                }
+            }
+            i++;
+        }
+
+        return parents;
     }
 
 }
