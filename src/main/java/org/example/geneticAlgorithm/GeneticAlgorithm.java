@@ -345,8 +345,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    public void algorithm() {
-
+    public double algorithm() {
         int wantedExamScheduleCount = 3;
         int currentGeneration = 0;
         int generationsWithoutImprovement = 0;
@@ -360,8 +359,12 @@ public class GeneticAlgorithm {
         generateData();
         population = initializationAndEncode();
 
+        double initalBestFitness = 0;
         while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
             calculateFitness(true);
+            if (currentGeneration == 0) {
+                initalBestFitness = findBestFitnessScore();
+            }
             currentGeneration += 1;
             updateAgesOfChromosomes();
             //geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
@@ -387,9 +390,11 @@ public class GeneticAlgorithm {
                 generationsWithoutImprovement = 0;
             }
         }
+        double convergenceRate = (findBestFitnessScore() - initalBestFitness) / currentGeneration;
 
         // Create Graphs and Analyse Fitness Scores
         VisualizationHelper.generateFitnessPlots();
 
+        return convergenceRate;
     }
 }
