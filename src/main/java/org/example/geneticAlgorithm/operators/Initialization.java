@@ -32,8 +32,7 @@ public class Initialization {
 
     public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithStudents(ArrayList<Course> courses, ArrayList<Student> students) {
         // Step 1
-        for (int i = 0; i < students.size(); i++) {
-            Student student = students.get(i);
+        for (Student student : students) {
             ArrayList<String> registeredCourses = student.getRegisteredCourses();
             int remainingCourseCapacity = student.getRemainingCourseCapacity();
             int studentCapacity = student.getMaxCoursesTakenCount();
@@ -154,7 +153,6 @@ public class Initialization {
         Collections.shuffle(exams, new Random(rand.nextInt(10000)));
         for (Exam exam : exams) {
             Course course = exam.getCourse();
-            int capacity = course.getRegisteredStudents().size();
             ArrayList<String> availableInvigilators = exam.getExamInvigilators();
             int invigilatorCount = rand.nextInt(5);
             // Determine the number of invigilators, randomly select 1-4
@@ -234,8 +232,6 @@ public class Initialization {
         int assignedCourses = 0;
 
         for (Exam exam : exams) {
-            int capacity = exam.getCourse().getRegisteredStudents().size();
-            boolean isPcExam = exam.getCourse().isPcExam();
 
             int classroomIndex = DataStructureHelper.getRandomElement(classrooms);
             Classroom classroom = classrooms.get(classroomIndex);
@@ -301,11 +297,9 @@ public class Initialization {
         // Step 5
         Random rand = new Random();
         Collections.shuffle(exams, new Random(rand.nextInt(10000)));
-        int interval = (int) Duration.between(timeslots.get(0).getStart(), timeslots.get(0).getEnd()).toMinutes();
         for (Exam exam : exams) {
             boolean found = false;
             ArrayList<Timeslot> assignedTimeslots = new ArrayList<>();
-            Course course = exam.getCourse();
             int requiredTimeslotCount = rand.nextInt(8) + 1;
             int timeslotStartIndex = 0;
             while (!found) {

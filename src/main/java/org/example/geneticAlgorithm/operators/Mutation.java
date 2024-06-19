@@ -47,7 +47,7 @@ public class Mutation {
 
         mutationRates.forEach((key, value) -> {
             double randomProbability = random.nextDouble() * 0.1;
-            if (currentGeneration > 200) {
+            if (currentGeneration > 200 && currentGeneration < 500) {
                 // elitismus off and more mutation
                 if (randomProbability <= value) {
                     int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 4 : 4;
@@ -58,7 +58,7 @@ public class Mutation {
                         randomResetMutation(key, classrooms, resetExamThreshold);
                     }
                 }
-            } else if (currentGeneration > 500) {
+            } else if (currentGeneration > 500 && currentGeneration < 1000) {
                 if (randomProbability <= value) {
                     int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 3 : 8;
 
