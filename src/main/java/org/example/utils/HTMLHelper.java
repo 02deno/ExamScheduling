@@ -435,7 +435,7 @@ public class HTMLHelper {
         StringBuilder htmlContent = new StringBuilder();
         htmlContent.append("<html>");
         htmlContent.append("<head>");
-        htmlContent.append("<title>" + title + "</title>");
+        htmlContent.append("<title>").append(title).append("</title>");
         htmlContent.append("<script src=\"https://cdn.plot.ly/plotly-latest.min.js\"></script>");
         htmlContent.append("<style>");
         htmlContent.append("body { font-family: Arial, sans-serif; margin: 40px; }");
@@ -455,7 +455,7 @@ public class HTMLHelper {
         htmlContent.append("};");
         htmlContent.append("var data = [trace];");
         htmlContent.append("var layout = {");
-        htmlContent.append("title: { text: '" + title + "', font: { size: 24 } },");
+        htmlContent.append("title: { text: '").append(title).append("', font: { size: 24 } },");
         htmlContent.append("xaxis: { title: { text: 'Population', font: { size: 18 } }, showgrid: true, zeroline: true },");
         htmlContent.append("yaxis: { title: { text: 'Fitness Score', font: { size: 18 } }, showgrid: true, zeroline: true },");
         htmlContent.append("margin: { l: 50, r: 50, b: 50, t: 50 },");

@@ -41,7 +41,7 @@ public class HyperparameterSearch {
         double bestConvergenceRate = 0;
 
         ArrayList<Integer> experimentIds = new ArrayList<>();
-        ArrayList<Double> bestFitnesses = new ArrayList<>();
+        ArrayList<Double> bestFitnessScores = new ArrayList<>();
         ArrayList<Double> convergenceRates = new ArrayList<>();
         ArrayList<Long> executionTimes = new ArrayList<>();
         ArrayList<Integer> populationSizes = new ArrayList<>();
@@ -98,7 +98,7 @@ public class HyperparameterSearch {
                                     bestConvergenceRate = convergenceRate;
                                 }
                                 experimentIds.add((int) experimentId);
-                                bestFitnesses.add(currentBestFitness);
+                                bestFitnessScores.add(currentBestFitness);
                                 convergenceRates.add(convergenceRate);
                                 executionTimes.add(executionTime);
                                 populationSizes.add(populationSize);
@@ -108,8 +108,7 @@ public class HyperparameterSearch {
                                 highMutationRates.add(highMutationRate);
                                 crossoverRates.add(crossoverRate);
 
-                                saveExperiment(populationSize, generationCount, generationWithoutImprovement,
-                                        lowMutationRate, highMutationRate, crossoverRate, executionTime);
+                                saveExperiment();
                                 experimentId++;
 
                             }
@@ -129,7 +128,7 @@ public class HyperparameterSearch {
 
         String output = "experiments/grid_search_results_" + formattedDate + ".html";
         String title = "Grid Search Result Table";
-        saveResultsToTable(experimentIds, bestFitnesses, convergenceRates, executionTimes,
+        saveResultsToTable(experimentIds, bestFitnessScores, convergenceRates, executionTimes,
                 populationSizes, generationCounts, generationWithoutImprovements, lowMutationRates,
                 highMutationRates, crossoverRates, output, title);
 
@@ -162,7 +161,7 @@ public class HyperparameterSearch {
         double bestConvergenceRate = 0;
 
         ArrayList<Integer> experimentIds = new ArrayList<>();
-        ArrayList<Double> bestFitnesses = new ArrayList<>();
+        ArrayList<Double> bestFitnessScores = new ArrayList<>();
         ArrayList<Double> convergenceRates = new ArrayList<>();
         ArrayList<Long> executionTimes = new ArrayList<>();
         ArrayList<Integer> populationSizes = new ArrayList<>();
@@ -221,7 +220,7 @@ public class HyperparameterSearch {
             }
 
             experimentIds.add((int) experimentId);
-            bestFitnesses.add(currentBestFitness);
+            bestFitnessScores.add(currentBestFitness);
             convergenceRates.add(convergenceRate);
             executionTimes.add(executionTime);
             populationSizes.add(populationSize);
@@ -231,8 +230,7 @@ public class HyperparameterSearch {
             highMutationRates.add(highMutationRate);
             crossoverRates.add(crossoverRate);
 
-            saveExperiment(populationSize, generationCount, generationWithoutImprovement,
-                    lowMutationRate, highMutationRate, crossoverRate, executionTime);
+            saveExperiment();
 
             experimentId++;
         }
@@ -246,7 +244,7 @@ public class HyperparameterSearch {
 
         String output = "experiments/random_search_results_" + formattedDate + ".html";
         String title = "Random Search Result Table";
-        saveResultsToTable(experimentIds, bestFitnesses, convergenceRates, executionTimes,
+        saveResultsToTable(experimentIds, bestFitnessScores, convergenceRates, executionTimes,
                 populationSizes, generationCounts, generationWithoutImprovements, lowMutationRates,
                 highMutationRates, crossoverRates, output, title);
 
@@ -265,8 +263,7 @@ public class HyperparameterSearch {
 
     }
 
-    private void saveExperiment(int populationSize, int generationCount, int generationWithoutImprovement,
-                                double lowMutationRate, double highMutationRate, double crossoverRate, long executionTime) {
+    private void saveExperiment() {
 
         VisualizationHelper.generateFitnessPlotsExperiment(experimentId);
         String sourcePath = "src/main/resources/config.properties";
@@ -275,7 +272,7 @@ public class HyperparameterSearch {
 
     }
 
-    private void saveResultsToTable(ArrayList<Integer> experimentIds, ArrayList<Double> bestFitnesses,
+    private void saveResultsToTable(ArrayList<Integer> experimentIds, ArrayList<Double> bestFitnessScores,
                                     ArrayList<Double> convergenceRates, ArrayList<Long> executionTimes,
                                     ArrayList<Integer> populationSizes, ArrayList<Integer> generationCounts,
                                     ArrayList<Integer> generationWithoutImprovements, ArrayList<Double> lowMutationRates,
@@ -304,7 +301,7 @@ public class HyperparameterSearch {
         resultHeaders.append("]");
 
         StringBuilder col1 = integerArraylistToString(experimentIds);
-        StringBuilder col2 = doubleArraylistToString(bestFitnesses);
+        StringBuilder col2 = doubleArraylistToString(bestFitnessScores);
         StringBuilder col3 = doubleArraylistToString(convergenceRates);
         StringBuilder col4 = longArraylistToString(executionTimes);
         StringBuilder col5 = integerArraylistToString(populationSizes);
