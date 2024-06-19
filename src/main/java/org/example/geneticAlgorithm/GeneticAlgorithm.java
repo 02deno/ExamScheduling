@@ -251,7 +251,7 @@ public class GeneticAlgorithm {
         this.classrooms = resetClassrooms;
     }
 
-    public void calculateFitness(boolean saveToExcel) {
+    public void calculateFitness(boolean saveToExcel, boolean experiment, int experimentId) {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
         Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
@@ -297,7 +297,12 @@ public class GeneticAlgorithm {
 
         if (saveToExcel) {
             // this tables contain all the fitness function scores
-            String baseFileName = "graphs/FitnessScores/";
+            String baseFileName;
+            if (experiment) {
+                baseFileName = "experiments/experiment_" + experimentId + "/FitnessScores/";
+            } else {
+                baseFileName = "graphs/FitnessScores/";
+            }
             FileHelper.createDirectory(baseFileName);
             FileHelper.writeHardFitnessScoresToFile(hardConstraintScoresList, baseFileName + "fitness_scores_HARD.csv");
             FileHelper.writeSoftFitnessScoresToFile(softConstraintScoresList, baseFileName + "fitness_scores_SOFT.csv");
@@ -350,7 +355,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    public double algorithm() {
+    public double[] algorithm(boolean experiment, int experimentId) {
         int wantedExamScheduleCount = 3;
         int currentGeneration = 0;
         int generationsWithoutImprovement = 0;
@@ -358,15 +363,15 @@ public class GeneticAlgorithm {
         int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
 
 
-        ArrayList<Chromosome> population;
+        ArrayList<Chromosome> populationTemp;
         ArrayList<Chromosome> childChromosomes;
 
         generateData();
-        population = initializationAndEncode();
+        populationTemp = initializationAndEncode();
 
         double initalBestFitness = 0;
         while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
-            calculateFitness(true);
+            calculateFitness(true, experiment, experimentId);
             if (currentGeneration == 0) {
                 initalBestFitness = findBestFitnessScore();
             }
@@ -379,11 +384,11 @@ public class GeneticAlgorithm {
             childChromosomes = crossover();
             mutation();
             replacement(currentGeneration, childChromosomes.size());
-            population.addAll(childChromosomes);
+            populationTemp.addAll(childChromosomes);
 
 
-            calculateFitness(false);
-            logger.debug("population size: " + population.size());
+            calculateFitness(false, experiment, experimentId);
+            logger.debug("population size: " + populationTemp.size());
             double lastBestFitnessScore = findBestFitnessScore();
             logger.info("Generation: " + currentGeneration);
             logger.info("bestFitnessScore: " + bestFitnessScore);
@@ -398,8 +403,10 @@ public class GeneticAlgorithm {
         double convergenceRate = (findBestFitnessScore() - initalBestFitness) / currentGeneration;
 
         // Create Graphs and Analyse Fitness Scores
-        VisualizationHelper.generateFitnessPlots();
+        if (!experiment) {
+            VisualizationHelper.generateFitnessPlots();
+        }
 
-        return convergenceRate;
+        return new double[]{convergenceRate, findBestFitnessScore()};
     }
 }

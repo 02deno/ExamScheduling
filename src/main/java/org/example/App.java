@@ -17,8 +17,10 @@ public class App
         long startTime = System.currentTimeMillis();
         final Logger logger = LogManager.getLogger(App.class);
 
-        String folderPath = "graphs/";
-        deleteFolderContents(new File(folderPath));
+        String graphsFolderPath = "graphs/";
+        deleteFolderContents(new File(graphsFolderPath));
+        String experimentsFolderPath = "experiments/";
+        deleteFolderContents(new File(experimentsFolderPath));
 
         logger.info("Application started...");
 
@@ -26,7 +28,7 @@ public class App
         HyperparameterSearch hyperparameterSearch = new HyperparameterSearch();
         String destination = "src/main/resources/";
 
-        double[] bestExperimentRandomSearch = hyperparameterSearch.randomSearch(10);
+        double[] bestExperimentRandomSearch = hyperparameterSearch.randomSearch(3);
         logger.info("Best Experiment Id of Random Search: " + bestExperimentRandomSearch[0] +
                 "\nBest Experiment Fitness Score of Random Search: " + bestExperimentRandomSearch[1] +
                 "\nBest Experiment Convergence Rate of Random Search: " + bestExperimentRandomSearch[2]);
@@ -55,7 +57,7 @@ public class App
 
         logger.info("Genetic Algorithm with best parameters has started....");
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-        geneticAlgorithm.algorithm();
+        geneticAlgorithm.algorithm(false, 0);
         logger.info("Genetic Algorithm with best parameters has ended.");
 
         long endTime = System.currentTimeMillis();
