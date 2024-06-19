@@ -2,9 +2,10 @@ name: Run Java Application
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
 jobs:
   build:
     runs-on: ubuntu-latest
