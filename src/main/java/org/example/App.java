@@ -42,7 +42,7 @@ public class App
 //        source = "experiments/experiment_" + (int) bestExperimentRandomSearch[0] + "/config.properties";
 //        FileHelper.copyFile(source, destination);
 //
-//        logger.info("Experiments for best parameters have ended.");
+
 //
 //        // If both searches will be executed, uncomment this :
 //        if (bestExperimentRandomSearch[2] > bestExperimentGridSearch[2]) {
@@ -54,6 +54,8 @@ public class App
 //            source = "experiments/experiment_" + bestExperimentRandomSearch[0] + "/config.properties";
 //            FileHelper.copyFile(source, destination);
 //        }
+
+        logger.info("Experiments for best parameters have ended.");
 
         logger.info("Genetic Algorithm with best parameters has started....");
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
