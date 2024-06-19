@@ -56,6 +56,7 @@ public class GeneticAlgorithm {
     private int populationSize = Integer.parseInt(ConfigHelper.getProperty("POPULATION_SIZE"));
     private ArrayList<EncodedExam> encodedExamArrayList = new ArrayList<>();
     private long chromosomeIdCounter = 0;
+    private int maxGeneration = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
 
 
     public void generateData() {
@@ -284,7 +285,6 @@ public class GeneticAlgorithm {
             chromosome.setFitnessScore(fitnessScore);
 
         }
-
         // sort hashmaps based on fitness scores, this tables only contain fitness scores
         hardConstraintFitnessScores = sortByValueDescending(hardConstraintFitnessScores);
         softConstraintFitnessScores = sortByValueDescending(softConstraintFitnessScores);
@@ -310,9 +310,14 @@ public class GeneticAlgorithm {
         return population.get(0).getFitnessScore();
     }
 
-    public void selectParents() {
+    public void selectParents(int currentGeneration) {
         Selection selection = new Selection();
-        parents = selection.rouletteWheelSelection(population);
+        if (currentGeneration >= maxGeneration * 0.7) {
+            parents = selection.rankSelection(population);
+        } else {
+            parents = selection.tournamentSelection(population);
+        }
+
     }
 
     public ArrayList<Chromosome> crossover() {
@@ -326,13 +331,13 @@ public class GeneticAlgorithm {
 
     public void mutation() {
         Mutation mutation = new Mutation();
-        mutation.mutation(population);
+        mutation.mutation(population, this.timeslots, this.classrooms);
     }
 
     public void replacement(int currentGeneration, int childChromosomesSize) {
         Replacement replacement = new Replacement();
 
-        if (currentGeneration == 1) {
+        if (currentGeneration < 10) {
             replacement.randomReplacement(population, childChromosomesSize);
         } else {
             replacement.ageBasedReplacement(population, childChromosomesSize);
@@ -370,7 +375,7 @@ public class GeneticAlgorithm {
             //geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
             double bestFitnessScore = findBestFitnessScore();
 
-            selectParents();
+            selectParents(currentGeneration);
             childChromosomes = crossover();
             mutation();
             replacement(currentGeneration, childChromosomes.size());
