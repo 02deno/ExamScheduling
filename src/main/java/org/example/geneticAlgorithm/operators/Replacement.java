@@ -7,7 +7,9 @@ import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.models.Chromosome;
 import org.example.utils.ConfigHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 @Getter
 @Setter
@@ -35,19 +37,29 @@ public class Replacement {
         }
     }
 
-    public void ageBasedReplacement(ArrayList<Chromosome> population, int childChromosomesSize) {
+    public void ageBasedReplacement(ArrayList<Chromosome> population, int childChromosomesSize, int currentGeneration) {
         elitism(population);
         Collections.shuffle(population);
         population.sort(Chromosome.sortChromosomesByAge);
 
 
         for (Chromosome chromosome : population) {
-            if (!eliteChromosomes.contains(chromosome)) {
+            if (currentGeneration > 200) {
+                // elitsim off
                 if (chromosomesToBeRemoved.size() == childChromosomesSize) {
                     break;
                 }
                 chromosomesToBeRemoved.add(chromosome);
+
+            } else {
+                if (!eliteChromosomes.contains(chromosome)) {
+                    if (chromosomesToBeRemoved.size() == childChromosomesSize) {
+                        break;
+                    }
+                    chromosomesToBeRemoved.add(chromosome);
+                }
             }
+
         }
 
         population.removeAll(chromosomesToBeRemoved);

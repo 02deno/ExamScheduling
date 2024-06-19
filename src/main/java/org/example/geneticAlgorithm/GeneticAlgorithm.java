@@ -120,16 +120,19 @@ public class GeneticAlgorithm {
             Collections.shuffle(this.classrooms, new Random(rand.nextInt(10000)));
 
             HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(exams, invigilators);
+            //HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.randomMapExamsWithInvigilators(exams, invigilators);
             this.exams = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
             logger.debug("heuristicMapExamsWithInvigilators finished.");
 
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(exams, classrooms);
+            //HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.randomMapExamsWithClassrooms(exams, classrooms);
             this.exams = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
             logger.debug("heuristicMapExamsWithClassrooms finished.");
 
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(exams, timeslots);
+            //HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.randomMapExamsWithTimeslots(exams, timeslots);
             this.exams = DataStructureHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
             logger.debug("heuristicMapExamsWithTimeslots finished.");
 
@@ -348,18 +351,26 @@ public class GeneticAlgorithm {
         return childChromosomes;
     }
 
-    public void mutation() {
+    public void mutation(int currentGeneration) {
         Mutation mutation = new Mutation();
-        mutation.mutation(population, this.classrooms, lowMutationRate, highMutationRate, isStable);
+        mutation.mutation(population, this.classrooms, lowMutationRate, highMutationRate, isStable, currentGeneration);
     }
 
     public void replacement(int currentGeneration, int childChromosomesSize) {
         Replacement replacement = new Replacement();
 
-        if (currentGeneration < 10) {
+        if (currentGeneration < 100) {
             replacement.randomReplacement(population, childChromosomesSize);
+        } else if (currentGeneration < 300) {
+            replacement.ageBasedReplacement(population, childChromosomesSize, currentGeneration);
         } else {
-            replacement.ageBasedReplacement(population, childChromosomesSize);
+            Random random = new Random();
+            boolean randomBoolean = random.nextBoolean();
+            if (randomBoolean) {
+                replacement.randomReplacement(population, childChromosomesSize);
+            } else {
+                replacement.ageBasedReplacement(population, childChromosomesSize, currentGeneration);
+            }
         }
     }
 
@@ -397,7 +408,7 @@ public class GeneticAlgorithm {
 
             selectParents(currentGeneration);
             childChromosomes = crossover();
-            mutation();
+            mutation(currentGeneration);
             replacement(currentGeneration, childChromosomes.size());
             populationTemp.addAll(childChromosomes);
 
