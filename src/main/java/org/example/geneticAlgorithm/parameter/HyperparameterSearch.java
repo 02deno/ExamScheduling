@@ -36,6 +36,7 @@ public class HyperparameterSearch {
         double bestExperimentId = 0;
         double bestConvergenceRate = 0;
         double bestTournamentSelectionNumber = 0;
+        double bestElitismPercent = 0;
 
         ArrayList<Integer> experimentIds = new ArrayList<>();
         ArrayList<Double> bestFitnessScores = new ArrayList<>();
@@ -48,6 +49,7 @@ public class HyperparameterSearch {
         ArrayList<Double> highMutationRates = new ArrayList<>();
         ArrayList<Double> crossoverRates = new ArrayList<>();
         ArrayList<Integer> tournamentSelectionNumbers = new ArrayList<>();
+        ArrayList<Double> elitismPercents = new ArrayList<>();
 
         for (int populationSize : parameters.getPopulationSizes()) {
             for (int generationCount : parameters.getGenerationCounts()) {
@@ -56,61 +58,69 @@ public class HyperparameterSearch {
                         for (double highMutationRate : parameters.getHighMutationRates()) {
                             for (double crossoverRate : parameters.getCrossoverRates()) {
                                 for (int tournamentSelectionNumber : parameters.getTournamentSelectionNumbers()) {
-                                    //generationCount = 10; // to check grid search functionality, later this line will be deleted
+                                    for (double elitismPercent : parameters.getElitismPercents()) {
+                                        //generationCount = 10; // to check grid search functionality, later this line will be deleted
 
-                                    logger.debug("Population Size: " + populationSize);
-                                    logger.debug("Generation Count: " + generationCount);
-                                    logger.debug("Generations without improvement: " + generationWithoutImprovement);
-                                    logger.debug("Low Mutation Rate: " + lowMutationRate);
-                                    logger.debug("High Mutation Rate: " + highMutationRate);
-                                    logger.debug("Crossover Rate: " + crossoverRate);
-                                    logger.debug("Tournament Selection Number: " + tournamentSelectionNumber);
+                                        logger.debug("Population Size: " + populationSize);
+                                        logger.debug("Generation Count: " + generationCount);
+                                        logger.debug("Generations without improvement: " + generationWithoutImprovement);
+                                        logger.debug("Low Mutation Rate: " + lowMutationRate);
+                                        logger.debug("High Mutation Rate: " + highMutationRate);
+                                        logger.debug("Crossover Rate: " + crossoverRate);
+                                        logger.debug("Tournament Selection Number: " + tournamentSelectionNumber);
+                                        logger.debug("Elitism Percent: " + elitismPercent);
 
-                                    ConfigHelper.setProperty("POPULATION_SIZE", String.valueOf(populationSize));
-                                    ConfigHelper.setProperty("MAX_GENERATIONS", String.valueOf(generationCount));
-                                    ConfigHelper.setProperty("GENERATIONS_WITHOUT_IMPROVEMENT", String.valueOf(generationWithoutImprovement));
-                                    ConfigHelper.setProperty("LOW_MUTATION_RATE", String.valueOf(lowMutationRate));
-                                    ConfigHelper.setProperty("HIGH_MUTATION_RATE", String.valueOf(highMutationRate));
-                                    ConfigHelper.setProperty("CROSSOVER_RATE", String.valueOf(crossoverRate));
-                                    ConfigHelper.setProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES", String.valueOf(tournamentSelectionNumber));
+                                        ConfigHelper.setProperty("POPULATION_SIZE", String.valueOf(populationSize));
+                                        ConfigHelper.setProperty("MAX_GENERATIONS", String.valueOf(generationCount));
+                                        ConfigHelper.setProperty("GENERATIONS_WITHOUT_IMPROVEMENT", String.valueOf(generationWithoutImprovement));
+                                        ConfigHelper.setProperty("LOW_MUTATION_RATE", String.valueOf(lowMutationRate));
+                                        ConfigHelper.setProperty("HIGH_MUTATION_RATE", String.valueOf(highMutationRate));
+                                        ConfigHelper.setProperty("CROSSOVER_RATE", String.valueOf(crossoverRate));
+                                        ConfigHelper.setProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES", String.valueOf(tournamentSelectionNumber));
+                                        ConfigHelper.setProperty("ELITISM_PERCENT", String.valueOf(elitismPercent));
 
-                                    ConfigHelper.saveConfig();
+                                        ConfigHelper.saveConfig();
 
-                                    long startTime = System.currentTimeMillis();
-                                    GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-                                    double[] metrics = geneticAlgorithm.algorithm(true, (int) experimentId);
-                                    double convergenceRate = metrics[0];
-                                    double currentBestFitness = metrics[1];
-                                    long endTime = System.currentTimeMillis();
-                                    long durationMs = endTime - startTime;
-                                    long executionTime = durationMs / 1000;
+                                        long startTime = System.currentTimeMillis();
+                                        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
+                                        double[] metrics = geneticAlgorithm.algorithm(true, (int) experimentId);
+                                        double convergenceRate = metrics[0];
+                                        double currentBestFitness = metrics[1];
+                                        long endTime = System.currentTimeMillis();
+                                        long durationMs = endTime - startTime;
+                                        long executionTime = durationMs / 1000;
 
-                                    if (convergenceRate > bestConvergenceRate) {
-                                        bestFitness = currentBestFitness;
-                                        bestPopulationSize = populationSize;
-                                        bestGenerationCount = generationCount;
-                                        bestGenerationWithoutImprovement = generationWithoutImprovement;
-                                        bestLowMutationRate = lowMutationRate;
-                                        bestHighMutationRate = highMutationRate;
-                                        bestCrossoverRate = crossoverRate;
-                                        bestExecutionTime = executionTime;
-                                        bestExperimentId = experimentId;
-                                        bestConvergenceRate = convergenceRate;
-                                        bestTournamentSelectionNumber = tournamentSelectionNumber;
+                                        if (convergenceRate > bestConvergenceRate) {
+                                            bestFitness = currentBestFitness;
+                                            bestPopulationSize = populationSize;
+                                            bestGenerationCount = generationCount;
+                                            bestGenerationWithoutImprovement = generationWithoutImprovement;
+                                            bestLowMutationRate = lowMutationRate;
+                                            bestHighMutationRate = highMutationRate;
+                                            bestCrossoverRate = crossoverRate;
+                                            bestExecutionTime = executionTime;
+                                            bestExperimentId = experimentId;
+                                            bestConvergenceRate = convergenceRate;
+                                            bestTournamentSelectionNumber = tournamentSelectionNumber;
+                                            bestElitismPercent = elitismPercent;
+                                        }
+                                        experimentIds.add((int) experimentId);
+                                        bestFitnessScores.add(currentBestFitness);
+                                        convergenceRates.add(convergenceRate);
+                                        executionTimes.add(executionTime);
+                                        populationSizes.add(populationSize);
+                                        generationCounts.add(generationCount);
+                                        generationWithoutImprovements.add(generationWithoutImprovement);
+                                        lowMutationRates.add(lowMutationRate);
+                                        highMutationRates.add(highMutationRate);
+                                        crossoverRates.add(crossoverRate);
+                                        tournamentSelectionNumbers.add(tournamentSelectionNumber);
+                                        elitismPercents.add(elitismPercent);
+
+                                        saveExperiment();
+                                        experimentId++;
                                     }
-                                    experimentIds.add((int) experimentId);
-                                    bestFitnessScores.add(currentBestFitness);
-                                    convergenceRates.add(convergenceRate);
-                                    executionTimes.add(executionTime);
-                                    populationSizes.add(populationSize);
-                                    generationCounts.add(generationCount);
-                                    generationWithoutImprovements.add(generationWithoutImprovement);
-                                    lowMutationRates.add(lowMutationRate);
-                                    highMutationRates.add(highMutationRate);
-                                    crossoverRates.add(crossoverRate);
-                                    tournamentSelectionNumbers.add(tournamentSelectionNumber);
-                                    saveExperiment();
-                                    experimentId++;
+
                                 }
 
 
@@ -133,7 +143,7 @@ public class HyperparameterSearch {
         String title = "Grid Search Result Table";
         saveResultsToTable(experimentIds, bestFitnessScores, convergenceRates, executionTimes,
                 populationSizes, generationCounts, generationWithoutImprovements, lowMutationRates,
-                highMutationRates, crossoverRates, tournamentSelectionNumbers, output, title);
+                highMutationRates, crossoverRates, tournamentSelectionNumbers, elitismPercents, output, title);
 
         logger.info("Total Execution Time of Grid Search in seconds: " + totalExecutionTime);
         logger.info("Best Fitness Score of Grid Search: " + bestFitness);
@@ -146,6 +156,7 @@ public class HyperparameterSearch {
         logger.info("Best Execution Time of Grid Search: " + bestExecutionTime);
         logger.info("Best Experiment ID of Grid Search: " + bestExperimentId);
         logger.info("Best Tournament Selection Number of Grid Search: " + bestTournamentSelectionNumber);
+        logger.info("Best Elitsim Percent of Grid Search: " + bestElitismPercent);
 
         return new double[]{bestExperimentId, bestFitness, bestConvergenceRate};
     }
@@ -163,6 +174,7 @@ public class HyperparameterSearch {
         double bestExperimentId = 0;
         double bestConvergenceRate = 0;
         double bestTournamentSelectionNumber = 0;
+        double bestElitismPercent = 0;
 
         ArrayList<Integer> experimentIds = new ArrayList<>();
         ArrayList<Double> bestFitnessScores = new ArrayList<>();
@@ -175,6 +187,7 @@ public class HyperparameterSearch {
         ArrayList<Double> highMutationRates = new ArrayList<>();
         ArrayList<Double> crossoverRates = new ArrayList<>();
         ArrayList<Integer> tournamentSelectionNumbers = new ArrayList<>();
+        ArrayList<Double> elitismPercents = new ArrayList<>();
 
         for (int i = 0; i < iterations; i++) {
             Random random = new Random();
@@ -186,6 +199,7 @@ public class HyperparameterSearch {
             double highMutationRate = parameters.getHighMutationRateMin() + (parameters.getHighMutationRateMax() - parameters.getHighMutationRateMin()) * random.nextDouble();
             double crossoverRate = parameters.getCrossoverRateMin() + (parameters.getCrossoverRateMax() - parameters.getCrossoverRateMin()) * random.nextDouble();
             int tournamentSelectionNumber = random.nextInt(parameters.getTournamentSelectionNumberMax() - parameters.getTournamentSelectionNumberMin() + 1) + parameters.getTournamentSelectionNumberMin();
+            double elitismPercent = parameters.getElitismPercentMin() + (parameters.getElitismPercentMax() - parameters.getElitismPercentMin()) * random.nextDouble();
 
             logger.debug("Population Size: " + populationSize);
             logger.debug("Generation Count: " + generationCount);
@@ -194,7 +208,7 @@ public class HyperparameterSearch {
             logger.debug("High Mutation Rate: " + highMutationRate);
             logger.debug("Crossover Rate: " + crossoverRate);
             logger.debug("Tournament Selection Number: " + tournamentSelectionNumber);
-
+            logger.debug("Elitism Percent: " + elitismPercent);
 
             ConfigHelper.setProperty("POPULATION_SIZE", String.valueOf(populationSize));
             ConfigHelper.setProperty("MAX_GENERATIONS", String.valueOf(generationCount));
@@ -203,6 +217,7 @@ public class HyperparameterSearch {
             ConfigHelper.setProperty("HIGH_MUTATION_RATE", String.valueOf(highMutationRate));
             ConfigHelper.setProperty("CROSSOVER_RATE", String.valueOf(crossoverRate));
             ConfigHelper.setProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES", String.valueOf(tournamentSelectionNumber));
+            ConfigHelper.setProperty("ELITISM_PERCENT", String.valueOf(elitismPercent));
 
             ConfigHelper.saveConfig();
 
@@ -227,6 +242,7 @@ public class HyperparameterSearch {
                 bestExperimentId = experimentId;
                 bestConvergenceRate = convergenceRate;
                 bestTournamentSelectionNumber = tournamentSelectionNumber;
+                bestElitismPercent = elitismPercent;
             }
 
             experimentIds.add((int) experimentId);
@@ -240,6 +256,7 @@ public class HyperparameterSearch {
             highMutationRates.add(highMutationRate);
             crossoverRates.add(crossoverRate);
             tournamentSelectionNumbers.add(tournamentSelectionNumber);
+            elitismPercents.add(elitismPercent);
 
             saveExperiment();
 
@@ -257,7 +274,7 @@ public class HyperparameterSearch {
         String title = "Random Search Result Table";
         saveResultsToTable(experimentIds, bestFitnessScores, convergenceRates, executionTimes,
                 populationSizes, generationCounts, generationWithoutImprovements, lowMutationRates,
-                highMutationRates, crossoverRates, tournamentSelectionNumbers, output, title);
+                highMutationRates, crossoverRates, tournamentSelectionNumbers, elitismPercents, output, title);
 
         logger.info("Total Execution Time of Random Search in seconds: " + totalExecutionTime);
         logger.info("Best Fitness Score of Random Search: " + bestFitness);
@@ -270,6 +287,7 @@ public class HyperparameterSearch {
         logger.info("Best Execution Time of Random Search: " + bestExecutionTime);
         logger.info("Best Experiment ID of Random Search: " + bestExperimentId);
         logger.info("Best Tournament Selection Number of Random Search: " + bestTournamentSelectionNumber);
+        logger.info("Best Elitsim Percent of Random Search: " + bestElitismPercent);
 
         return new double[]{bestExperimentId, bestFitness, bestConvergenceRate};
 
@@ -289,7 +307,7 @@ public class HyperparameterSearch {
                                     ArrayList<Integer> populationSizes, ArrayList<Integer> generationCounts,
                                     ArrayList<Integer> generationWithoutImprovements, ArrayList<Double> lowMutationRates,
                                     ArrayList<Double> highMutationRates, ArrayList<Double> crossoverRates,
-                                    ArrayList<Integer> tournamentSelectionNumbers,
+                                    ArrayList<Integer> tournamentSelectionNumbers, ArrayList<Double> elitismPercents,
                                     String output, String title) {
 
         ArrayList<String> headers = new ArrayList<>();
@@ -304,6 +322,7 @@ public class HyperparameterSearch {
         headers.add("High Mutation Rate");
         headers.add("Crossover Rate");
         headers.add("Tournament Selection Number");
+        headers.add("Elitism Percent");
 
         StringBuilder resultHeaders = new StringBuilder("[");
         for (int i = 0; i < headers.size(); i++) {
@@ -325,6 +344,7 @@ public class HyperparameterSearch {
         StringBuilder col9 = doubleArraylistToString(highMutationRates);
         StringBuilder col10 = doubleArraylistToString(crossoverRates);
         StringBuilder col11 = integerArraylistToString(tournamentSelectionNumbers);
+        StringBuilder col12 = doubleArraylistToString(elitismPercents);
 
         String htmlContent = "<!DOCTYPE html>\n" +
                 "<html>\n" +
@@ -357,7 +377,8 @@ public class HyperparameterSearch {
                 col8.toString() + "," +
                 col9.toString() + "," +
                 col10.toString() + "," +
-                col11.toString() +
+                col11.toString() + "," +
+                col12.toString() +
                 "],\n" +
                 "                align: 'center',\n" +
                 "                line: {color: 'black', width: 1},\n" +
