@@ -359,13 +359,14 @@ public class GeneticAlgorithm {
     public void replacement(int currentGeneration, int childChromosomesSize) {
         Replacement replacement = new Replacement();
 
-        if (currentGeneration < 100) {
+        if (currentGeneration < 10) {
             replacement.randomReplacement(population, childChromosomesSize);
-        } else if (currentGeneration < 300) {
+        } else if (currentGeneration > 10 && currentGeneration < 300) {
             replacement.ageBasedReplacement(population, childChromosomesSize, currentGeneration);
         } else {
             Random random = new Random();
             boolean randomBoolean = random.nextBoolean();
+            randomBoolean = false;
             if (randomBoolean) {
                 replacement.randomReplacement(population, childChromosomesSize);
             } else {

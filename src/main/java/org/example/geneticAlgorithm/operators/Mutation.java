@@ -50,7 +50,7 @@ public class Mutation {
             if (currentGeneration > 200 && currentGeneration < 500) {
                 // elitismus off and more mutation
                 if (randomProbability <= value) {
-                    int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 4 : 4;
+                    int resetExamThreshold = key.getFitnessScore() < threshHold ? 7 : 2;
 
                     if (isStable) {
                         swapMutation(key, resetExamThreshold);
@@ -59,8 +59,9 @@ public class Mutation {
                     }
                 }
             } else if (currentGeneration > 500 && currentGeneration < 1000) {
+                randomProbability = 0;
                 if (randomProbability <= value) {
-                    int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 3 : 8;
+                    int resetExamThreshold = key.getFitnessScore() < threshHold ? 10 : 4;
 
                     if (isStable) {
                         swapMutation(key, resetExamThreshold);
@@ -70,7 +71,7 @@ public class Mutation {
                 }
             } else {
                 if (randomProbability <= value && !eliteChromosomes.contains(key)) {
-                    int resetExamThreshold = key.getFitnessScore() < threshHold ? key.getEncodedExams().size() / 5 : 2;
+                    int resetExamThreshold = key.getFitnessScore() < threshHold ? 5 : 2;
 
                     if (isStable) {
                         swapMutation(key, resetExamThreshold);

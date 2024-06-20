@@ -326,7 +326,7 @@ public class Fitness {
                     logger.debug(timeslots.get(i));
                     logger.debug(timeslots.get(j));
                     logger.debug("Overlapped minutes: " + minutes);
-                    overlappedPunishment += (double) minutes / 60;
+                    overlappedPunishment += 1;
                 }
             }
         }

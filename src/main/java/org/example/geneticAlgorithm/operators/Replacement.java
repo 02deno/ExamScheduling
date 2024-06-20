@@ -44,7 +44,7 @@ public class Replacement {
 
 
         for (Chromosome chromosome : population) {
-            if (currentGeneration > 200) {
+            if (currentGeneration > 300) {
                 // elitsim off
                 if (chromosomesToBeRemoved.size() == childChromosomesSize) {
                     break;
