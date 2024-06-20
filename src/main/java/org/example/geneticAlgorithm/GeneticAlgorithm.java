@@ -23,11 +23,6 @@ import static org.example.utils.DataStructureHelper.sortByValueDescending;
 @Data
 public class GeneticAlgorithm {
 
-    // TODO(Deniz) : Chromosome and Population classes can be added to
-    //  reduce complexity
-
-    // TODO(Deniz) : Add a diversity calculator, it should calculate the
-    //  diversity of a population
 
     private ArrayList<Course> courses = new ArrayList<>();
     private ArrayList<Invigilator> invigilators = new ArrayList<>();
@@ -259,7 +254,7 @@ public class GeneticAlgorithm {
         this.classrooms = resetClassrooms;
     }
 
-    public void calculateFitness(boolean saveToExcel, boolean experiment, int experimentId) {
+    public void calculateFitness(boolean saveToExcel, boolean experiment, int experimentId, int currentGeneration) {
         // make a hashmap with encoded exam as a key
         // and fitness score as a value
         Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
@@ -293,6 +288,34 @@ public class GeneticAlgorithm {
             chromosome.setFitnessScore(fitnessScore);
 
         }
+
+        // fitness sharing
+
+        if (Boolean.parseBoolean(ConfigHelper.getProperty("FITNESS_SHARE")) && currentGeneration > 200) {
+            population = Fitness.fitnessShare(population);
+            // update fitnessScores and fitnessScoresList after fitness share
+            // ArrayList<double[]> fitnessScoresList : chromosom id , fitness score
+
+            for (Chromosome chromosom : population) {
+                double id = chromosom.getChromosomeId();
+                double fit = chromosom.getFitnessScore();
+
+                for (Chromosome chromosom1 : fitnessScores.keySet()) {
+                    if (chromosom1.getChromosomeId() == id) {
+                        fitnessScores.put(chromosom1, fit);
+                    }
+                }
+
+                for (double[] fScores : fitnessScoresList) {
+                    if (fScores[0] == id) {
+                        fScores[1] = fit;
+                    }
+                }
+            }
+        }
+
+
+
         // sort hashmaps based on fitness scores, this tables only contain fitness scores
         hardConstraintFitnessScores = sortByValueDescending(hardConstraintFitnessScores);
         softConstraintFitnessScores = sortByValueDescending(softConstraintFitnessScores);
@@ -389,7 +412,7 @@ public class GeneticAlgorithm {
 
         double initalBestFitness = 0;
         while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
-            calculateFitness(true, experiment, experimentId);
+            calculateFitness(true, experiment, experimentId, currentGeneration);
             if (currentGeneration == 0) {
                 initalBestFitness = findBestFitnessScore();
             }
@@ -405,8 +428,7 @@ public class GeneticAlgorithm {
             populationTemp.addAll(childChromosomes);
 
 
-
-            calculateFitness(false, experiment, experimentId);
+            calculateFitness(false, experiment, experimentId, currentGeneration);
             logger.debug("population size: " + populationTemp.size());
             double lastBestFitnessScore = findBestFitnessScore();
 
@@ -435,6 +457,7 @@ public class GeneticAlgorithm {
                 highMutationRate += 0.01;
                 crossoverRate += 0.05;
                 isStable = true;
+                generationsWithoutImprovement = 0;
             }
 
         }
