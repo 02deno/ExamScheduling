@@ -104,7 +104,7 @@ public class Fitness {
         // or increase fintess score when diversity is high
         // hamming distance : range [0,1]
         // new fitness values = weight1*actual fitness + weight2*diversity
-        double sharingThreshold = population.get(0).getEncodedExams().size() / 2; // how far apart chromosomes should be
+        double sharingThreshold = (double) population.get(0).getEncodedExams().size() / 2; // how far apart chromosomes should be
         double shapeParameter = 1;
 
         for (int i = 0; i < population.size(); i++) {

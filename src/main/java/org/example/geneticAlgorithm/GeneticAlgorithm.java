@@ -292,7 +292,7 @@ public class GeneticAlgorithm {
         // fitness sharing
 
         if (Boolean.parseBoolean(ConfigHelper.getProperty("FITNESS_SHARE")) && currentGeneration > 200) {
-            population = Fitness.fitnessShare(population);
+            Fitness.fitnessShare(population);
             // update fitnessScores and fitnessScoresList after fitness share
             // ArrayList<double[]> fitnessScoresList : chromosom id , fitness score
 
