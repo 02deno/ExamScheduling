@@ -120,16 +120,19 @@ public class GeneticAlgorithm {
             Collections.shuffle(this.classrooms, new Random(rand.nextInt(10000)));
 
             HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.heuristicMapExamsWithInvigilators(exams, invigilators);
+            //HashMap<String, ArrayList<?>> resultCoursesInvigilators = Initialization.randomMapExamsWithInvigilators(exams, invigilators);
             this.exams = DataStructureHelper.castArrayList(resultCoursesInvigilators.get("exams"), Exam.class);
             logger.debug("heuristicMapExamsWithInvigilators finished.");
 
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.heuristicMapExamsWithClassrooms(exams, classrooms);
+            //HashMap<String, ArrayList<?>> resultCoursesClassrooms = Initialization.randomMapExamsWithClassrooms(exams, classrooms);
             this.exams = DataStructureHelper.castArrayList(resultCoursesClassrooms.get("exams"), Exam.class);
             logger.debug("heuristicMapExamsWithClassrooms finished.");
 
             Collections.shuffle(exams, new Random(rand.nextInt(10000)));
             HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.heuristicMapExamsWithTimeslots(exams, timeslots);
+            //HashMap<String, ArrayList<?>> resultCoursesTimeslots = Initialization.randomMapExamsWithTimeslots(exams, timeslots);
             this.exams = DataStructureHelper.castArrayList(resultCoursesTimeslots.get("exams"), Exam.class);
             logger.debug("heuristicMapExamsWithTimeslots finished.");
 
