@@ -457,7 +457,6 @@ public class GeneticAlgorithm {
                 highMutationRate += 0.01;
                 crossoverRate += 0.05;
                 isStable = true;
-                generationsWithoutImprovement = 0;
             }
 
         }
