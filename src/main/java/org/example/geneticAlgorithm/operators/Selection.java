@@ -2,12 +2,11 @@ package org.example.geneticAlgorithm.operators;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.xmlbeans.impl.store.CharUtil;
 import org.example.models.Chromosome;
 import org.example.utils.ConfigHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 public class Selection {
 
@@ -34,6 +33,7 @@ public class Selection {
     private final int numberOfChromosomesToBeSelected = Integer.parseInt(ConfigHelper.getProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES"));
     private static final Logger logger = LogManager.getLogger(Selection.class);
     private final Random random = new Random();
+    private final Set<Chromosome> uniqueParents = new HashSet<>();
     private final ArrayList<Chromosome> parents = new ArrayList<>();
 
     public ArrayList<Chromosome> rouletteWheelSelection(ArrayList<Chromosome> population) {
@@ -44,7 +44,7 @@ public class Selection {
             totalScore += chromosome.getFitnessScore();
         }
 
-        while (i < populationSize * 0.7) {
+        while (i < populationSize * 0.6) {
             double randomValue = random.nextDouble() * totalScore;
 
             double temp = 0;
@@ -63,19 +63,19 @@ public class Selection {
 
     public ArrayList<Chromosome> tournamentSelection(ArrayList<Chromosome> population) {
         int i = 0;
-        ArrayList<Chromosome> tournamentChromosomes = new ArrayList<>();
 
-        while (i < populationSize * 0.7) {
-            for (int j = 0; j < numberOfChromosomesToBeSelected; j++) {
+        while (i < populationSize) {
+            ArrayList<Chromosome> tournamentChromosomes = new ArrayList<>();
+            for (int j = 0; j <= numberOfChromosomesToBeSelected; j++) {
                 int randomChromosomeIndex = random.nextInt(populationSize);
                 tournamentChromosomes.add(population.get(randomChromosomeIndex));
             }
 
             tournamentChromosomes.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);
-            parents.add(tournamentChromosomes.get(0));
+            uniqueParents.add(tournamentChromosomes.get(0));
             i++;
         }
-
+        parents.addAll(uniqueParents);
         return parents;
     }
 
@@ -96,7 +96,7 @@ public class Selection {
             totalProbability += probability;
         }
 
-        while (i < populationSize * 0.7) {
+        while (i < populationSize * 0.6) {
             double randomValue = random.nextDouble() * totalProbability;
 
             double temp = 0;
