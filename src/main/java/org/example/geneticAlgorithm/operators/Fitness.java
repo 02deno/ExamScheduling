@@ -53,12 +53,6 @@ public class Fitness {
      * score can be at most 1 if everything is perfect
      *
      *
-     * TODO(Deniz) : add graphs for fitness function, like their
-     *  progress in different generations, or their average in one
-     *  population, ..
-     *
-     * TODO(Deniz) : Return true/false array for constraints
-     *  or if score is not one == violation
      *
      * TODO(Deniz) : Add weights to constraints by calculating
      *  fitness scores
@@ -103,45 +97,43 @@ public class Fitness {
         return new double[][]{hardConstraintScores, softConstraintScores, new double[]{chromosome.getChromosomeId(), fitnessScore}};
     }
 
-    public double[] hardConstraintScores(Chromosome chromosome) {
+    public static ArrayList<Chromosome> fitnessShare(ArrayList<Chromosome> population) {
+        // compare each chromosom with each other
+        // calculate similarity or diversity
+        // reduce fitness score when similarity is high
+        // or increase fintess score when diversity is high
+        // hamming distance : range [0,1]
+        // new fitness values = weight1*actual fitness + weight2*diversity
+        double sharingThreshold = (double) population.get(0).getEncodedExams().size() / 2; // how far apart chromosomes should be
+        double shapeParameter = 1;
 
-        ArrayList<EncodedExam> encodedExams = chromosome.getEncodedExams();
-        double allExamsHaveRequiredTime = (double) 1 / (1 + allExamsHaveRequiredTime(encodedExams));
-        double allExamHaveRequiredInvigilatorCount = (double) 1 / (1 + allExamHaveRequiredInvigilatorCount(encodedExams));
-        double classroomOverlapped = (double) 1 / (1 + classroomOverlapped());
-        double allExamsHaveClassrooms = (double) 1 / (1 + allExamsHaveClassrooms(encodedExams));
-        double classroomsHasCapacity = (double) 1 / (1 + classroomsHasCapacity(encodedExams));
-        double invigilatorOverlapped = (double) 1 / (1 + invigilatorOverlapped());
-        double studentOverlapped = (double) 1 / (1 + studentOverlapped());
-        double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailable());
-        double startAndEndTimeDateViolated = (double) 1 / (1 + startAndEndTimeDateViolated(encodedExams));
-        double allExamsHaveRequiredEquipments = (double) 1 / (1 + allExamsHaveRequiredEquipments(encodedExams));
-        double noExamsHolidays = (double) 1 / (1 + noExamsInHolidays(encodedExams));
-        double examStartAndEndDateSame = (double) 1 / (1 + examStartAndEndDateSame(encodedExams));
+        for (int i = 0; i < population.size(); i++) {
+            Chromosome chromosome = population.get(i);
+            double actualFitness = chromosome.getFitnessScore();
+            double distanceSum = 0; // we want this to be max for diversity
 
-        // use f1 score to calculate average, harmonic average
-        // we can also use weight/priority based average calculation
-        // n = fitness function count
-        int n = 12;
-        double fitnessScore = n / (
-                1 / allExamsHaveRequiredTime +
-                        1 / allExamHaveRequiredInvigilatorCount +
-                        1 / classroomOverlapped +
-                        1 / allExamsHaveClassrooms +
-                        1 / classroomsHasCapacity +
-                        1 / invigilatorOverlapped +
-                        1 / studentOverlapped +
-                        1 / invigilatorAvailable +
-                        1 / startAndEndTimeDateViolated +
-                        1 / allExamsHaveRequiredEquipments +
-                        1 / noExamsHolidays +
-                        1 / examStartAndEndDateSame
-        );
-        return new double[]{chromosome.getChromosomeId(), allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
-                allExamsHaveClassrooms, classroomsHasCapacity, invigilatorOverlapped,
-                studentOverlapped, invigilatorAvailable, startAndEndTimeDateViolated,
-                allExamsHaveRequiredEquipments, noExamsHolidays, examStartAndEndDateSame,
-                fitnessScore};
+            for (int j = 0; j < population.size(); j++) {
+                if (i == j) {
+                    continue;
+                }
+                Chromosome anotherChromosome = population.get(j);
+                double hammingDistance = hammingDistance(chromosome, anotherChromosome);
+                // hamming - max : encodedExam.size, min : 0
+
+                double distance = Math.pow(hammingDistance / chromosome.getEncodedExams().size(), shapeParameter);
+                distanceSum += distance;
+
+
+            }
+
+            // update fitness
+            if (distanceSum != 0) {
+                chromosome.setFitnessScore(0.9 * actualFitness + 0.1 * (distanceSum / (population.size() - 1)));
+            }
+        }
+
+
+        return population;
     }
 
     public double[] softConstraintScores(Chromosome chromosome) {
@@ -172,6 +164,72 @@ public class Fitness {
                 fitnessScore};
     }
 
+    public static double hammingDistance(Chromosome chromosome1, Chromosome chromosome2) {
+        int distance = 0;
+        ArrayList<EncodedExam> encodedExams1 = chromosome1.getEncodedExams();
+        ArrayList<EncodedExam> encodedExams2 = chromosome2.getEncodedExams();
+        for (int i = 0; i < encodedExams1.size(); i++) {
+            EncodedExam exam = encodedExams1.get(i);
+            String course = exam.getCourseCode();
+            String classrooom = exam.getClassroomCode();
+            ArrayList<String> invigilators = exam.getInvigilators();
+            Timeslot timeslot = exam.getTimeSlot();
+
+            for (EncodedExam exam2 : encodedExams2) {
+                if (exam2.getCourseCode().equals(course)) {
+                    if (classrooom.equals(exam2.getClassroomCode()) &&
+                            !timeslot.getStart().isEqual(exam2.getTimeSlot().getStart()) &&
+                            !timeslot.getEnd().isEqual(exam2.getTimeSlot().getEnd()) &&
+                            !invigilators.containsAll(exam2.getInvigilators()) &&
+                            !exam2.getInvigilators().containsAll(invigilators)) {
+
+                        distance++;
+                    }
+                }
+            }
+        }
+        return distance;
+    }
+
+    public double[] hardConstraintScores(Chromosome chromosome) {
+
+        ArrayList<EncodedExam> encodedExams = chromosome.getEncodedExams();
+        double allExamsHaveRequiredTime = (double) 1 / (1 + allExamsHaveRequiredTime(encodedExams));
+        double allExamHaveRequiredInvigilatorCount = (double) 1 / (1 + allExamHaveRequiredInvigilatorCount(encodedExams));
+        double classroomOverlapped = (double) 1 / (1 + classroomOverlapped());
+        double allExamsHaveClassrooms = (double) 1 / (1 + allExamsHaveClassrooms(encodedExams));
+        double classroomsHasCapacity = (double) 1 / (1 + classroomsHasCapacity(encodedExams));
+        double invigilatorOverlapped = (double) 1 / (1 + invigilatorOverlapped());
+        double studentOverlapped = (double) 1 / (1 + studentOverlapped());
+        double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailable());
+        double startAndEndTimeDateViolated = (double) 1 / (1 + startAndEndTimeDateViolated(encodedExams));
+        double allExamsHaveRequiredEquipments = (double) 1 / (1 + allExamsHaveRequiredEquipments(encodedExams));
+        double noExamsHolidays = (double) 1 / (1 + noExamsInHolidays(encodedExams));
+        double examStartAndEndDateSame = (double) 1 / (1 + examStartAndEndDateSame(encodedExams));
+
+        // use f1 score to calculate average, harmonic average
+        // we can also use weight/priority based average calculation
+        // n = fitness function count
+        int n = 11;
+        double fitnessScore = n / (
+                1 / allExamsHaveRequiredTime +
+                        1 / allExamHaveRequiredInvigilatorCount +
+                        1 / classroomOverlapped +
+                        1 / allExamsHaveClassrooms +
+                        1 / classroomsHasCapacity +
+                        1 / invigilatorOverlapped +
+                        1 / studentOverlapped +
+                        1 / invigilatorAvailable +
+                        1 / startAndEndTimeDateViolated +
+                        1 / noExamsHolidays +
+                        1 / examStartAndEndDateSame
+        );
+        return new double[]{chromosome.getChromosomeId(), allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
+                allExamsHaveClassrooms, classroomsHasCapacity, invigilatorOverlapped,
+                studentOverlapped, invigilatorAvailable, startAndEndTimeDateViolated,
+                allExamsHaveRequiredEquipments, noExamsHolidays, examStartAndEndDateSame,
+                fitnessScore};
+    }
 
     private void prepareDataForFitness(ArrayList<EncodedExam> chromosome) {
 
@@ -326,7 +384,8 @@ public class Fitness {
                     logger.debug(timeslots.get(i));
                     logger.debug(timeslots.get(j));
                     logger.debug("Overlapped minutes: " + minutes);
-                    overlappedPunishment += (double) minutes / 60;
+                    //overlappedPunishment += (double) minutes / 60;
+                    overlappedPunishment += 1;
                 }
             }
         }
