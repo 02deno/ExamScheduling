@@ -149,7 +149,7 @@ public class Fitness {
 
         int n = 7;
         double fitnessScore = n / (
-                1 / studentMoreThanTwoExamSameDay +
+                        1 / studentMoreThanTwoExamSameDay +
                         1 / minimumGapBetweenExamsStudent +
                         1 / invigilatorMoreThanThreeExamSameDay +
                         1 / minimumGapBetweenExamsInvigilator +
@@ -203,7 +203,6 @@ public class Fitness {
         double studentOverlapped = (double) 1 / (1 + studentOverlapped());
         double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailable());
         double startAndEndTimeDateViolated = (double) 1 / (1 + startAndEndTimeDateViolated(encodedExams));
-        double allExamsHaveRequiredEquipments = (double) 1 / (1 + allExamsHaveRequiredEquipments(encodedExams));
         double noExamsHolidays = (double) 1 / (1 + noExamsInHolidays(encodedExams));
         double examStartAndEndDateSame = (double) 1 / (1 + examStartAndEndDateSame(encodedExams));
 
@@ -212,7 +211,7 @@ public class Fitness {
         // n = fitness function count
         int n = 11;
         double fitnessScore = n / (
-                1 / allExamsHaveRequiredTime +
+                        1 / allExamsHaveRequiredTime +
                         1 / allExamHaveRequiredInvigilatorCount +
                         1 / classroomOverlapped +
                         1 / allExamsHaveClassrooms +
@@ -227,7 +226,7 @@ public class Fitness {
         return new double[]{chromosome.getChromosomeId(), allExamsHaveRequiredTime, allExamHaveRequiredInvigilatorCount, classroomOverlapped,
                 allExamsHaveClassrooms, classroomsHasCapacity, invigilatorOverlapped,
                 studentOverlapped, invigilatorAvailable, startAndEndTimeDateViolated,
-                allExamsHaveRequiredEquipments, noExamsHolidays, examStartAndEndDateSame,
+                noExamsHolidays, examStartAndEndDateSame,
                 fitnessScore};
     }
 
@@ -304,6 +303,7 @@ public class Fitness {
                 }
             }
         }
+        logger.info("requiredTimeslotPunishment" + requiredTimeslotPunishment);
         return requiredTimeslotPunishment;
     }
 
@@ -330,6 +330,7 @@ public class Fitness {
                 }
             }
         }
+        logger.info("invigilatorCountPunishment" + invigilatorCountPunishment);
         return invigilatorCountPunishment;
     }
 
@@ -347,7 +348,7 @@ public class Fitness {
 
             classroomPunishment = getOverlappedPunishment(classroomPunishment, timeslots);
         }
-
+        logger.info("classroomPunishment" + classroomPunishment);
         return classroomPunishment;
     }
 
@@ -371,6 +372,7 @@ public class Fitness {
             }
             studentOverlappedPunishment = getOverlappedPunishment(studentOverlappedPunishment, timeslots);
         }
+        logger.info("studentOverlappedPunishment" + studentOverlappedPunishment);
         return studentOverlappedPunishment;
     }
 
@@ -407,7 +409,7 @@ public class Fitness {
             invigilatorOverlappedPunishment = getOverlappedPunishment(invigilatorOverlappedPunishment, timeslots);
 
         }
-
+        logger.info("invigilatorOverlappedPunishment" + invigilatorOverlappedPunishment);
         return invigilatorOverlappedPunishment;
     }
 
@@ -431,7 +433,7 @@ public class Fitness {
                 }
             }
         }
-
+        logger.info("invigilatorAvailablePunishment" + invigilatorAvailablePunishment);
         return invigilatorAvailablePunishment;
     }
 
@@ -445,7 +447,7 @@ public class Fitness {
                 allExamsHaveClassroomsPunishment++;
             }
         }
-
+        logger.info("allExamsHaveClassroomsPunishment" + allExamsHaveClassroomsPunishment);
         return allExamsHaveClassroomsPunishment;
     }
 
@@ -471,7 +473,7 @@ public class Fitness {
                 classroomsHasCapacityPunishment++;
             }
         }
-
+        logger.info("classroomsHasCapacityPunishment" + classroomsHasCapacityPunishment);
         return classroomsHasCapacityPunishment;
     }
 
@@ -492,6 +494,7 @@ public class Fitness {
                 startAndEndTimeDatePunishment++;
             }
         }
+        logger.info("startAndEndTimeDatePunishment" + startAndEndTimeDatePunishment);
         return startAndEndTimeDatePunishment;
     }
 
@@ -510,6 +513,7 @@ public class Fitness {
                 }
             }
         }
+        logger.info("allExamsHaveRequiredEquipmentsPunishment" + allExamsHaveRequiredEquipmentsPunishment);
         return allExamsHaveRequiredEquipmentsPunishment;
     }
 
@@ -529,7 +533,7 @@ public class Fitness {
                 noExamsHolidaysPunishment++;
             }
         }
-
+        logger.info("noExamsHolidaysPunishment" + noExamsHolidaysPunishment);
         return noExamsHolidaysPunishment;
     }
 
@@ -541,6 +545,7 @@ public class Fitness {
                 examStartAndEndDateSamePunishment++;
             }
         }
+        logger.info("examStartAndEndDateSamePunishment" + examStartAndEndDateSamePunishment);
         return examStartAndEndDateSamePunishment;
     }
 
@@ -577,6 +582,8 @@ public class Fitness {
             }
 
         }
+        logger.info("studentMoreThanTwoExamSameDayPunishment" + studentMoreThanTwoExamSameDayPunishment);
+
         return studentMoreThanTwoExamSameDayPunishment;
     }
 
@@ -616,6 +623,8 @@ public class Fitness {
                 }
             }
         }
+        logger.info("minimumGapBetweenExamsStudentPunishment" + minimumGapBetweenExamsStudentPunishment);
+
         return minimumGapBetweenExamsStudentPunishment;
     }
 
@@ -651,12 +660,13 @@ public class Fitness {
             }
 
         }
+        logger.info("invigilatorMoreThanThreeExamSameDayPunishment" + invigilatorMoreThanThreeExamSameDayPunishment);
 
         return invigilatorMoreThanThreeExamSameDayPunishment;
     }
 
     public double minimumGapBetweenExamsInvigilator() {
-        // If student has more than one exam in the same day , they should have at least 1 hour between
+        // If invigilator has more than one exam in the same day , they should have at least 1 hour between
         int minimumGapBetweenExamsInvigilatorPunishment = 0;
 
         for (String invigilatorId : invigilatorExams.keySet()) {
@@ -689,6 +699,7 @@ public class Fitness {
                 }
             }
         }
+        logger.info("minimumGapBetweenExamsInvigilatorPunishment" + minimumGapBetweenExamsInvigilatorPunishment);
 
         return minimumGapBetweenExamsInvigilatorPunishment;
     }
@@ -710,6 +721,7 @@ public class Fitness {
             }
 
         }
+        logger.info("noExamsWeekendPunishment" + noExamsWeekendPunishment);
 
         return noExamsWeekendPunishment;
     }
@@ -764,6 +776,8 @@ public class Fitness {
             double difference = Math.abs(desiredAfternoonProportion - afternoonProportion);
             afternoonPunishment += difference * 10;
         }
+        logger.info("afternoonPunishment" + afternoonPunishment);
+
         return afternoonPunishment;
     }
 
@@ -805,6 +819,7 @@ public class Fitness {
                 }
             }
         }
+        logger.info("popularExamsNotAtBeginningPunishment" + popularExamsNotAtBeginningPunishment);
 
         return popularExamsNotAtBeginningPunishment;
     }

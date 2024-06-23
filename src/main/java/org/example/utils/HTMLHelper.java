@@ -3,6 +3,7 @@ package org.example.utils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.geneticAlgorithm.operators.Fitness;
 import org.example.models.*;
 
 import java.io.FileWriter;
@@ -339,7 +340,7 @@ public class HTMLHelper {
                 if (exam.getTimeSlot().toString().contains(currentDate.toString())) {
                     timeslot = exam.getTimeSlot();
                     classroomCode = exam.getClassroomCode();
-                    htmlContent.append("<td>").append(timeslot.getStart().toLocalTime()).append("-").append(timeslot.getEnd().toLocalTime()).append("<br>").append(classroomCode).append("</td>");
+                    htmlContent.append("<td>").append(timeslot.getStart().toLocalTime()).append("-").append(timeslot.getEnd().toLocalTime()).append("<br>").append(classroomCode).append("<br>").append(exam.getInvigilators()).append("</td>");
                 } else {
                     htmlContent.append("<td>").append("</td>");
                 }
@@ -562,6 +563,101 @@ public class HTMLHelper {
             fileWriter.write(htmlContent.toString());
         } catch (IOException e) {
             logger.error("Some error occurred while writing HTML file to desired path", e);
+        }
+    }
+
+    public static void visualizeBestChromosomeConstraintChecklist(Fitness fitness, Chromosome bestChromosome) {
+        String title = "Best Chromosome With Constraints Checklist";
+        StringBuilder htmlContent = new StringBuilder();
+
+        htmlContent.append("<html>");
+        htmlContent.append("<head>");
+        htmlContent.append("<title>").append(title).append("</title>");
+        htmlContent.append("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css\">");
+        htmlContent.append("<style>");
+        htmlContent.append(".header {background-color: #C2452A; height: 70px; margin-left: 50px; margin-right: 50px; margin-bottom: 10px;}");
+        htmlContent.append(".constraint-title {color: #ffffff; font-size: 40px; justify-content: center; align-items: center; display: flex; padding-top: 13px;}");
+        htmlContent.append(".checklist {background-color: #F5F0EF; margin-right: 50px; margin-left: 50px; color: #000000; font-size: 20px; padding: 10px;}");
+        htmlContent.append(".icon {color: #3aad38; margin-left: 10px;}");
+        htmlContent.append("</style>");
+        htmlContent.append("</head>");
+        htmlContent.append("<body>");
+        htmlContent.append("<div class='header'>");
+        htmlContent.append("<p class='constraint-title'>HARTE BESCHRAENKUNGEN</p>");
+        htmlContent.append("</div>");
+        htmlContent.append("<div class='checklist'>");
+        htmlContent.append("<p id='required_time'>1- Alle Pruefungen sollten den erforderlichen Zeitrahmen fuer Aufsichtspersonen und Studierende haben.</p>");
+        htmlContent.append("<p id='invigilator_count'>2- Fuer alle Pruefungen muss die erforderliche Anzahl an Aufseher vorhanden sein.</p>");
+        htmlContent.append("<p id='classroom_overlap'>3- Keinem Klassenraum kann gleichzeitig mehr als eine Pruefung zugewiesen werden.</p>");
+        htmlContent.append("<p id='student_overlap'>4- Kein Student darf mehr als eine Pruefung zur gleichen Zeit ablegen.</p>");
+        htmlContent.append("<p id='invigilator_overlap'>5- Kein Aufseher sollte mehr als einer Pruefung zur gleichen Zeit zugeordnet sein.</p>");
+        htmlContent.append("<p id='invigilator_available'>6- Keiner Aufsichtsperson kann mehr Aufgaben zugewiesen werden, als ihre/seine Kapazitaeten zulassen.</p>");
+        htmlContent.append("<p id='have_classrooms'>7- Alle Pruefungen sollten einen Klassenraum haben.</p>");
+        htmlContent.append("<p id='has_capacity'>8- In einem Klassenzimmer koennen sich nicht mehr Studenten aufhalten, als die festgelegte Studentenkapazitaet im selben Zeitfenster betraegt.</p>");
+        htmlContent.append("<p id='start_end_time'>9- Die Pruefungen duerfen nicht vor 9 Uhr morgens und nicht nach 17 Uhr abends beginnen.</p>");
+        htmlContent.append("<p id='holidays'>10- An Feiertagen sollten keine Pruefungen stattfinden.</p>");
+        htmlContent.append("<p id='same_start_end'>11- Die Pruefung sollte am selben Tag beginnen und enden</p>");
+        htmlContent.append("</div>");
+
+        htmlContent.append("<div class='header' style='background-color: #39BBC8;'>");
+        htmlContent.append("<p class='constraint-title'>WEICHE BESCHRAENKUNGEN</p>");
+        htmlContent.append("</div>");
+        htmlContent.append("<div class='checklist' style='background-color: #F0F5F6;' >");
+        htmlContent.append("<p id='student_too_many_exams'>1- Kein Student sollte an einem Tag mehr als zwei Pruefungen ablegen.</p>");
+        htmlContent.append("<p id='min_gap_students'>2- Wenn ein Student an einem Tag mehr als eine Pruefung hat, sollte zwischen den beiden mindestens eine Stunde liegen.</p>");
+        htmlContent.append("<p id='inv_too_many_exams'>3- Kein Aufseher sollte mehr als drei Pruefungen an einem Tag ueberwachen.</p>");
+        htmlContent.append("<p id='min_gap_inv'>4- Wenn der Aufseher mehr als eine Pruefung am selben Tag hat, sollte er mindestens 1 Stunde Zeit haben zwischen.</p>");
+        htmlContent.append("<p id='weekend_exams'>5- Am Wochenende soll es keine Pruefungen geben.</p>");
+        htmlContent.append("<p id='exams_in_afternoon'>6- Die meisten Pruefungen sollten nachmittags stattfinden, da die Wahrnehmung der Studierenden dann in der Regel am offensten ist.</p>");
+        htmlContent.append("<p id='popular_exams'>7- Die von den meisten Schuelern gewaehlten Unterrichtsstunden sollten moeglichst zu Beginn des Pruefungsstundenplans stattfinden. So bleibt der Lehrkraft genuegend Zeit, die Pruefungen zu bewerten.</p>");
+        htmlContent.append("</div>");
+
+
+        htmlContent.append("<script>");
+        htmlContent.append("function createIcon() {\n" +
+                "    let icon = document.createElement(\"i\");\n" +
+                "    icon.className = \"fas fa-check-square icon\"; // Font Awesome check box icon\n" +
+                "    return icon;\n" +
+                "}");
+        htmlContent.append("let icon = document.createElement('i');");
+        htmlContent.append("icon.className = \"fa-solid fa-square-check icon\";");
+
+
+        if (fitness.allExamsHaveRequiredTime(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('required_time').appendChild(createIcon());");
+        if (fitness.allExamHaveRequiredInvigilatorCount(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('invigilator_count').appendChild(createIcon());");
+        if (fitness.classroomOverlapped() == 0.0) htmlContent.append("document.getElementById('classroom_overlap').appendChild(createIcon());");
+        if (fitness.studentOverlapped() == 0.0) htmlContent.append("document.getElementById('student_overlap').appendChild(createIcon());");
+        if (fitness.invigilatorOverlapped() == 0.0) htmlContent.append("document.getElementById('invigilator_overlap').appendChild(createIcon());");
+        if (fitness.invigilatorAvailable() == 0.0) htmlContent.append("document.getElementById('invigilator_available').appendChild(createIcon());");
+        if (fitness.allExamsHaveClassrooms(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('have_classrooms').appendChild(createIcon());");
+        if (fitness.classroomsHasCapacity(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('has_capacity').appendChild(createIcon());");
+        if (fitness.startAndEndTimeDateViolated(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('start_end_time').appendChild(createIcon());");
+        if (fitness.noExamsInHolidays(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('holidays').appendChild(createIcon());");
+        if (fitness.examStartAndEndDateSame(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('same_start_end').appendChild(createIcon());");
+
+
+        if (fitness.studentMoreThanTwoExamSameDay() == 0.0) htmlContent.append("document.getElementById('student_too_many_exams').appendChild(createIcon());");
+        if (fitness.minimumGapBetweenExamsStudent() == 0.0) htmlContent.append("document.getElementById('min_gap_students').appendChild(createIcon());");
+        if (fitness.invigilatorMoreThanThreeExamSameDay() == 0.0) htmlContent.append("document.getElementById('inv_too_many_exams').appendChild(createIcon());");
+        if (fitness.minimumGapBetweenExamsInvigilator() == 0.0) htmlContent.append("document.getElementById('min_gap_inv').appendChild(createIcon());");
+        if (fitness.noExamsAtWeekends(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('weekend_exams').appendChild(createIcon());");
+        if (fitness.examsNotInAfternoon() == 0.0) htmlContent.append("document.getElementById('exams_in_afternoon').appendChild(createIcon());");
+        if (fitness.popularExamsAtBeginning(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('popular_exams').appendChild(createIcon());");
+
+        htmlContent.append("</script>");
+        htmlContent.append("</body>");
+        htmlContent.append("</html>");
+
+        String baseFileName = "graphs/Checklist/";
+        FileHelper.createDirectory(baseFileName);
+        String outputFilePath = baseFileName + "checklist.html";
+        try {
+            FileWriter writer = new FileWriter(outputFilePath);
+            writer.write(htmlContent.toString());
+            writer.close();
+            logger.info("Report saved as HTML file: " + outputFilePath);
+        } catch (IOException e) {
+            logger.error("Error writing HTML file: " + e.getMessage());
         }
     }
 

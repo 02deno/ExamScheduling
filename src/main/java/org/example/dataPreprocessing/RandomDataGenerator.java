@@ -44,10 +44,10 @@ public class RandomDataGenerator {
     public static HashMap<String, HashMap<String, ArrayList<Object>>> combineAllData() {
         //Step 1,2,3
 
-        String courseDataPath = "data/tum_dersler.xlsx";
+        String courseDataPath = "data/tum_derslerv2.xlsx";
         String studentDataPath = "data/students.xlsx";
         String invigilatorDataPath = "data/invigilators.xlsx";
-        String classroomDataPath = "data/Classrooms_v3.xlsx";
+        String classroomDataPath = "data/Classrooms_v4 (1).xlsx";
         CourseDataParser courseDataParser = new CourseDataParser(courseDataPath);
         PersonDataParser personDataParser = new PersonDataParser(studentDataPath, invigilatorDataPath);
         ClassroomDataParser classroomDataParser = new ClassroomDataParser(classroomDataPath);

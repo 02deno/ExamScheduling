@@ -3,11 +3,7 @@ package org.example.geneticAlgorithm.operators;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.example.models.Chromosome;
 import org.example.models.EncodedExam;
-import org.example.utils.ConfigHelper;
-import org.example.utils.HTMLHelper;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Random;
@@ -24,10 +20,6 @@ public class Crossover {
     private int crossoverPoint;
     private int firstCrossoverPoint;
     private  int secondCrossoverPoint;
-    private LocalDate startDate = LocalDate.parse(ConfigHelper.getProperty("START_DATE"));
-    private LocalDate endDate = LocalDate.parse(ConfigHelper.getProperty("END_DATE")); // this date is not included
-    private LocalTime startTime = LocalTime.parse(ConfigHelper.getProperty("START_TIME"));
-    private LocalTime endTime = LocalTime.parse(ConfigHelper.getProperty("END_TIME"));
 
     public ArrayList<Chromosome> onePointCrossover(ArrayList<Chromosome> parents, long chromosomeIdCounter, double crossoverRate) {
         for (Chromosome parent : parents) {
@@ -80,8 +72,7 @@ public class Crossover {
                 ImmutablePair<Chromosome, Chromosome> randomParents = getRandomParents(parents);
                 Chromosome firstParent = randomParents.left;
                 Chromosome secondParent = randomParents.right;
-                //HTMLHelper.generateExamTableDila(startDate, endDate, firstParent.getEncodedExams(), i + " " + firstParent.getChromosomeId() + " - First Parent.html");
-                //HTMLHelper.generateExamTableDila(startDate, endDate, secondParent.getEncodedExams(), i + " " + secondParent.getChromosomeId() + " - Second Parent.html");
+
 
 
 
@@ -92,14 +83,11 @@ public class Crossover {
 
                 createOffspring(firstChildList, firstParent, secondParent, firstChildChromosome, chromosomeIdCounter, false);
                 chromosomeIdCounter++;
-                //HTMLHelper.generateExamTableDila(startDate, endDate, firstChildChromosome.getEncodedExams(), i + " " + firstChildChromosome.getChromosomeId() + " - First Child.html");
+
 
 
                 createOffspring(secondChildList, secondParent, firstParent, secondChildChromosome, chromosomeIdCounter, false);
                 chromosomeIdCounter++;
-                //HTMLHelper.generateExamTableDila(startDate, endDate, secondChildChromosome.getEncodedExams(), i + " " + secondChildChromosome.getChromosomeId() + " - Second Child.html");
-
-
                 childChromosomes.add(firstChildChromosome);
                 childChromosomes.add(secondChildChromosome);
             }

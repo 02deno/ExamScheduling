@@ -376,13 +376,13 @@ public class GeneticAlgorithm {
 
     public void mutation() {
         Mutation mutation = new Mutation();
-        mutation.mutation(population, this.classrooms, lowMutationRate, highMutationRate, isStable);
+        mutation.mutation(population, this.classrooms, lowMutationRate, highMutationRate, isStable, this.invigilators);
     }
 
     public void replacement(int currentGeneration, int childChromosomesSize) {
         Replacement replacement = new Replacement();
 
-        if (currentGeneration < 10) {
+        if (currentGeneration < 100) {
             replacement.randomReplacement(population, childChromosomesSize);
         } else {
             replacement.ageBasedReplacement(population, childChromosomesSize);
@@ -398,11 +398,9 @@ public class GeneticAlgorithm {
     public double[] algorithm(boolean experiment, int experimentId) {
         int wantedExamScheduleCount = 3;
         int currentGeneration = 0;
-        int generationsWithoutImprovement = 0;
         int generationsWithUnderImprovementThreshold = 0;
         int maxGenerations = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
         int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
-
 
         ArrayList<Chromosome> populationTemp;
         ArrayList<Chromosome> childChromosomes;
@@ -411,14 +409,14 @@ public class GeneticAlgorithm {
         populationTemp = initializationAndEncode();
 
         double initalBestFitness = 0;
-        while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
+        while (currentGeneration < maxGenerations) {//değiştirilebilir
             calculateFitness(true, experiment, experimentId, currentGeneration);
             if (currentGeneration == 0) {
                 initalBestFitness = findBestFitnessScore();
             }
             currentGeneration += 1;
             updateAgesOfChromosomes();
-            //geneticAlgorithm.visualization(wantedExamScheduleCount, currentGeneration);
+            visualization(wantedExamScheduleCount, currentGeneration);
             bestFitnessScore = findBestFitnessScore();
 
             selectParents(currentGeneration);
@@ -438,28 +436,38 @@ public class GeneticAlgorithm {
 
 
             if (lastBestFitnessScore <= bestFitnessScore) {
-                generationsWithoutImprovement += 1;
+                toleratedGenerationsWithoutImprovement += 1;
             } else {
-                generationsWithoutImprovement = 0;
+                toleratedGenerationsWithoutImprovement = 0;
                 isStable = false;
             }
 
             double improvement = lastBestFitnessScore - bestFitnessScore;
-            if (improvement < 0.01) {
+            logger.info("improvement: " + improvement);
+            if (improvement < 0.001) {
                 generationsWithUnderImprovementThreshold++;
+                logger.info("generationsWithUnderImprovementThreshold: " + generationsWithUnderImprovementThreshold);
             } else {
                 generationsWithUnderImprovementThreshold = 0;
+                isStable = false;
             }
 
-            if (generationsWithoutImprovement == 10) {
+            if (generationsWithUnderImprovementThreshold == 100) {
                 logger.info("parameters are changing..");
                 lowMutationRate += 0.001;
                 highMutationRate += 0.01;
-                crossoverRate += 0.05;
+                crossoverRate += 0.02;
+
+            } else if (generationsWithUnderImprovementThreshold == 250) {
+                logger.info("stable");
                 isStable = true;
+                generationsWithUnderImprovementThreshold = 0;
             }
 
         }
+        Fitness fitness = new Fitness(courses, students, classrooms, invigilators, startDate, endDate, startTime, endTime);
+        Chromosome bestChromosome = findBestChromosome();
+        HTMLHelper.visualizeBestChromosomeConstraintChecklist(fitness, bestChromosome);
         double convergenceRate = (findBestFitnessScore() - initalBestFitness) / currentGeneration;
 
         // Create Graphs and Analyse Fitness Scores
@@ -468,5 +476,10 @@ public class GeneticAlgorithm {
         }
 
         return new double[]{convergenceRate, findBestFitnessScore()};
+    }
+
+    private Chromosome findBestChromosome() {
+        population.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);
+        return population.get(0);
     }
 }
