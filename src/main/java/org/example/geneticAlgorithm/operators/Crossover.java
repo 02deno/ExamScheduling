@@ -35,11 +35,11 @@ public class Crossover {
             secondChildList = new ArrayList<>();
 
             if (randomProbability <= crossoverRate) {
-                Chromosome firstParent = getRandomParents(parents).left;
-                Chromosome secondParent = getRandomParents(parents).right;
+                ImmutablePair<Chromosome, Chromosome> randomParents = getRandomParents(parents);
+                Chromosome firstParent = randomParents.left;
+                Chromosome secondParent = randomParents.right;
 
-                crossoverPoint = random.nextInt(firstParent.getEncodedExams().size());
-
+                crossoverPoint = random.nextInt(firstParent.getEncodedExams().size() -1) + 1;
 
                 createOffspring(firstChildList, firstParent, secondParent, firstChildChromosome, chromosomeIdCounter, true);
                 chromosomeIdCounter++;
@@ -69,8 +69,12 @@ public class Crossover {
             secondChildList = new ArrayList<>();
 
             if (randomProbability <= crossoverRate) {
-                Chromosome firstParent = getRandomParents(parents).left;
-                Chromosome secondParent = getRandomParents(parents).right;
+                ImmutablePair<Chromosome, Chromosome> randomParents = getRandomParents(parents);
+                Chromosome firstParent = randomParents.left;
+                Chromosome secondParent = randomParents.right;
+
+
+
 
                 firstCrossoverPoint = random.nextInt(firstParent.getEncodedExams().size() - 2);
                 secondCrossoverPoint = random.nextInt(
@@ -80,9 +84,10 @@ public class Crossover {
                 createOffspring(firstChildList, firstParent, secondParent, firstChildChromosome, chromosomeIdCounter, false);
                 chromosomeIdCounter++;
 
+
+
                 createOffspring(secondChildList, secondParent, firstParent, secondChildChromosome, chromosomeIdCounter, false);
                 chromosomeIdCounter++;
-
                 childChromosomes.add(firstChildChromosome);
                 childChromosomes.add(secondChildChromosome);
             }
