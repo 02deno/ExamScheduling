@@ -24,7 +24,6 @@ public class CourseDataParser {
     public void initializeCourseColumnHeaderMap() {
         columnHeaderMap.put("classCode", "Ders Kodu");
         columnHeaderMap.put("className", "Ders Adı");
-        columnHeaderMap.put("classCapacity", "Sınava Girecek Öğrenci Sayısı");
         columnHeaderMap.put("examDuration", "Sınav Süresi (Slot Sayısı)");
         columnHeaderMap.put("beforeExamPrep", "Gözetmenlik Öncesi Boşluk Süresi (Slot Sayısı)");
         columnHeaderMap.put("afterExamPrep", "Gözetmenlik Sonrası Boşluk Süresi (Slot Sayısı)");

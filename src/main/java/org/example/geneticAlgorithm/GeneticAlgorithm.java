@@ -145,7 +145,8 @@ public class GeneticAlgorithm {
     }
 
     public void encode() {
-        this.encodedExams = Encode.encode(this.exams);
+        Encode encode = new Encode();
+        this.encodedExams = encode.encode(this.exams, this.classrooms);
 
         chromosome = new Chromosome(chromosomeIdCounter, encodedExams, 0);
         chromosomeIdCounter++;
@@ -210,7 +211,8 @@ public class GeneticAlgorithm {
             // Reports that are changing : invigilators, classrooms, exam schedules
             int n = (Integer) uniqueNumbers.toArray()[k];
             HashMap<String, ArrayList<?>> randomInfo = populationForVisualization.get(n);
-            ArrayList<EncodedExam> randomExamScheduleForInvigilators = Encode.encode(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class));
+            Encode encode = new Encode();
+            ArrayList<EncodedExam> randomExamScheduleForInvigilators = encode.encode(DataStructureHelper.castArrayList(randomInfo.get("exams"), Exam.class), this.classrooms);
 
             ArrayList<EncodedExam> randomExamScheduleForStudents = new ArrayList<>();
             for (EncodedExam encodedExam : randomExamScheduleForInvigilators) {
@@ -407,9 +409,8 @@ public class GeneticAlgorithm {
 
         generateData();
         populationTemp = initializationAndEncode();
-
         double initalBestFitness = 0;
-        while (currentGeneration < maxGenerations) {//değiştirilebilir
+        while (currentGeneration < maxGenerations && generationsWithUnderImprovementThreshold < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
             calculateFitness(true, experiment, experimentId, currentGeneration);
             if (currentGeneration == 0) {
                 initalBestFitness = findBestFitnessScore();
@@ -436,15 +437,15 @@ public class GeneticAlgorithm {
 
 
             if (lastBestFitnessScore <= bestFitnessScore) {
-                toleratedGenerationsWithoutImprovement += 1;
+                generationsWithUnderImprovementThreshold += 1;
             } else {
-                toleratedGenerationsWithoutImprovement = 0;
+                generationsWithUnderImprovementThreshold = 0;
                 isStable = false;
             }
 
             double improvement = lastBestFitnessScore - bestFitnessScore;
             logger.info("improvement: " + improvement);
-            if (improvement < 0.001) {
+            if (improvement < 0.0001) {
                 generationsWithUnderImprovementThreshold++;
                 logger.info("generationsWithUnderImprovementThreshold: " + generationsWithUnderImprovementThreshold);
             } else {

@@ -164,8 +164,8 @@ public class HTMLHelper {
     }
     public static void generateCourseReport(ArrayList<Course> courses, String output, String title) {
         HTMLHelper.generateReport(courses, output, title,
-                new String[]{"Course Code", "Course Name", "Is PC Exam", "Student Capacity", "Remaining Student Capacity", "Registered Student IDs", "Before Exam", "Exam Duration", "After Exam"},
-                new String[]{"courseCode", "courseName", "isPcExam", "studentCapacity", "remainingStudentCapacity", "registeredStudents", "beforeExamPrepTime", "examDuration", "afterExamPrepTime"});
+                new String[]{"Course Code", "Course Name", "Is PC Exam", "Registered Student IDs", "Before Exam", "Exam Duration", "After Exam"},
+                new String[]{"courseCode", "courseName", "isPcExam", "registeredStudents", "beforeExamPrepTime", "examDuration", "afterExamPrepTime"});
     }
 
     public static void generateStudentReport(ArrayList<Student> students, String output, String title) {
@@ -606,7 +606,7 @@ public class HTMLHelper {
         htmlContent.append("<p id='student_too_many_exams'>1- Kein Student sollte an einem Tag mehr als zwei Pruefungen ablegen.</p>");
         htmlContent.append("<p id='min_gap_students'>2- Wenn ein Student an einem Tag mehr als eine Pruefung hat, sollte zwischen den beiden mindestens eine Stunde liegen.</p>");
         htmlContent.append("<p id='inv_too_many_exams'>3- Kein Aufseher sollte mehr als drei Pruefungen an einem Tag ueberwachen.</p>");
-        htmlContent.append("<p id='min_gap_inv'>4- Wenn der Aufseher mehr als eine Pruefung am selben Tag hat, sollte er mindestens 1 Stunde Zeit haben zwischen.</p>");
+        htmlContent.append("<p id='min_gap_inv'>4- Wenn der Aufseher mehr als eine Pruefung am selben Tag hat, sollte er mindestens halbe Stunde Zeit haben zwischen.</p>");
         htmlContent.append("<p id='weekend_exams'>5- Am Wochenende soll es keine Pruefungen geben.</p>");
         htmlContent.append("<p id='exams_in_afternoon'>6- Die meisten Pruefungen sollten nachmittags stattfinden, da die Wahrnehmung der Studierenden dann in der Regel am offensten ist.</p>");
         htmlContent.append("<p id='popular_exams'>7- Die von den meisten Schuelern gewaehlten Unterrichtsstunden sollten moeglichst zu Beginn des Pruefungsstundenplans stattfinden. So bleibt der Lehrkraft genuegend Zeit, die Pruefungen zu bewerten.</p>");

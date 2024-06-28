@@ -29,22 +29,19 @@ public class Course {
     private String courseName;
     private String courseCode;
     private boolean isPcExam;
-    private int studentCapacity;
     private int beforeExamPrepTime;
     private int examDuration;
     private int afterExamPrepTime;
-    private int remainingStudentCapacity;
     private ArrayList<String> registeredStudents = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(Course.class);
-    public Course(String courseCode, String courseName, boolean isPcExam, int studentCapacity, int beforeExamPrepTime, int examDuration, int afterExamPrepTime) {
+
+    public Course(String courseCode, String courseName, boolean isPcExam, int beforeExamPrepTime, int examDuration, int afterExamPrepTime) {
         this.courseName = courseName;
         this.courseCode = courseCode;
         this.isPcExam = isPcExam;
-        this.studentCapacity = studentCapacity;
         this.beforeExamPrepTime = beforeExamPrepTime;
         this.examDuration = examDuration;
         this.afterExamPrepTime = afterExamPrepTime;
-        this.remainingStudentCapacity = studentCapacity;
     }
 
     public static void updateCourse(ArrayList<Course> courses, Course updatedCourse) {

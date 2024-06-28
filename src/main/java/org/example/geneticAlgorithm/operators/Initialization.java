@@ -32,35 +32,24 @@ public class Initialization {
 
     public static HashMap<String, ArrayList<?>> heuristicMapCoursesWithStudents(ArrayList<Course> courses, ArrayList<Student> students) {
         // Step 1
-        for (Student student : students) {
-            ArrayList<String> registeredCourses = student.getRegisteredCourses();
-            int remainingCourseCapacity = student.getRemainingCourseCapacity();
-            int studentCapacity = student.getMaxCoursesTakenCount();
-            double randomValue = Math.random();
-            // Scale to the range 0.0 to 0.2
-            double scaledValue = randomValue * 0.2;
-            // Shift to the range 0.8 to 1.0
-            double randomRatio = 0.8 + scaledValue;
-            while (registeredCourses.size() < studentCapacity * randomRatio) {
-                int courseIndex = DataStructureHelper.getRandomElement(courses);
-                Course course = courses.get(courseIndex);
-                int remainingStudentCapacity = course.getRemainingStudentCapacity();
-                if (remainingStudentCapacity != 0) {
-                    // update course
-                    ArrayList<String> registeredStudents = course.getRegisteredStudents();
-                    registeredStudents.add(student.getID());
-                    remainingStudentCapacity--;
-                    course.setRemainingStudentCapacity(remainingStudentCapacity);
-                    course.setRegisteredStudents(registeredStudents);
 
-                    // update student
-                    registeredCourses.add(course.getCourseCode());
-                    remainingCourseCapacity--;
-                    student.setRemainingCourseCapacity(remainingCourseCapacity);
-                    student.setRegisteredCourses(registeredCourses);
+
+        for (Course course : courses) {
+            Set<String> registeredStudentsList = new HashSet<>();
+            for (Student student : students) {
+                if (student.getRegisteredCourses().contains(course.getCourseCode())) {
+                    registeredStudentsList.add(student.getID());
                 }
             }
+            course.setRegisteredStudents(new ArrayList<>(registeredStudentsList));
         }
+        ArrayList<Course> coursesToBeDeleted = new ArrayList<>();
+        for (Course course : courses) {
+            if (course.getRegisteredStudents().isEmpty()) {
+                coursesToBeDeleted.add(course);
+            }
+        }
+        courses.removeAll(coursesToBeDeleted);
 
         logger.debug("Student instances mapped with courses successfully :)");
         HashMap<String, ArrayList<?>> result = new HashMap<>();

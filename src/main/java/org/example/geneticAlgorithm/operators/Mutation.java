@@ -42,6 +42,7 @@ public class Mutation {
         setMutationRates(population, threshHold, lowMutationRate, highMutationRate);
         elitism(population);
 
+
         mutationRates.forEach((key, value) -> {
             double randomProbability = random.nextDouble() * 0.1;
 
@@ -50,7 +51,6 @@ public class Mutation {
 
                 if (isStable) {
                     swapMutation(key, examNumberToBeChanged);
-                    elitismPercent = 0.0;
                 } else {
                     randomResetMutation(key, classrooms, examNumberToBeChanged, invigilators);
                 }

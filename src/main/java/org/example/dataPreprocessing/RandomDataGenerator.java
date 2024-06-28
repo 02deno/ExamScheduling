@@ -8,6 +8,7 @@ import org.example.utils.ConfigHelper;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -44,8 +45,8 @@ public class RandomDataGenerator {
     public static HashMap<String, HashMap<String, ArrayList<Object>>> combineAllData() {
         //Step 1,2,3
 
-        String courseDataPath = "data/tum_derslerv2.xlsx";
-        String studentDataPath = "data/students.xlsx";
+        String courseDataPath = "data/tum_dersler.xlsx";
+        String studentDataPath = "data/students_with_courses_v3.xlsx";
         String invigilatorDataPath = "data/invigilators.xlsx";
         String classroomDataPath = "data/Classrooms_v4 (1).xlsx";
         CourseDataParser courseDataParser = new CourseDataParser(courseDataPath);
@@ -84,16 +85,15 @@ public class RandomDataGenerator {
         for (HashMap.Entry<String, ArrayList<Object>> entry : courseData.entrySet()) {
             String courseCode = entry.getKey();
             String courseName = (String) entry.getValue().get(0);
-            int studentCapacity = (int) entry.getValue().get(1);
-            int beforeExamPrepTime = (int) entry.getValue().get(2);
-            int examDuration = (int) entry.getValue().get(3);
-            int afterExamPrepTime = (int) entry.getValue().get(4);
+            int beforeExamPrepTime = (int) entry.getValue().get(1);
+            int examDuration = (int) entry.getValue().get(2);
+            int afterExamPrepTime = (int) entry.getValue().get(3);
 
             double pcExamProbability = Double.parseDouble(ConfigHelper.getProperty("PC_EXAM")); // 30%
             double randomNumber = random.nextDouble();
             boolean isPcExam = randomNumber < pcExamProbability;
 
-            Course course = new Course(courseCode, courseName, isPcExam, studentCapacity, beforeExamPrepTime, examDuration, afterExamPrepTime);
+            Course course = new Course(courseCode, courseName, isPcExam, beforeExamPrepTime, examDuration, afterExamPrepTime);
             courses.add(course);
         }
         //logger.debug(courses);
@@ -141,16 +141,24 @@ public class RandomDataGenerator {
         // create Invigilator instances
         ArrayList<Student> students = new ArrayList<>();
         for (HashMap.Entry<String, ArrayList<Object>> entry : studentData.entrySet()) {
+
             String id = entry.getKey();
-            String name = (String) entry.getValue().get(1);
-            String surname = (String) entry.getValue().get(0);
+            String name = (String) entry.getValue().get(4);
+            String surname = (String) entry.getValue().get(3);
+            String department = (String) entry.getValue().get(0);
+            int year = (int) entry.getValue().get(1);
+
+            String courseData = (String) entry.getValue().get(2);
+            String[] splittedCourses = courseData.split(";");
+            ArrayList<String> registeredCourses = new ArrayList<>(Arrays.asList(splittedCourses));
+
             // int maxCoursesTakenCount = random.nextInt(6) + 1;
             // maxCoursesTakenCount between 6 and 12
             int minCoursesTaken = Integer.parseInt(ConfigHelper.getProperty("MIN_COURSES_TAKEN"));
             int maxCoursesTaken = Integer.parseInt(ConfigHelper.getProperty("MAX_COURSES_TAKEN"));
             int coursesTaken = random.nextInt(maxCoursesTaken - (minCoursesTaken - 1)) + (maxCoursesTaken - minCoursesTaken);
 
-            Student student = new Student(id, name, surname, coursesTaken);
+            Student student = new Student(id, name, surname, registeredCourses, department, year);
             students.add(student);
         }
         //logger.debug(invigilators);

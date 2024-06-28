@@ -28,6 +28,9 @@ public class PersonDataParser {
         studentColumnHeaderMap.put("studentID", "School ID");
         studentColumnHeaderMap.put("studentName", "Name");
         studentColumnHeaderMap.put("studentSurname", "Surname");
+        studentColumnHeaderMap.put("year", "Year");
+        studentColumnHeaderMap.put("department", "Department");
+        studentColumnHeaderMap.put("courses", "Courses");
         studentKeyHeader = "studentID";
 
     }
