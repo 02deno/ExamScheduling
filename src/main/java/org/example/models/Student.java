@@ -27,6 +27,8 @@ public class Student extends Person{
      *
      * */
     private ArrayList<String> registeredCourses = new ArrayList<>();
+    private int year;
+    private String department;
     private int maxCoursesTakenCount;
     private int remainingCourseCapacity;
     private static final Logger logger = LogManager.getLogger(Student.class);
@@ -35,6 +37,13 @@ public class Student extends Person{
         super(ID, name, surname);
         this.maxCoursesTakenCount = maxCoursesTakenCount;
         this.remainingCourseCapacity = maxCoursesTakenCount;
+    }
+
+    public Student(String ID, String name, String surname, ArrayList<String> courses, String department, int year) {
+        super(ID, name, surname);
+        this.department = department;
+        this.registeredCourses = courses;
+        this.year = year;
     }
 
     public static void updateStudent(ArrayList<Student> students, Student updatedStudent) {
@@ -48,5 +57,6 @@ public class Student extends Person{
         }
         logger.error("Student not found for update.");
     }
+
 
 }

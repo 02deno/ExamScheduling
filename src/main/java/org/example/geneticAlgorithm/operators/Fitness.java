@@ -158,6 +158,7 @@ public class Fitness {
                         1 / popularExamsAtBeginning
 
         );
+        logger.debug(" soft fitness score: " + fitnessScore);
 
         return new double[]{chromosome.getChromosomeId(), studentMoreThanTwoExamSameDay, minimumGapBetweenExamsStudent, invigilatorMoreThanThreeExamSameDay,
                 minimumGapBetweenExamsInvigilator, noExamsAtWeekends, examsNotInAfternoon, popularExamsAtBeginning,
@@ -303,7 +304,7 @@ public class Fitness {
                 }
             }
         }
-        logger.info("requiredTimeslotPunishment" + requiredTimeslotPunishment);
+        logger.debug("requiredTimeslotPunishment" + requiredTimeslotPunishment);
         return requiredTimeslotPunishment;
     }
 
@@ -330,7 +331,7 @@ public class Fitness {
                 }
             }
         }
-        logger.info("invigilatorCountPunishment" + invigilatorCountPunishment);
+        logger.debug("invigilatorCountPunishment" + invigilatorCountPunishment);
         return invigilatorCountPunishment;
     }
 
@@ -348,7 +349,7 @@ public class Fitness {
 
             classroomPunishment = getOverlappedPunishment(classroomPunishment, timeslots);
         }
-        logger.info("classroomPunishment" + classroomPunishment);
+        logger.debug("classroomPunishment" + classroomPunishment);
         return classroomPunishment;
     }
 
@@ -372,7 +373,7 @@ public class Fitness {
             }
             studentOverlappedPunishment = getOverlappedPunishment(studentOverlappedPunishment, timeslots);
         }
-        logger.info("studentOverlappedPunishment" + studentOverlappedPunishment);
+        logger.debug("studentOverlappedPunishment" + studentOverlappedPunishment);
         return studentOverlappedPunishment;
     }
 
@@ -409,7 +410,7 @@ public class Fitness {
             invigilatorOverlappedPunishment = getOverlappedPunishment(invigilatorOverlappedPunishment, timeslots);
 
         }
-        logger.info("invigilatorOverlappedPunishment" + invigilatorOverlappedPunishment);
+        logger.debug("invigilatorOverlappedPunishment" + invigilatorOverlappedPunishment);
         return invigilatorOverlappedPunishment;
     }
 
@@ -433,7 +434,7 @@ public class Fitness {
                 }
             }
         }
-        logger.info("invigilatorAvailablePunishment" + invigilatorAvailablePunishment);
+        logger.debug("invigilatorAvailablePunishment" + invigilatorAvailablePunishment);
         return invigilatorAvailablePunishment;
     }
 
@@ -447,7 +448,7 @@ public class Fitness {
                 allExamsHaveClassroomsPunishment++;
             }
         }
-        logger.info("allExamsHaveClassroomsPunishment" + allExamsHaveClassroomsPunishment);
+        logger.debug("allExamsHaveClassroomsPunishment" + allExamsHaveClassroomsPunishment);
         return allExamsHaveClassroomsPunishment;
     }
 
@@ -473,7 +474,7 @@ public class Fitness {
                 classroomsHasCapacityPunishment++;
             }
         }
-        logger.info("classroomsHasCapacityPunishment" + classroomsHasCapacityPunishment);
+        logger.debug("classroomsHasCapacityPunishment" + classroomsHasCapacityPunishment);
         return classroomsHasCapacityPunishment;
     }
 
@@ -494,7 +495,7 @@ public class Fitness {
                 startAndEndTimeDatePunishment++;
             }
         }
-        logger.info("startAndEndTimeDatePunishment" + startAndEndTimeDatePunishment);
+        logger.debug("startAndEndTimeDatePunishment" + startAndEndTimeDatePunishment);
         return startAndEndTimeDatePunishment;
     }
 
@@ -513,7 +514,7 @@ public class Fitness {
                 }
             }
         }
-        logger.info("allExamsHaveRequiredEquipmentsPunishment" + allExamsHaveRequiredEquipmentsPunishment);
+        logger.debug("allExamsHaveRequiredEquipmentsPunishment" + allExamsHaveRequiredEquipmentsPunishment);
         return allExamsHaveRequiredEquipmentsPunishment;
     }
 
@@ -533,7 +534,7 @@ public class Fitness {
                 noExamsHolidaysPunishment++;
             }
         }
-        logger.info("noExamsHolidaysPunishment" + noExamsHolidaysPunishment);
+        logger.debug("noExamsHolidaysPunishment" + noExamsHolidaysPunishment);
         return noExamsHolidaysPunishment;
     }
 
@@ -545,7 +546,7 @@ public class Fitness {
                 examStartAndEndDateSamePunishment++;
             }
         }
-        logger.info("examStartAndEndDateSamePunishment" + examStartAndEndDateSamePunishment);
+        logger.debug("examStartAndEndDateSamePunishment" + examStartAndEndDateSamePunishment);
         return examStartAndEndDateSamePunishment;
     }
 
@@ -582,7 +583,7 @@ public class Fitness {
             }
 
         }
-        logger.info("studentMoreThanTwoExamSameDayPunishment" + studentMoreThanTwoExamSameDayPunishment);
+        logger.debug("studentMoreThanTwoExamSameDayPunishment" + studentMoreThanTwoExamSameDayPunishment);
 
         return studentMoreThanTwoExamSameDayPunishment;
     }
@@ -623,7 +624,7 @@ public class Fitness {
                 }
             }
         }
-        logger.info("minimumGapBetweenExamsStudentPunishment" + minimumGapBetweenExamsStudentPunishment);
+        logger.debug("minimumGapBetweenExamsStudentPunishment" + minimumGapBetweenExamsStudentPunishment);
 
         return minimumGapBetweenExamsStudentPunishment;
     }
@@ -660,7 +661,7 @@ public class Fitness {
             }
 
         }
-        logger.info("invigilatorMoreThanThreeExamSameDayPunishment" + invigilatorMoreThanThreeExamSameDayPunishment);
+        logger.debug("invigilatorMoreThanThreeExamSameDayPunishment" + invigilatorMoreThanThreeExamSameDayPunishment);
 
         return invigilatorMoreThanThreeExamSameDayPunishment;
     }
@@ -699,7 +700,7 @@ public class Fitness {
                 }
             }
         }
-        logger.info("minimumGapBetweenExamsInvigilatorPunishment" + minimumGapBetweenExamsInvigilatorPunishment);
+        logger.debug("minimumGapBetweenExamsInvigilatorPunishment" + minimumGapBetweenExamsInvigilatorPunishment);
 
         return minimumGapBetweenExamsInvigilatorPunishment;
     }
@@ -721,7 +722,7 @@ public class Fitness {
             }
 
         }
-        logger.info("noExamsWeekendPunishment" + noExamsWeekendPunishment);
+        logger.debug("noExamsWeekendPunishment" + noExamsWeekendPunishment);
 
         return noExamsWeekendPunishment;
     }
@@ -776,7 +777,7 @@ public class Fitness {
             double difference = Math.abs(desiredAfternoonProportion - afternoonProportion);
             afternoonPunishment += difference * 10;
         }
-        logger.info("afternoonPunishment" + afternoonPunishment);
+        logger.debug("afternoonPunishment" + afternoonPunishment);
 
         return afternoonPunishment;
     }
@@ -819,7 +820,7 @@ public class Fitness {
                 }
             }
         }
-        logger.info("popularExamsNotAtBeginningPunishment" + popularExamsNotAtBeginningPunishment);
+        logger.debug("popularExamsNotAtBeginningPunishment" + popularExamsNotAtBeginningPunishment);
 
         return popularExamsNotAtBeginningPunishment;
     }

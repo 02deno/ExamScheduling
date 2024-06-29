@@ -33,7 +33,6 @@ public class Selection {
     private final int numberOfChromosomesToBeSelected = Integer.parseInt(ConfigHelper.getProperty("TOURNAMENT_SELECTION_NUMBER_OF_CHROMOSOMES"));
     private static final Logger logger = LogManager.getLogger(Selection.class);
     private final Random random = new Random();
-    private final Set<Chromosome> uniqueParents = new HashSet<>();
     private final ArrayList<Chromosome> parents = new ArrayList<>();
 
     public ArrayList<Chromosome> rouletteWheelSelection(ArrayList<Chromosome> population) {
@@ -44,7 +43,7 @@ public class Selection {
             totalScore += chromosome.getFitnessScore();
         }
 
-        while (i < populationSize * 0.6) {
+        while (i < populationSize * 0.5) {
             double randomValue = random.nextDouble() * totalScore;
 
             double temp = 0;
@@ -72,10 +71,9 @@ public class Selection {
             }
 
             tournamentChromosomes.sort(Chromosome.sortChromosomesByFitnessScoreDescendingOrder);
-            uniqueParents.add(tournamentChromosomes.get(0));
+            if (!parents.contains(tournamentChromosomes.get(0))) parents.add(tournamentChromosomes.get(0));
             i++;
         }
-        parents.addAll(uniqueParents);
         return parents;
     }
 
@@ -96,7 +94,7 @@ public class Selection {
             totalProbability += probability;
         }
 
-        while (i < populationSize * 0.6) {
+        while (i < populationSize * 0.5) {
             double randomValue = random.nextDouble() * totalProbability;
 
             double temp = 0;

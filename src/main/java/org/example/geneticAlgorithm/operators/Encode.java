@@ -1,14 +1,17 @@
 package org.example.geneticAlgorithm.operators;
 
+import org.example.models.Classroom;
 import org.example.models.EncodedExam;
 import org.example.models.Exam;
 import org.example.models.Timeslot;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Encode {
+    private final Random random = new Random();
 
-    public static ArrayList<EncodedExam> encode(ArrayList<Exam> exams) {
+    public ArrayList<EncodedExam> encode(ArrayList<Exam> exams, ArrayList<Classroom> classrooms) {
 
         ArrayList<EncodedExam> encodedExamList = new ArrayList<>();
         for (Exam exam: exams) {
@@ -17,6 +20,9 @@ public class Encode {
 
             if (exam.getClassroom() != null) {
                 classroomCode = exam.getClassroom().getClassroomCode();
+            } else {
+                int randomIndex = random.nextInt(classrooms.size());
+                classroomCode = classrooms.get(randomIndex).getClassroomCode();
             }
 
             ArrayList<String> invigilators = exam.getExamInvigilators();
