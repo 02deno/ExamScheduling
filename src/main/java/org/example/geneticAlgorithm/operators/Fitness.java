@@ -351,7 +351,7 @@ public class Fitness {
                 timeslots.add(timeslot);
             }
 
-            classroomPunishment = +getOverlappedPunishment(classroomPunishment, timeslots);
+            classroomPunishment += getOverlappedPunishment(classroomPunishment, timeslots);
         }
         logger.debug("classroomPunishment" + classroomPunishment);
         return classroomPunishment;
@@ -375,7 +375,7 @@ public class Fitness {
                     timeslots.add(new Timeslot(timeslot.getStart().plusHours(beforeExamPrep), timeslot.getEnd().minusHours(afterExamPrep)));
                 }
             }
-            studentOverlappedPunishment = +getOverlappedPunishment(studentOverlappedPunishment, timeslots);
+            studentOverlappedPunishment += getOverlappedPunishment(studentOverlappedPunishment, timeslots);
         }
         logger.debug("studentOverlappedPunishment" + studentOverlappedPunishment);
         return studentOverlappedPunishment;
@@ -411,7 +411,7 @@ public class Fitness {
                 timeslots.add(timeslot);
             }
 
-            invigilatorOverlappedPunishment = +getOverlappedPunishment(invigilatorOverlappedPunishment, timeslots);
+            invigilatorOverlappedPunishment += getOverlappedPunishment(invigilatorOverlappedPunishment, timeslots);
 
         }
         logger.debug("invigilatorOverlappedPunishment" + invigilatorOverlappedPunishment);
