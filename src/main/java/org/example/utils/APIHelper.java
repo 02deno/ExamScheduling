@@ -43,7 +43,7 @@ public class APIHelper {
 
         logger.info("Request: " + request);
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            if (!response.isSuccessful()) throw new IOException("Response isnt successful " + response);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(Objects.requireNonNull(response.body()).string());

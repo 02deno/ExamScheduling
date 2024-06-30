@@ -9,6 +9,8 @@ import org.example.utils.VisualizationHelper;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -419,7 +421,9 @@ public class HyperparameterSearch {
     public StringBuilder doubleArraylistToString(ArrayList<Double> list) {
         StringBuilder result = new StringBuilder("[");
         for (int i = 0; i < list.size(); i++) {
-            result.append(list.get(i));
+            BigDecimal bigDecimal = new BigDecimal(Double.toString(list.get(i)));
+            bigDecimal = bigDecimal.setScale(10, RoundingMode.HALF_UP);
+            result.append(bigDecimal.doubleValue());
             if (i < list.size() - 1) {
                 result.append(", ");
             }

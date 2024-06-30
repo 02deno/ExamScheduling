@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.geneticAlgorithm.parameter.HyperparameterSearch;
-import org.example.utils.FileHelper;
 
 import java.io.File;
 
@@ -28,12 +27,12 @@ public class App
         HyperparameterSearch hyperparameterSearch = new HyperparameterSearch();
         String destination = "src/main/resources/";
 
-        double[] bestExperimentRandomSearch = hyperparameterSearch.randomSearch(3);
-        logger.info("Best Experiment Id of Random Search: " + bestExperimentRandomSearch[0] +
-                "\nBest Experiment Fitness Score of Random Search: " + bestExperimentRandomSearch[1] +
-                "\nBest Experiment Convergence Rate of Random Search: " + bestExperimentRandomSearch[2]);
-        String source = "experiments/experiment_" + (int) bestExperimentRandomSearch[0] + "/config.properties";
-        FileHelper.copyFile(source, destination);
+//        double[] bestExperimentRandomSearch = hyperparameterSearch.randomSearch(3);
+//        logger.info("Best Experiment Id of Random Search: " + bestExperimentRandomSearch[0] +
+//                "\nBest Experiment Fitness Score of Random Search: " + bestExperimentRandomSearch[1] +
+//                "\nBest Experiment Convergence Rate of Random Search: " + bestExperimentRandomSearch[2]);
+//        String source = "experiments/experiment_" + (int) bestExperimentRandomSearch[0] + "/config.properties";
+//        FileHelper.copyFile(source, destination);
 
 //        double[] bestExperimentGridSearch = hyperparameterSearch.gridSearch();
 //        logger.info("Best Experiment Id of Grid Search: " + bestExperimentGridSearch[0] +
@@ -44,7 +43,7 @@ public class App
 //
 //        logger.info("Experiments for best parameters have ended.");
 //
-//        // If both searches will be executed, uncomment this :
+//        // if both searches will be executed, uncomment this :
 //        if (bestExperimentRandomSearch[2] > bestExperimentGridSearch[2]) {
 //            // random search > grid search
 //            source = "experiments/experiment_" + bestExperimentRandomSearch[0] + "/config.properties";

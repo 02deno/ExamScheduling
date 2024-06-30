@@ -11,8 +11,8 @@ import java.util.Random;
 public class Crossover {
 
     private final Random random = new Random();
-    private Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
-    private ArrayList<Chromosome> childChromosomes = new ArrayList<>();;
+    private final Comparator<EncodedExam> comparator = EncodedExam.sortExamsByCourseCode();
+    private final ArrayList<Chromosome> childChromosomes = new ArrayList<>();
     private Chromosome firstChildChromosome;
     private Chromosome secondChildChromosome;
     private ArrayList<EncodedExam> firstChildList;
@@ -74,8 +74,6 @@ public class Crossover {
                 Chromosome secondParent = randomParents.right;
 
 
-
-
                 firstCrossoverPoint = random.nextInt(firstParent.getEncodedExams().size() - 2);
                 secondCrossoverPoint = random.nextInt(
                         (firstParent.getEncodedExams().size() - 1) - (firstCrossoverPoint + 1)) + (firstCrossoverPoint + 1);
@@ -83,8 +81,6 @@ public class Crossover {
 
                 createOffspring(firstChildList, firstParent, secondParent, firstChildChromosome, chromosomeIdCounter, false);
                 chromosomeIdCounter++;
-
-
 
                 createOffspring(secondChildList, secondParent, firstParent, secondChildChromosome, chromosomeIdCounter, false);
                 chromosomeIdCounter++;
