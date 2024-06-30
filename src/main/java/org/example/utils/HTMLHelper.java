@@ -575,8 +575,9 @@ public class HTMLHelper {
         htmlContent.append("<p id='have_classrooms'>7- Alle Pruefungen sollten einen Klassenraum haben.</p>");
         htmlContent.append("<p id='has_capacity'>8- In einem Klassenzimmer koennen sich nicht mehr Studenten aufhalten, als die festgelegte Studentenkapazitaet im selben Zeitfenster betraegt.</p>");
         htmlContent.append("<p id='start_end_time'>9- Die Pruefungen duerfen nicht vor 9 Uhr morgens und nicht nach 17 Uhr abends beginnen.</p>");
-        htmlContent.append("<p id='holidays'>10- An Feiertagen sollten keine Pruefungen stattfinden.</p>");
-        htmlContent.append("<p id='same_start_end'>11- Die Pruefung sollte am selben Tag beginnen und enden</p>");
+        htmlContent.append("<p id='all-required-equipment'>10- Das Klassenzimmer verfügt über die erforderliche Ausstattung (Computer), falls erforderlich.</p>");
+        htmlContent.append("<p id='holidays'>11- An Feiertagen sollten keine Pruefungen stattfinden.</p>");
+        htmlContent.append("<p id='same_start_end'>12- Die Pruefung sollte am selben Tag beginnen und enden</p>");
         htmlContent.append("</div>");
 
         htmlContent.append("<div class='header' style='background-color: #39BBC8;'>");
@@ -612,6 +613,8 @@ public class HTMLHelper {
         if (fitness.allExamsHaveClassrooms(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('have_classrooms').appendChild(createIcon());");
         if (fitness.classroomsHasCapacity(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('has_capacity').appendChild(createIcon());");
         if (fitness.startAndEndTimeDateViolated(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('start_end_time').appendChild(createIcon());");
+        if (fitness.allExamsHaveRequiredEquipments(bestChromosome.getEncodedExams()) == 0.0)
+            htmlContent.append("document.getElementById('all-required-equipment').appendChild(createIcon());");
         if (fitness.noExamsInHolidays(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('holidays').appendChild(createIcon());");
         if (fitness.examStartAndEndDateSame(bestChromosome.getEncodedExams()) == 0.0) htmlContent.append("document.getElementById('same_start_end').appendChild(createIcon());");
 
