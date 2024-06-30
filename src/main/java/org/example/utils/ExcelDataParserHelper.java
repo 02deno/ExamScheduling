@@ -36,8 +36,6 @@ public class ExcelDataParserHelper {
                     columnIndexMap.put(columnHeader, cell.getColumnIndex());
                 }
                 if (!columnIndexMap.containsValue(-1)) {
-                    // if indexes of all column headers
-                    // are found stop the for loop.
                     break;
                 }
             }
@@ -49,7 +47,6 @@ public class ExcelDataParserHelper {
         HashMap<String, ArrayList<Object>> map = new HashMap<>();
         if (columnIndexMap.values().stream().noneMatch(index -> index == -1)) {
             for (Row row : sheet) {
-                // Skip header row
                 if (row.getRowNum() == 0) {
                     continue;
                 }

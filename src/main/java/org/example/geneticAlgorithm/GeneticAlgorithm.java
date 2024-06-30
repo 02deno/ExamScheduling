@@ -62,13 +62,13 @@ public class GeneticAlgorithm {
     public void generateData() {
         HashMap<String, HashMap<String, ArrayList<Object>>> randomData = RandomDataGenerator.combineAllData();
         this.courses = RandomDataGenerator.generateCourseInstances(randomData.get("courseData"));
-        this.courses = new ArrayList<>(courses.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("COURSE_COUNT")), courses.size())));
+        //this.courses = new ArrayList<>(courses.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("COURSE_COUNT")), courses.size())));
 
         this.invigilators = RandomDataGenerator.generateInvigilatorInstances(randomData.get("invigilatorData"));
         this.invigilators = new ArrayList<>(invigilators.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("INVIGILATOR_COUNT")), invigilators.size())));
 
         this.classrooms = RandomDataGenerator.generateClassroomInstances(randomData.get("classroomData"));
-        this.classrooms = new ArrayList<>(classrooms.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("CLASSROOM_COUNT")), classrooms.size())));
+        //this.classrooms = new ArrayList<>(classrooms.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("CLASSROOM_COUNT")), classrooms.size())));
 
         this.students = RandomDataGenerator.generateStudentInstances(randomData.get("studentData"));
         this.students = new ArrayList<>(students.subList(0, Math.min(Integer.parseInt(ConfigHelper.getProperty("STUDENT_COUNT")), students.size())));
@@ -133,7 +133,6 @@ public class GeneticAlgorithm {
 
             encode();
 
-            // for visualization purposes and reduce complexity
             this.chromosomeForVisualization.put("exams", new ArrayList<>(exams));
             this.chromosomeForVisualization.put("invigilators", new ArrayList<>(invigilators));
             this.chromosomeForVisualization.put("classrooms", new ArrayList<>(classrooms));
@@ -240,7 +239,6 @@ public class GeneticAlgorithm {
     }
 
     public void reset() {
-        // reset classrooms and invigilators
         ArrayList<Invigilator> resetInvigilators = new ArrayList<>();
         ArrayList<Classroom> resetClassrooms = new ArrayList<>();
         for (Invigilator originalInvigilator : this.invigilators) {
@@ -293,7 +291,7 @@ public class GeneticAlgorithm {
 
         // fitness sharing
 
-        if (Boolean.parseBoolean(ConfigHelper.getProperty("FITNESS_SHARE")) && currentGeneration > 200) {
+        if (Boolean.parseBoolean(ConfigHelper.getProperty("FITNESS_SHARE"))) {
             Fitness.fitnessShare(population);
             // update fitnessScores and fitnessScoresList after fitness share
             // ArrayList<double[]> fitnessScoresList : chromosom id , fitness score
@@ -317,19 +315,15 @@ public class GeneticAlgorithm {
         }
 
 
-
-        // sort hashmaps based on fitness scores, this tables only contain fitness scores
         hardConstraintFitnessScores = sortByValueDescending(hardConstraintFitnessScores);
         softConstraintFitnessScores = sortByValueDescending(softConstraintFitnessScores);
         fitnessScores = sortByValueDescending(fitnessScores);
 
-        // visualize
         for (Chromosome chromosome : fitnessScores.keySet()) {
             logger.debug("Id of Exam Schedule: " + chromosome.getChromosomeId() + ", Score: " + fitnessScores.get(chromosome));
         }
 
         if (saveToExcel) {
-            // this tables contain all the fitness function scores
             String baseFileName;
             if (experiment) {
                 baseFileName = "experiments/experiment_" + experimentId + "/FitnessScores/";
@@ -417,7 +411,7 @@ public class GeneticAlgorithm {
             }
             currentGeneration += 1;
             updateAgesOfChromosomes();
-            visualization(wantedExamScheduleCount, currentGeneration);
+            //visualization(wantedExamScheduleCount, currentGeneration);
             bestFitnessScore = findBestFitnessScore();
 
             selectParents(currentGeneration);
@@ -471,7 +465,6 @@ public class GeneticAlgorithm {
         HTMLHelper.visualizeBestChromosomeConstraintChecklist(fitness, bestChromosome);
         double convergenceRate = (findBestFitnessScore() - initalBestFitness) / currentGeneration;
 
-        // Create Graphs and Analyse Fitness Scores
         if (!experiment) {
             VisualizationHelper.generateFitnessPlots();
         }

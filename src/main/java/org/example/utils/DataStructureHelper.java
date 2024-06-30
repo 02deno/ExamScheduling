@@ -1,8 +1,5 @@
 package org.example.utils;
 
-import org.example.models.Chromosome;
-import org.example.models.EncodedExam;
-
 import java.util.*;
 
 public class DataStructureHelper {
@@ -27,10 +24,8 @@ public class DataStructureHelper {
     public static <K, V extends Comparable<? super V>> HashMap<K, V> sortByValueDescending(HashMap<K, V> map) {
         List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
 
-        // Sort the list based on values in descending order
         list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
 
-        // Create a LinkedHashMap to maintain the order of sorted entries
         HashMap<K, V> result = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : list) {
             result.put(entry.getKey(), entry.getValue());
@@ -42,10 +37,8 @@ public class DataStructureHelper {
     public static <K, V extends Comparable<? super V>> HashMap<K, V> sortByValueAscending(HashMap<K, V> map) {
         List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
 
-        // Sort the list based on values in descending order
         list.sort(Map.Entry.comparingByValue());
 
-        // Create a LinkedHashMap to maintain the order of sorted entries
         HashMap<K, V> result = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : list) {
             result.put(entry.getKey(), entry.getValue());

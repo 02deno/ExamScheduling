@@ -118,12 +118,10 @@ public class FileHelper {
         for (double[] row : scoresList) {
             for (int i = 0; i < row.length; i++) {
                 writer.write(Double.toString(row[i]));
-                // Add comma if it's not the last score
                 if (i < row.length - 1) {
                     writer.write(",");
                 }
             }
-            // Add new line after each row
             writer.write("\n");
         }
         logger.debug("Rows appended to CSV file: " + filePath);
@@ -132,7 +130,6 @@ public class FileHelper {
     private static void writeHeaderRow(String[] header, FileWriter writer) throws IOException {
         for (int i = 0; i < header.length; i++) {
             writer.write(header[i]);
-            // Add comma if it's not the last header element
             if (i < header.length - 1) {
                 writer.write(",");
             }

@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.models.*;
 import org.example.utils.ConfigHelper;
-import org.example.utils.HTMLHelper;
 
 import java.time.*;
 import java.util.*;
@@ -29,7 +28,7 @@ public class Mutation {
     private final LocalTime startTime = LocalTime.parse(ConfigHelper.getProperty("START_TIME"));
     private final LocalTime endTime = LocalTime.parse(ConfigHelper.getProperty("END_TIME"));
     private final ArrayList<Chromosome> eliteChromosomes = new ArrayList<>();
-    private double elitismPercent = Double.parseDouble(ConfigHelper.getProperty("ELITISM_PERCENT"));
+    private final double elitismPercent = Double.parseDouble(ConfigHelper.getProperty("ELITISM_PERCENT"));
 
     public void mutation(ArrayList<Chromosome> population, ArrayList<Classroom> classrooms, double lowMutationRate, double highMutationRate, boolean isStable, ArrayList<Invigilator> invigilators) {
 
@@ -41,7 +40,6 @@ public class Mutation {
         double threshHold = calculateAvgFitnessScore(population);
         setMutationRates(population, threshHold, lowMutationRate, highMutationRate);
         elitism(population);
-
 
         mutationRates.forEach((key, value) -> {
             double randomProbability = random.nextDouble() * 0.1;

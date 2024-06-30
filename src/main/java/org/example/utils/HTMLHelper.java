@@ -63,7 +63,6 @@ public class HTMLHelper {
         htmlContent.append("</body>");
         htmlContent.append("</html>");
 
-        // Write HTML content to file
         try {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
@@ -77,7 +76,6 @@ public class HTMLHelper {
     public static void generateReport(ArrayList<?> data, String outputFilePath, String reportTitle, String[] headers, String[] fields) {
         StringBuilder htmlContent = new StringBuilder();
 
-        // HTML head
         htmlContent.append("<!DOCTYPE html>");
         htmlContent.append("<html lang=\"en\">");
         htmlContent.append("<head>");
@@ -85,7 +83,6 @@ public class HTMLHelper {
         htmlContent.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
         htmlContent.append("<title>").append(reportTitle).append("</title>");
         htmlContent.append("<style>");
-        // CSS styles
         htmlContent.append("table { border-collapse: collapse; width: 100%; }");
         htmlContent.append("th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }");
         htmlContent.append("tr:hover { background-color: #f5f5f5; }");
@@ -94,10 +91,8 @@ public class HTMLHelper {
         htmlContent.append("</head>");
         htmlContent.append("<body>");
 
-        // Report title
         htmlContent.append("<h1>").append(reportTitle).append("</h1>");
 
-        // Table to display data
         htmlContent.append("<table>");
         htmlContent.append("<tr>");
         for (String header : headers) {
@@ -105,7 +100,6 @@ public class HTMLHelper {
         }
         htmlContent.append("</tr>");
 
-        // Iterate over data and add rows to the table
         for (int i = 0; i < data.size(); i++) {
             htmlContent.append("<tr");
             if (i % 2 == 0) {
@@ -115,14 +109,12 @@ public class HTMLHelper {
             Object obj = data.get(i);
             for (String field : fields) {
                 try {
-                    // Construct method name based on field
                     String methodName;
                     if (field.startsWith("is")) {
                         methodName = field;
                     } else {
                         methodName = "get" + field.substring(0, 1).toUpperCase() + field.substring(1);
                     }
-                    // Invoke method dynamically
                     Method method = obj.getClass().getMethod(methodName);
                     Object value = method.invoke(obj);
                     htmlContent.append("<td>").append(value).append("</td>");
@@ -135,11 +127,9 @@ public class HTMLHelper {
 
         htmlContent.append("</table>");
 
-        // HTML end
         htmlContent.append("</body>");
         htmlContent.append("</html>");
 
-        // Write HTML content to file
         try {
             FileWriter writer = new FileWriter(outputFilePath);
             writer.write(htmlContent.toString());
@@ -184,7 +174,6 @@ public class HTMLHelper {
 
     public static void generateExamTable(LocalTime startTime, LocalTime endTime, LocalDate startDate, LocalDate endDate, int interval, ArrayList<EncodedExam> exams, String title) {
 
-        // Create HTML content
         StringBuilder htmlContent = new StringBuilder();
         htmlContent.append("<!DOCTYPE html>");
         htmlContent.append("<html lang=\"en\">");
@@ -218,12 +207,10 @@ public class HTMLHelper {
         while (!currentTime.equals(endTime)) {
             htmlContent.append("<tr><td>").append(currentTime).append("-").append(currentTime.plusMinutes(interval)).append("</td>");
 
-            // Iterate through dates
             currentDate = startDate;
             while (!currentDate.isEqual(endDate)) {
-                // Check if any exams are scheduled at the current time slot
                 StringBuilder courseCodesHTML = new StringBuilder();
-                Set<String> uniqueCourseCodes = new HashSet<>(); // To keep track of unique course codes in the time slot
+                Set<String> uniqueCourseCodes = new HashSet<>();
                 for (EncodedExam exam : exams) {
                     if (isInTimeInterval(exam.getTimeSlot().getStart(), exam.getTimeSlot().getEnd(), currentDate, currentTime, interval)) {
                         String courseCode = exam.getCourseCode();
@@ -232,9 +219,8 @@ public class HTMLHelper {
                 }
 
                 for (String courseCode : uniqueCourseCodes) {
-                    // Get color for course code
                     String color = courseCodeColors.computeIfAbsent(courseCode, key -> generateColor(courseCode));
-                    String textColor = getContrastColor(color); // Get contrast text color
+                    String textColor = getContrastColor(color);
                     courseCodesHTML.append("<span style=\"background-color: ").append(color).append("; color: ").append(textColor).append(";\">")
                             .append(courseCode).append("</span><br>");
                 }
@@ -247,7 +233,6 @@ public class HTMLHelper {
             currentTime = currentTime.plusMinutes(interval);
         }
 
-        // Close HTML tags
         htmlContent.append("</table></body></html>");
 
         htmlContent.append("</br>");
@@ -293,7 +278,6 @@ public class HTMLHelper {
 
     public static void generateExamTableDila(LocalDate startDate, LocalDate endDate, ArrayList<EncodedExam> exams, String title) {
 
-        // Create HTML content
         StringBuilder htmlContent = new StringBuilder();
         htmlContent.append("<!DOCTYPE html>");
         htmlContent.append("<html lang=\"en\">");
@@ -351,7 +335,6 @@ public class HTMLHelper {
         }
 
 
-        // Close HTML tags
         htmlContent.append("</table></body></html>");
 
         htmlContent.append("</br>");
@@ -391,7 +374,6 @@ public class HTMLHelper {
     }
 
     private static String generateColor(String courseCode) {
-        // Generate a color based on the hash code of the course code
         int hash = courseCode.hashCode();
         Random random = new Random(hash);
         int r = (hash & 0xFF0000) >> 16;
@@ -407,9 +389,7 @@ public class HTMLHelper {
     }
 
     private static String getContrastColor(String hexColor) {
-        // Calculate the YIQ brightness of the color and return the
-        // background color black or white accordingly
-        // to accomplish visibility
+
         int r = Integer.valueOf(hexColor.substring(1, 3), 16);
         int g = Integer.valueOf(hexColor.substring(3, 5), 16);
         int b = Integer.valueOf(hexColor.substring(5, 7), 16);

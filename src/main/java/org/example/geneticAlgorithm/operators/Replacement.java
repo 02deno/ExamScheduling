@@ -7,7 +7,9 @@ import org.example.geneticAlgorithm.GeneticAlgorithm;
 import org.example.models.Chromosome;
 import org.example.utils.ConfigHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 @Getter
 @Setter
@@ -39,7 +41,6 @@ public class Replacement {
         elitism(population);
         Collections.shuffle(population);
         population.sort(Chromosome.sortChromosomesByAge);//descending
-
 
         for (Chromosome chromosome : population) {
             if (!eliteChromosomes.contains(chromosome)) {
