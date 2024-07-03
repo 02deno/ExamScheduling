@@ -72,7 +72,13 @@ public class Fitness {
     private LocalTime endTime;
     private final double hardWeight = Double.parseDouble(ConfigHelper.getProperty("HARD_CONSTRAINT_WEIGHT"));
     private final double softWeight = Double.parseDouble(ConfigHelper.getProperty("SOFT_CONSTRAINT_WEIGHT"));
-
+    private int invigilatorMoreThanThreeExamSameDayPunishment;
+    private int minimumGapBetweenExamsInvigilatorPunishment;
+    private int studentMoreThanTwoExamSameDayPunishment;
+    private int minimumGapBetweenExamsStudentPunishment;
+    private int noExamsWeekendPunishment;
+    private double afternoonPunishment;
+    private double popularExamsNotAtBeginningPunishment;
     public Fitness(ArrayList<Course> courses, ArrayList<Student> students, ArrayList<Classroom> classrooms, ArrayList<Invigilator> invigilators, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         this.courses = courses;
         this.students = students;
@@ -139,17 +145,17 @@ public class Fitness {
     public double[] softConstraintScores(Chromosome chromosome) {
 
         ArrayList<EncodedExam> encodedExams = chromosome.getEncodedExams();
-        double studentMoreThanTwoExamSameDay = (double) 1 / (1 + studentMoreThanTwoExamSameDay());
-        double minimumGapBetweenExamsStudent = (double) 1 / (1 + minimumGapBetweenExamsStudent());
-        double invigilatorMoreThanThreeExamSameDay = (double) 1 / (1 + invigilatorMoreThanThreeExamSameDay());
-        double minimumGapBetweenExamsInvigilator = (double) 1 / (1 + minimumGapBetweenExamsInvigilator());
-        double noExamsAtWeekends = (double) 1 / (1 + noExamsAtWeekends(encodedExams));
-        double examsNotInAfternoon = (double) 1 / (1 + examsNotInAfternoon());
-        double popularExamsAtBeginning = (double) 1 / (1 + popularExamsAtBeginning(encodedExams));
+        double studentMoreThanTwoExamSameDay = (double) 1 / (1 + this.studentMoreThanTwoExamSameDayPunishment);
+        double minimumGapBetweenExamsStudent = (double) 1 / (1 + this.minimumGapBetweenExamsStudentPunishment);
+        double invigilatorMoreThanThreeExamSameDay = (double) 1 / (1 + this.invigilatorMoreThanThreeExamSameDayPunishment);
+        double minimumGapBetweenExamsInvigilator = (double) 1 / (1 + this.minimumGapBetweenExamsInvigilatorPunishment);
+        double noExamsAtWeekends = (double) 1 / (1 + this.noExamsWeekendPunishment);
+        double examsNotInAfternoon = (double) 1 / (1 + this.afternoonPunishment);
+        double popularExamsAtBeginning = (double) 1 / (1 + this.popularExamsNotAtBeginningPunishment);
 
         int n = 7;
         double fitnessScore = n / (
-                        1 / studentMoreThanTwoExamSameDay +
+                1 / studentMoreThanTwoExamSameDay +
                         1 / minimumGapBetweenExamsStudent +
                         1 / invigilatorMoreThanThreeExamSameDay +
                         1 / minimumGapBetweenExamsInvigilator +
@@ -195,25 +201,274 @@ public class Fitness {
     public double[] hardConstraintScores(Chromosome chromosome) {
 
         ArrayList<EncodedExam> encodedExams = chromosome.getEncodedExams();
-        double allExamsHaveRequiredTime = (double) 1 / (1 + allExamsHaveRequiredTime(encodedExams));
-        double allExamHaveRequiredInvigilatorCount = (double) 1 / (1 + allExamHaveRequiredInvigilatorCount(encodedExams));
+        int allExamsHaveClassroomsPunishment = 0;
+        int requiredTimeslotPunishment = 0;
+        int invigilatorCountPunishment = 0;
+        int classroomsHasCapacityPunishment = 0;
+        int startAndEndTimeDatePunishment = 0;
+        int allExamsHaveRequiredEquipmentsPunishment = 0;
+        int noExamsHolidaysPunishment = 0;
+        int examStartAndEndDateSamePunishment = 0;
+
+
+        Set<LocalDate> holidays = FileHelper.loadHolidaysFromFile();
+
+
+        double invigilatorOverlappedPunishment = 0;
+        double invigilatorAvailablePunishment = 0;
+        for (String invigilatorId : invigilatorExams.keySet()) {
+            ArrayList<LocalDateTime> examEndTimes = new ArrayList<>();
+            Invigilator invigilator = Invigilator.findByInvigilatorId(invigilators, invigilatorId);
+            if (invigilator != null) {
+                int maxMonitoredExamCount = invigilator.getMaxCoursesMonitoredCount();
+                ArrayList<EncodedExam> monitoredExams = invigilatorExams.get(invigilatorId);
+                int monitoredExamCount = monitoredExams.size();
+                if (maxMonitoredExamCount < monitoredExamCount) {
+                    invigilatorAvailablePunishment++;
+                }
+            }
+
+            ArrayList<EncodedExam> assignedExams = invigilatorExams.get(invigilatorId);
+            ArrayList<Timeslot> timeslots = new ArrayList<>();
+            HashMap<LocalDate, Integer> examCountPerDay = new HashMap<>();
+            for (EncodedExam exam : assignedExams) {
+                Timeslot timeslot = exam.getTimeSlot();
+                timeslots.add(timeslot);
+                Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+                if (course != null) {
+                    LocalDate examDay = timeslot.getStart().toLocalDate();
+
+                    if (examCountPerDay.containsKey(examDay)) {
+                        examCountPerDay.put(examDay, examCountPerDay.get(examDay) + 1);
+                    } else {
+                        examCountPerDay.put(examDay, 1);
+                    }
+
+                }
+                examEndTimes.add(timeslot.getEnd());
+            }
+
+            invigilatorOverlappedPunishment += getOverlappedPunishment(invigilatorOverlappedPunishment, timeslots);
+
+            for (int count : examCountPerDay.values()) {
+                if (count > 3) {
+                    invigilatorMoreThanThreeExamSameDayPunishment++;
+                }
+            }
+
+            Collections.sort(examEndTimes);
+            for (int i = 1; i < examEndTimes.size(); i++) {
+                LocalDateTime previousExamEnd = examEndTimes.get(i - 1);
+                LocalDateTime currentExamStart = examEndTimes.get(i);
+
+                long gapInMinutes = Duration.between(previousExamEnd, currentExamStart).toMinutes();
+
+                if (gapInMinutes < 30) {
+                    minimumGapBetweenExamsInvigilatorPunishment++;
+                }
+            }
+
+        }
+
+
+        double studentOverlappedPunishment = 0;
+
+        LocalTime afternoonStart = LocalTime.of(12, 0);
+        LocalTime afternoonEnd = LocalTime.of(18, 0);
+
+        int totalExams = 0;
+        int afternoonExams = 0;
+
+        LocalDate examPeriodStart = startDate;
+        LocalDate examPeriodThreshold = examPeriodStart.plusDays(4); // first 4 days
+
+        HashMap<String, Integer> examPopularity = new HashMap<>();
+
+        for (String studentId : studentExams.keySet()) {
+            ArrayList<EncodedExam> assignedExams = studentExams.get(studentId);
+            ArrayList<Timeslot> timeslots = new ArrayList<>();
+            HashMap<LocalDate, Integer> examCountPerDay = new HashMap<>();
+            ArrayList<LocalDateTime> examEndTimes = new ArrayList<>();
+            for (EncodedExam exam : assignedExams) {
+                Course course = Course.findByCourseCode(courses, exam.getCourseCode());
+                String courseCode = exam.getCourseCode();
+                examPopularity.put(courseCode, examPopularity.getOrDefault(courseCode, 0) + 1);
+                if (course != null) {
+                    int beforeExamPrep = course.getBeforeExamPrepTime();
+                    int afterExamPrep = course.getAfterExamPrepTime();
+                    Timeslot timeslot = exam.getTimeSlot();
+                    LocalTime examStartTime = timeslot.getStart().plusHours(beforeExamPrep).toLocalTime();
+                    totalExams++;
+                    timeslots.add(new Timeslot(timeslot.getStart().plusHours(beforeExamPrep), timeslot.getEnd().minusHours(afterExamPrep)));
+                    if (!examStartTime.isBefore(afternoonStart) && !examStartTime.isAfter(afternoonEnd)) {
+                        afternoonExams++;
+                    }
+                    LocalDate examDay = timeslot.getStart().toLocalDate();
+
+                    if (examCountPerDay.containsKey(examDay)) {
+                        examCountPerDay.put(examDay, examCountPerDay.get(examDay) + 1);
+                    } else {
+                        examCountPerDay.put(examDay, 1);
+                    }
+
+                    examEndTimes.add(timeslot.getEnd().minusHours(afterExamPrep));
+                }
+            }
+
+
+            studentOverlappedPunishment += getOverlappedPunishment(studentOverlappedPunishment, timeslots);
+
+            for (int count : examCountPerDay.values()) {
+                if (count > 2) {
+                    //studentMoreThanTwoExamSameDayPunishment += count - 2;
+                    studentMoreThanTwoExamSameDayPunishment++;
+                    logger.debug("Student:" + studentId + " Count:" + count);
+                }
+            }
+            Collections.sort(examEndTimes);
+
+            for (int i = 1; i < examEndTimes.size(); i++) {
+                LocalDateTime previousExamEnd = examEndTimes.get(i - 1);
+                LocalDateTime currentExamStart = examEndTimes.get(i);
+
+                long gapInMinutes = Duration.between(previousExamEnd, currentExamStart).toMinutes();
+
+                if (gapInMinutes < 60) {
+                    logger.debug(previousExamEnd);
+                    logger.debug(currentExamStart);
+                    logger.debug("The gap for student between consecutive exams is less than 60 minutes, it is: " + gapInMinutes);
+                    minimumGapBetweenExamsStudentPunishment++;
+                }
+            }
+
+        }
+
+        double afternoonProportion = (double) afternoonExams / totalExams;
+        double desiredAfternoonProportion = 0.7;
+
+        if (afternoonProportion < desiredAfternoonProportion) {
+            double difference = Math.abs(desiredAfternoonProportion - afternoonProportion);
+            afternoonPunishment += difference * 10;
+        }
+
+
+        ArrayList<HashMap.Entry<String, Integer>> sortedExams = new ArrayList<>(examPopularity.entrySet());
+        sortedExams.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())); // Descending order
+        int numberOfPopularExams = 5; //  top 5 popular exams
+        ArrayList<String> popularExams = new ArrayList<>();
+        for (int i = 0; i < Math.min(numberOfPopularExams, sortedExams.size()); i++) {
+            popularExams.add(sortedExams.get(i).getKey());
+        }
+
+
+        for (EncodedExam exam : encodedExams) {
+
+            if (popularExams.contains(exam.getCourseCode())) {
+                Timeslot timeslot = exam.getTimeSlot();
+                if (timeslot.getStart().toLocalDate().isAfter(examPeriodThreshold)) {
+                    popularExamsNotAtBeginningPunishment++;
+                    logger.debug("Popular Exam that is not in the first 4 days: " + exam.getCourseCode());
+                    logger.debug("Timeslot : " + timeslot);
+
+                }
+            }
+
+            LocalDateTime startDateTime = exam.getTimeSlot().getStart();
+            LocalDate examDate = startDateTime.toLocalDate();
+            DayOfWeek dayOfWeek = examDate.getDayOfWeek();
+
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+                logger.debug("Exam Date: " + examDate);
+                logger.debug("Exam can not be placed in the weekends");
+                noExamsWeekendPunishment++;
+            }
+
+            if (holidays.contains(examDate)) {
+                noExamsHolidaysPunishment++;
+            }
+
+            if (exam.getClassroomCode() == null) {
+                allExamsHaveClassroomsPunishment++;
+            }
+            String courseCode = exam.getCourseCode();
+            Course course = Course.findByCourseCode(courses, courseCode);
+            Classroom classroom = Classroom.findByClassroomCode(classrooms, exam.getClassroomCode());
+            if (course != null && classroom != null) {
+                boolean pcLab = classroom.isPcLab();
+                boolean pcRequired = course.isPcExam();
+                if (pcLab != pcRequired) {
+                    allExamsHaveRequiredEquipmentsPunishment++;
+                }
+            }
+
+            if (course != null) {
+                Timeslot timeslots = exam.getTimeSlot();
+                int examTimeslotCount = (int) Duration.between(timeslots.getStart(), timeslots.getEnd()).toHours();
+                int timeslotCountForInvigilator = course.getBeforeExamPrepTime() + course.getExamDuration() + course.getAfterExamPrepTime();
+                int timeslotCountForStudent = course.getExamDuration();
+                int differenceInvigilator = Math.abs(examTimeslotCount - timeslotCountForInvigilator);
+                int differenceStudent = Math.abs((examTimeslotCount - (course.getBeforeExamPrepTime() + course.getAfterExamPrepTime())) - timeslotCountForStudent);
+                if (differenceInvigilator != 0) {
+                    requiredTimeslotPunishment += 1;
+                }
+                if (differenceStudent != 0) {
+                    requiredTimeslotPunishment += 1;
+                }
+
+                int invigilatorCount = exam.getInvigilators().size();
+                int capacity = course.getRegisteredStudents().size();
+                int requiredInvigilator = capacity < 20 ? 1 : capacity < 75 ? 2 : (capacity < 150 ? 3 : 4);
+                int difference = Math.abs(requiredInvigilator - invigilatorCount);
+                if (difference != 0) {
+                    invigilatorCountPunishment += 1;
+                }
+
+                if (classroom == null) {
+                    continue;
+                }
+
+                if (classroom.getCapacity() < course.getRegisteredStudents().size()) {
+                    classroomsHasCapacityPunishment++;
+                }
+            }
+
+            Timeslot timeslot = exam.getTimeSlot();
+            LocalDateTime start = timeslot.getStart();
+            LocalDateTime end = timeslot.getEnd();
+            LocalDateTime startDateTim = LocalDateTime.of(startDate, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
+            if (start.isBefore(startDateTim) || start.isAfter(endDateTime) ||
+                    end.isBefore(startDateTim) || end.isAfter(endDateTime)) {
+                startAndEndTimeDatePunishment++;
+            }
+
+            if (!exam.getTimeSlot().getStart().toLocalDate().isEqual(exam.getTimeSlot().getEnd().toLocalDate())) {
+                examStartAndEndDateSamePunishment++;
+            }
+
+
+        }
+
+
+        double allExamsHaveRequiredTime = (double) 1 / (1 + requiredTimeslotPunishment);
+        double allExamHaveRequiredInvigilatorCount = (double) 1 / (1 + invigilatorCountPunishment);
         double classroomOverlapped = (double) 1 / (1 + classroomOverlapped());
-        double allExamsHaveClassrooms = (double) 1 / (1 + allExamsHaveClassrooms(encodedExams));
-        double classroomsHasCapacity = (double) 1 / (1 + classroomsHasCapacity(encodedExams));
-        double invigilatorOverlapped = (double) 1 / (1 + invigilatorOverlapped());
-        double studentOverlapped = (double) 1 / (1 + studentOverlapped());
-        double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailable());
-        double startAndEndTimeDateViolated = (double) 1 / (1 + startAndEndTimeDateViolated(encodedExams));
-        double allExamsHaveRequiredEquipments = (double) 1 / (1 + allExamsHaveRequiredEquipments(encodedExams));
-        double noExamsHolidays = (double) 1 / (1 + noExamsInHolidays(encodedExams));
-        double examStartAndEndDateSame = (double) 1 / (1 + examStartAndEndDateSame(encodedExams));
+        double allExamsHaveClassrooms = (double) 1 / (1 + allExamsHaveClassroomsPunishment);
+        double classroomsHasCapacity = (double) 1 / (1 + classroomsHasCapacityPunishment);
+        double invigilatorOverlapped = (double) 1 / (1 + invigilatorOverlappedPunishment);
+        double studentOverlapped = (double) 1 / (1 + studentOverlappedPunishment);
+        double invigilatorAvailable = (double) 1 / (1 + invigilatorAvailablePunishment);
+        double startAndEndTimeDateViolated = (double) 1 / (1 + startAndEndTimeDatePunishment);
+        double allExamsHaveRequiredEquipments = (double) 1 / (1 + allExamsHaveRequiredEquipmentsPunishment);
+        double noExamsHolidays = (double) 1 / (1 + noExamsHolidaysPunishment);
+        double examStartAndEndDateSame = (double) 1 / (1 + examStartAndEndDateSamePunishment);
 
         // use f1 score to calculate average, harmonic average
         // we can also use weight/priority based average calculation
         // n = fitness function count
         int n = 12;
         double fitnessScore = n / (
-                        1 / allExamsHaveRequiredTime +
+                1 / allExamsHaveRequiredTime +
                         1 / allExamHaveRequiredInvigilatorCount +
                         1 / classroomOverlapped +
                         1 / allExamsHaveClassrooms +
@@ -222,7 +477,7 @@ public class Fitness {
                         1 / studentOverlapped +
                         1 / invigilatorAvailable +
                         1 / startAndEndTimeDateViolated +
-                                1 / allExamsHaveRequiredEquipments +
+                        1 / allExamsHaveRequiredEquipments +
                         1 / noExamsHolidays +
                         1 / examStartAndEndDateSame
         );
