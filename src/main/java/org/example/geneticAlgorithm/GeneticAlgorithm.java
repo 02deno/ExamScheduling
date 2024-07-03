@@ -399,11 +399,11 @@ public class GeneticAlgorithm {
         int maxGenerations = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
         int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
 
-        ArrayList<Chromosome> populationTemp;
+        ArrayList<Chromosome> population;
         ArrayList<Chromosome> childChromosomes;
 
         generateData();
-        populationTemp = initializationAndEncode();
+        population = initializationAndEncode();
         calculateFitness(false, experiment, experimentId, currentGeneration);
         double initalBestFitness = 0;
         while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
@@ -419,11 +419,11 @@ public class GeneticAlgorithm {
             childChromosomes = crossover();
             mutation();
             replacement(currentGeneration, childChromosomes.size());
-            populationTemp.addAll(childChromosomes);
+            population.addAll(childChromosomes);
 
 
             calculateFitness(true, experiment, experimentId, currentGeneration);
-            logger.debug("population size: " + populationTemp.size());
+            logger.debug("population size: " + population.size());
             double lastBestFitnessScore = findBestFitnessScore();
 
             logger.info("Generation: " + currentGeneration);
