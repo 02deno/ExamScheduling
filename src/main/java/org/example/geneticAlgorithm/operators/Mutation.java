@@ -45,7 +45,7 @@ public class Mutation {
             double randomProbability = random.nextDouble() * 0.1;
 
             if (randomProbability < value && !eliteChromosomes.contains(key)) {
-                int examNumberToBeChanged = key.getFitnessScore() < threshHold ? 4 : 2;
+                int examNumberToBeChanged = key.getFitnessScore() < threshHold ? 10 : 2;
 
                 if (isStable) {
                     swapMutation(key, examNumberToBeChanged);
