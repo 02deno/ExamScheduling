@@ -30,13 +30,11 @@ public class Student extends Person{
     private int year;
     private String department;
     private int maxCoursesTakenCount;
-    private int remainingCourseCapacity;
     private static final Logger logger = LogManager.getLogger(Student.class);
 
     public Student(String ID, String name, String surname, int maxCoursesTakenCount) {
         super(ID, name, surname);
         this.maxCoursesTakenCount = maxCoursesTakenCount;
-        this.remainingCourseCapacity = maxCoursesTakenCount;
     }
 
     public Student(String ID, String name, String surname, ArrayList<String> courses, String department, int year) {
