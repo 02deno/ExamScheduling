@@ -395,6 +395,7 @@ public class GeneticAlgorithm {
         int wantedExamScheduleCount = 3;
         int currentGeneration = 0;
         int generationsWithUnderImprovementThreshold = 0;
+        int generationsWithoutImprovement = 0;
         int maxGenerations = Integer.parseInt(ConfigHelper.getProperty("MAX_GENERATIONS"));
         int toleratedGenerationsWithoutImprovement = Integer.parseInt(ConfigHelper.getProperty("GENERATIONS_WITHOUT_IMPROVEMENT"));
 
@@ -403,9 +404,9 @@ public class GeneticAlgorithm {
 
         generateData();
         populationTemp = initializationAndEncode();
+        calculateFitness(false, experiment, experimentId, currentGeneration);
         double initalBestFitness = 0;
-        while (currentGeneration < maxGenerations && generationsWithUnderImprovementThreshold < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
-            calculateFitness(true, experiment, experimentId, currentGeneration);
+        while (currentGeneration < maxGenerations && generationsWithoutImprovement < toleratedGenerationsWithoutImprovement) {//değiştirilebilir
             if (currentGeneration == 0) {
                 initalBestFitness = findBestFitnessScore();
             }
@@ -421,7 +422,7 @@ public class GeneticAlgorithm {
             populationTemp.addAll(childChromosomes);
 
 
-            calculateFitness(false, experiment, experimentId, currentGeneration);
+            calculateFitness(true, experiment, experimentId, currentGeneration);
             logger.debug("population size: " + populationTemp.size());
             double lastBestFitnessScore = findBestFitnessScore();
 
@@ -431,9 +432,9 @@ public class GeneticAlgorithm {
 
 
             if (lastBestFitnessScore <= bestFitnessScore) {
-                generationsWithUnderImprovementThreshold += 1;
+                generationsWithoutImprovement += 1;
             } else {
-                generationsWithUnderImprovementThreshold = 0;
+                generationsWithoutImprovement = 0;
                 isStable = false;
             }
 

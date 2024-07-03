@@ -160,8 +160,8 @@ public class HTMLHelper {
 
     public static void generateStudentReport(ArrayList<Student> students, String output, String title) {
         HTMLHelper.generateReport(students, output, title,
-                new String[]{"Student ID", "Name", "Surname", "Max Number of Courses to take", "Registered Course Codes", "Remaining Course Capacity"},
-                new String[]{"ID", "name", "surname", "maxCoursesTakenCount", "registeredCourses", "remainingCourseCapacity"});
+                new String[]{"Student ID", "Name", "Surname", "Max Number of Courses to take", "Registered Course Codes"},
+                new String[]{"ID", "name", "surname", "maxCoursesTakenCount", "registeredCourses"});
 
     }
 
