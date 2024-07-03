@@ -128,7 +128,7 @@ public class Fitness {
 
             // update fitness
             if (distanceSum != 0) {
-                chromosome.setFitnessScore(0.9 * actualFitness + 0.1 * (distanceSum / (population.size() - 1)));
+                chromosome.setFitnessScore(0.95 * actualFitness + 0.05 * (distanceSum / (population.size() - 1)));
             }
         }
 
